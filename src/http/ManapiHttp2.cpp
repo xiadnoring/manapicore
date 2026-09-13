@@ -624,7 +624,7 @@ static int http_v2_send_settings (manapi::net::http::http_v2_t *ctx, const std::
         }
 
 
-        ctx->timeout = manapi::async::current()->timerpool()->append_timer_sync(ctx->worker->config()->init_proto_timeout,
+        ctx->timeout = manapi::async::current()->timerpool()->append_timer_sync(ctx->worker->m_config->init_proto_timeout,
             [ctx, conn = ctx->conn] (const manapi::timer& ) -> void {
                 http_v2_goaway_t http_goaway = {
                     .err_code = manapi::net::worker::HTTP2_ERROR_SETTINGS_TIMEOUT,
@@ -798,8 +798,8 @@ int manapi::net::http::http_v2_on_write(http_v2_t *ctx) MANAPIHTTP_NOEXCEPT {
 }
 
 static int http_v2_process_window (const manapi::net::worker::shared_conn &conn, manapi::net::http::http_v2_stream_t *s) MANAPIHTTP_NOEXCEPT {
-    auto ssw = static_cast<ssize_t>((s->top->recv_size + 1) * s->ctx->worker->config()->buffer_size);
-    auto config = s->ctx->worker->config();
+    auto ssw = static_cast<ssize_t>((s->top->recv_size + 1) * s->ctx->worker->m_config->buffer_size);
+    auto config = s->ctx->worker->m_config;
 
     ssw = std::max<ssize_t>(0,
         std::min<ssize_t>(static_cast<ssize_t>(config->window_stream_size) - ssw, s->write_window));
@@ -839,7 +839,7 @@ static int http_v2_process_window (const manapi::net::worker::shared_conn &conn,
 int manapi::net::http::http_v2_on_read_stream(const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
     auto const s = conn->as<http_v2_stream_t>();
 
-    auto const config = s->ctx->worker->config();
+    auto const config = s->ctx->worker->m_config.get();
     auto const bs = config->max_buffer_stack;
     bool const read_blocked = worker::prepared::read_buffs_is_full(s->top.get(), bs);
 
@@ -1970,7 +1970,7 @@ header_skip:
 
 
                                     if (datasize != worker::base::connection_io_send(&sdata->top->recv, buffer + datapos,
-                                        datasize, &sdata->ctx->worker->bufferpool(), config->buffer_size,
+                                        datasize, config->buffer_size,
                                         &sdata->top->recv_size, maxcnt))
                                         return EHTTP_V2_PROTOCOL_ERROR;
 

@@ -63,18 +63,18 @@ namespace manapi {
 
         union data_t {
             void    *src;
-            BOOLEAN *bool_src_;
-            ARRAY   *array_src_;
+            BOOLEAN *m_bool_src;
+            ARRAY   *m_array_src;
 #ifdef MANAPIHTTP_BIGINT_SUPPORT
-            BIGINT  *bigint_src_;
+            BIGINT  *m_bigint_src;
 #endif
-            OBJECT  *object_src_;
-            STRING  *string_src_;
-            INTEGER *integer_src_;
-            DECIMAL *decimal_src_;
-            PAIR    *pair_src_;
-            manapi::slice *slice_src_;
-            manapi::json_source *source_src_;
+            OBJECT  *m_object_src;
+            STRING  *m_string_src;
+            INTEGER *m_integer_src;
+            DECIMAL *m_decimal_src;
+            PAIR    *m_pair_src;
+            manapi::slice *m_slice_src;
+            manapi::json_source *m_source_src;
         };
 
         enum types {

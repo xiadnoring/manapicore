@@ -382,13 +382,13 @@ UTEST(http_and_fetch, formdata_bad_response__no_data) {
 
     router->GET ("/bad", [&] (http::req &req, http::resp &resp) -> manapi::future<> {
         resp.header(std::string{manapi::net::http::H_CONTENT_LENGTH}, "100000");
-        co_return resp.callback_stream([] (auto cb) -> manapi::future<> {
+        co_return resp.callback_stream([] (manapi::net::http::response_stream stream) -> manapi::future<> {
             char tt[99999];
             memset(tt, '1', sizeof (tt));
             manapi::slice c{};
             c.resize(sizeof (tt)).unwrap();
             c.copy_from(tt, 0, sizeof (tt)).unwrap();
-            co_await cb (c, true);
+            co_await stream.fwrite (c, true);
         }).unwrap();
     }).unwrap();
 
@@ -467,22 +467,22 @@ UTEST(http_and_fetch, chunked_request) {
     });
 
     router->GET ("/chunked", [&] (http::req &req, http::resp &resp) -> manapi::future<> {
-        co_return resp.callback_stream([] (manapi::net::http::response::resp_stream_cb cb) -> manapi::future<> {
+        co_return resp.callback_stream([] (manapi::net::http::response_stream stream) -> manapi::future<> {
             char zz[100000];
             for(uint32_t i = 0; i < sizeof (zz); i++) {
                 zz[i] = (char)(i % 10);
             }
             manapi::slice_ref ref;
             ref.push_back(zz, 20000);
-            co_await cb (ref, false);
+            co_await stream.fwrite (ref, false);
 
             ref.clear();
             ref.push_back(zz + 20000, 30000);
-            co_await cb (ref, false);
+            co_await stream.fwrite (ref, false);
 
             ref.clear();
             ref.push_back(zz + 50000, 50000);
-            co_await cb (ref, true);
+            co_await stream.fwrite (ref, true);
         }).unwrap();
     }).unwrap();
 

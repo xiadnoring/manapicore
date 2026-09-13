@@ -45,7 +45,7 @@ void manapi::net::http_pool::send_stop(manapi::stoken token) {
     }
 }
 
-manapi::future<manapi::status> manapi::net::http_pool::run(std::shared_ptr<worker::base_http> site, manapi::net::worker::worker_data_t *wdata) {
+manapi::future<manapi::status> manapi::net::http_pool::run(std::shared_ptr<worker::base_http> site, std::shared_ptr<manapi::net::worker::worker_data_t> wdata) {
     try {
         manapi_log_trace("http_pool:init №%zu", this->m_id);
 
@@ -54,9 +54,9 @@ manapi::future<manapi::status> manapi::net::http_pool::run(std::shared_ptr<worke
         auto implementations = manapi::net::http::server::cast(site.get())->transport_protocol_worker(transport);
 
         if (implementations.contains(implementation)) {
-            this->m_worker = implementations[implementation] (site, wdata, this->m_config.get());
+            this->m_worker = implementations[implementation] ();
             auto const workerptr = dynamic_cast<worker::interface_worker *> (this->m_worker.get());
-
+            workerptr->setup( site, wdata, this->m_config );
             worker::wrk_interface_global_t wrk{};
             worker::default_wrk_http_all_global_init(&wrk, workerptr).unwrap();
 

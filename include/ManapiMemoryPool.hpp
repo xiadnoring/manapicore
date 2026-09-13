@@ -73,10 +73,6 @@ namespace manapi {
 
         manapi::bytebuffer buffer (void *pointer, std::size_t suggested);
 
-        void *alloc (std::size_t size) MANAPIHTTP_NOEXCEPT;
-
-        void *realloc (void *ptr, std::size_t) MANAPIHTTP_NOEXCEPT;
-
         void free (void *ptr, std::size_t size) MANAPIHTTP_NOEXCEPT;
 
         void clear ();
@@ -86,24 +82,10 @@ namespace manapi {
         static constexpr std::size_t area_size () { return 4096; }
 
         template<typename T, typename ...Args>
-        manapi::status_or<object_item_pool<T>> get (Args&&...args) {
-            auto b = this->alloc (sizeof (T));
-            try {
-                auto const data = new(b) T (std::forward<decltype(args)>(args)...);
-                return object_item_pool<T> (data);
-            }
-            catch (std::exception const &e) {
-                this->free(b, sizeof (T));
-                manapi_log_error("%s due to %s", "object init failed", e.what());
-                return manapi::status_internal("object init failed");
-            }
-        }
-
-        void free (void *pointer) MANAPIHTTP_NOEXCEPT;
-
-        template<typename T = void>
-        void free (T *pointer) MANAPIHTTP_NOEXCEPT {
-            return this->free(pointer, sizeof (T));
+        object_item_pool<T> get (Args&&...args) {
+            auto b = this->buffer (sizeof (T)).unwrap();
+            auto const p = new(b.data()) T (std::forward<decltype(args)>(args)...);
+            b.release(); return object_item_pool<T> (p);
         }
     };
 

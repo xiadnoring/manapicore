@@ -265,8 +265,8 @@ void manapi::net::http::response::compress_enabled (bool state) MANAPIHTTP_NOEXC
 
 std::string manapi::net::http::response::compress() MANAPIHTTP_NOEXCEPT {
     std::string compress;
-    auto config = this->m_cdata->worker->config();
-    auto server = dynamic_cast<manapi::net::http::server*> (this->m_cdata->worker->site().get());
+    auto config = this->m_cdata->worker->m_config;
+    auto server = dynamic_cast<manapi::net::http::server*> (this->m_cdata->worker->m_site.get());
 
     if ((this->m_flags & internal::RESPONSE_FLAG_COMPRESS_ENABLED)) {
         auto it = this->m_cdata->req_data->headers.find(H_ACCEPT_ENCODING);
@@ -439,8 +439,8 @@ manapi::status manapi::net::http::response::custom_data(custom_data_t data) MANA
     }
 }
 
-manapi::net::http::config *manapi::net::http::response::config() MANAPIHTTP_NOEXCEPT {
-    return this->m_cdata->worker->config();
+const std::shared_ptr<manapi::net::http::config> &manapi::net::http::response::config() MANAPIHTTP_NOEXCEPT {
+    return this->m_cdata->worker->m_config;
 }
 
 manapi::net::http::custom_data_t *manapi::net::http::response::custom_data() MANAPIHTTP_NOEXCEPT {
@@ -638,6 +638,8 @@ std::unique_ptr<manapi::net::http::response::resp_proxy_setup_cb> &manapi::net::
     return this->m_proxy_setup;
 }
 
+#endif
+
 manapi::status manapi::net::http::response::fd(manapi::ev::unique_file fd, std::string path) MANAPIHTTP_NOEXCEPT {
     try {
         auto storage = std::make_unique<internal::file_fd_t>();
@@ -656,4 +658,16 @@ manapi::status manapi::net::http::response::fd(manapi::ev::unique_file fd, std::
     }
 }
 
-#endif
+manapi::net::http::response_stream::response_stream(manapi::future<ssize_t> (*cb)(manapi::net::http::response *, manapi::slice_view, bool),
+                                                    manapi::net::http::response *resp) {
+    this->m_cb = cb;
+    this->m_resp = resp;
+}
+
+manapi::future<ssize_t> manapi::net::http::response_stream::fwrite ( manapi::slice_view buffs, bool fin) {
+    return this->m_cb ( this->m_resp, (buffs), fin );
+}
+
+manapi::net::http::request &manapi::net::http::response_stream::req () {
+    return *this->m_resp->req();
+}

@@ -110,7 +110,7 @@ namespace manapi::ext::pq {
 
         void notify_cb (std::move_only_function<manapi::future<>(notification notify)> cb) MANAPIHTTP_NOEXCEPT;
     private:
-        manapi::future<manapi::ev::status> connect_psql_ (manapi::ctoken token) MANAPIHTTP_NOEXCEPT;
+        manapi::future<manapi::ev::status> connect_psql (manapi::ctoken token) MANAPIHTTP_NOEXCEPT;
 
         MANAPIHTTP_NODISCARD manapi::status check_conn_ () const MANAPIHTTP_NOEXCEPT;
 

@@ -27,13 +27,24 @@ namespace manapi::net::http {
         void operator()(custom_data_t *n);
     };
 
+    class response_stream {
+    public:
+        response_stream ( manapi::future<ssize_t> (*cb)( manapi::net::http::response *, manapi::slice_view, bool ), manapi::net::http::response *resp);
+
+        manapi::future<ssize_t> fwrite ( manapi::slice_view buffs, bool fin);
+
+        manapi::net::http::request &req ();
+    private:
+        manapi::net::http::response *m_resp;
+        manapi::future<ssize_t> (*m_cb)( manapi::net::http::response *, manapi::slice_view, bool );
+    };
+
     class response {
         friend class uresponse;
     public:
         using resp_callback_sync = std::move_only_function<ssize_t(char *buffer, std::size_t size, bool&)>;
         using resp_callback_async = std::move_only_function<manapi::future<ssize_t>(slice_view buffs, bool&)>;
-        using resp_stream_cb = std::move_only_function<manapi::future<ssize_t>(manapi::slice_view buffs, bool)>;
-        using resp_stream = std::move_only_function<manapi::future<>(resp_stream_cb cb)>;
+        using resp_stream = std::move_only_function<manapi::future<>(response_stream stream)>;
 #ifdef MANAPIHTTP_FETCH_SUPPORT
         using resp_proxy_setup_cb = std::move_only_function<void(const std::shared_ptr<manapi::net::fetch> &)>;
 #endif
@@ -134,7 +145,7 @@ namespace manapi::net::http {
 
         manapi::status custom_data (custom_data_t data) MANAPIHTTP_NOEXCEPT;
 
-        http::config *config () MANAPIHTTP_NOEXCEPT;
+        const std::shared_ptr<http::config> &config () MANAPIHTTP_NOEXCEPT;
 
         struct custom_data_t *custom_data () MANAPIHTTP_NOEXCEPT;
 

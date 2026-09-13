@@ -227,7 +227,7 @@ static void default_wrk_http1_custom_read (const manapi::net::worker::shared_con
     auto wrk_ctx = static_cast<manapi::net::worker::wrk_http1_ctx_t *> (conn->wrk.data);
 
     if (wrk_ctx->flgs & HTTP1_BODY_CHUNKED) {
-        auto rhs = manapi::net::http::http_v1_1_chunked_read(wrk_ctx->chunked_ctx.get(), /*&wrk_ctx->req, w,*/ conn,/* w->config(), */buffer, nsize);
+        auto rhs = manapi::net::http::http_v1_1_chunked_read(wrk_ctx->chunked_ctx.get(), /*&wrk_ctx->req, w,*/ conn,/* w->m_config, */buffer, nsize);
 
         switch (rhs) {
             case manapi::net::http::EHTTP_V1_1_CHUNKED_OK: {
@@ -253,7 +253,7 @@ static int default_wrk_http1_init (const manapi::net::worker::shared_conn &conn,
 
         auto tp = std::make_unique<manapi::net::worker::wrk_http1_ctx_t>();
         tp->ctx = std::make_unique<manapi::net::http::http_v1_1_t>();
-        tp->ctx->config = w->config();
+        tp->ctx->config = w->m_config.get();
         tp->ctx->req = &tp->req;
 
         conn->version = manapi::net::http::versions::HTTP_v1_1;
@@ -404,7 +404,7 @@ exec:
                         conn->wrk.flags |= manapi::net::worker::WRK_INTERFACE_CUSTOM_READ;
                         wrk_data->chunked_ctx = std::make_unique<manapi::net::http::http_v1_1_chunked_t>();
                         wrk_data->chunked_ctx->worker = w;
-                        wrk_data->chunked_ctx->config = w->config();
+                        wrk_data->chunked_ctx->config = w->m_config.get();
                         wrk_data->chunked_ctx->req = req_ptr;
                         wrk_data->chunked_ctx->top_sz = 0;
 
@@ -434,22 +434,22 @@ exec:
                     goto send_error;
                 auto const values = rhs.unwrap();
 
-                bool keep_alive_ = false;
-                bool close_ = false;
+                bool is_keep_alive = false;
+                bool is_close = false;
 
                 for (const auto &v : values) {
                     if (manapi::string::equals(v.value, "keep-alive", 0b10))
-                        keep_alive_ = true;
+                        is_keep_alive = true;
                     else if (manapi::string::equals(v.value, "close", 0b10))
-                        close_ = true;
+                        is_close = true;
                     else
                         goto send_error;
                 }
 
-                if (keep_alive_ & close_)
+                if (is_keep_alive & is_close)
                     goto send_error;
 
-                if (keep_alive_ || !close_)
+                if (is_keep_alive || !is_close)
                     conn->wrk.flags |= manapi::net::worker::WRK_INTERFACE_TCP_KEEP_ALIVE;
             }
             else
@@ -466,7 +466,7 @@ exec:
             w->event_flags(conn, 0);
 
 
-            cdata->router = manapi::net::http::server::cast(w->site().get())->handler(req_ptr);
+            cdata->router = manapi::net::http::server::cast(w->m_site.get())->handler(req_ptr);
             cdata->req_data->cdata = cdata.get();
 
 

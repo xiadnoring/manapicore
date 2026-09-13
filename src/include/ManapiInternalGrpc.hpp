@@ -25,7 +25,7 @@ namespace manapi::net::wgrpc {
     template<typename ...Args>
     using resolve_callback_t = std::function<void(Args...)>;
 #endif
-    class config : public internal::config_interface {
+    class config : public config_interface {
     public:
         config (const manapi::json &n);
 

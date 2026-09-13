@@ -83,7 +83,7 @@ namespace manapi::net::http {
         typedef std::function<std::unique_ptr<manapi::compress::compress_base>()> compress_new_cb_t;
 
         // Worker init callbacks
-        typedef std::function<std::shared_ptr<worker::base>(std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t *wdata, http::config* config)> implement_create_cb;
+        typedef std::function<std::shared_ptr<worker::base>()> implement_create_cb;
 
         // Http init callback
         typedef std::function<manapi::status_or<std::unique_ptr<worker::wrk_interface_global_t>> (worker::interface_worker *w)> implemenet_http_cb;

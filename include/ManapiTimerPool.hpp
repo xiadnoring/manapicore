@@ -13,7 +13,7 @@
 #include "./ManapiEventStructures.hpp"
 
 namespace manapi {
-    class timerpool {
+    class timer_pool {
     public:
         typedef std::pair <std::chrono::steady_clock::time_point, std::shared_ptr<timer::timer_data_t>> sorted_storage_key;
         struct sorted_tasks_compare_t {
@@ -24,27 +24,27 @@ namespace manapi {
 
         struct data_t;
 
-        timerpool();
+        timer_pool();
 
         /**
-         * timerpool based on libuv timer event
+         * timer_pool based on libuv timer event
          */
-        static manapi::status_or<std::shared_ptr<timerpool>> create () MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<timer_pool>> create () MANAPIHTTP_NOEXCEPT;
 
         /* deconstructor */
-        ~timerpool();
+        ~timer_pool();
 
         /* move */
-        timerpool (timerpool &&n) MANAPIHTTP_NOEXCEPT;
+        timer_pool (timer_pool &&n) MANAPIHTTP_NOEXCEPT;
 
         /* move */
-        timerpool &operator=(timerpool &&n) MANAPIHTTP_NOEXCEPT;
+        timer_pool &operator=(timer_pool &&n) MANAPIHTTP_NOEXCEPT;
 
         /* copy */
-        timerpool (const timerpool &n);
+        timer_pool (const timer_pool &n);
 
         /* copy */
-        timerpool &operator=(const timerpool &n);
+        timer_pool &operator=(const timer_pool &n);
 
         /**
          * Create a timeout event with synchronous callback

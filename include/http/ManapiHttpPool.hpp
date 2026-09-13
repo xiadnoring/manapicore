@@ -41,7 +41,7 @@ namespace manapi::net {
          * start the server
          * @return InternalError, ResourceExausted, FailedPrecondition on error
          */
-        manapi::future<manapi::status> run (std::shared_ptr<worker::base_http> site, manapi::net::worker::worker_data_t *wdata);
+        manapi::future<manapi::status> run (std::shared_ptr<worker::base_http> site, std::shared_ptr<manapi::net::worker::worker_data_t> wdata);
 
         MANAPIHTTP_NODISCARD const std::shared_ptr <manapi::net::http::config> &config() const;
     private:

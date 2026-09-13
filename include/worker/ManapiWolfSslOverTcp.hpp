@@ -19,35 +19,35 @@ namespace manapi::net::worker {
         void stop(manapi::stoken token) override;
     protected:
 
-        bool ssl_is_init_fininshed_ (void *ssl) MANAPIHTTP_NOEXCEPT override;
+        bool ssl_is_init_fininshed (void *ssl) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_get_error_ (void *ssl, int rhs) MANAPIHTTP_NOEXCEPT override;
+        int ssl_get_error (void *ssl, int rhs) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_accept_ (void *ssl) MANAPIHTTP_NOEXCEPT override;
+        int ssl_accept (void *ssl) MANAPIHTTP_NOEXCEPT override;
 
-        void *ssl_new_ (void *ctx) MANAPIHTTP_NOEXCEPT override;
+        void *ssl_new (void *ctx) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_write_ (void *ssl, const void *buff, int size) MANAPIHTTP_NOEXCEPT override;
+        int ssl_write (void *ssl, const void *buff, int size) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_read_ (void *ssl, void *buff, int size) MANAPIHTTP_NOEXCEPT override;
+        int ssl_read (void *ssl, void *buff, int size) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_shutdown_ (void *ssl) MANAPIHTTP_NOEXCEPT override;
+        int ssl_shutdown (void *ssl) MANAPIHTTP_NOEXCEPT override;
 
-        void ssl_set_shutdown_(void *ssl, int flags) MANAPIHTTP_NOEXCEPT override;
+        void ssl_set_shutdown(void *ssl, int flags) MANAPIHTTP_NOEXCEPT override;
 
-        void ssl_free_(void *ssl) MANAPIHTTP_NOEXCEPT override;
+        void ssl_free(void *ssl) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_bio_read_(void *wbio, void *buff, int size) MANAPIHTTP_NOEXCEPT override;
+        int ssl_bio_read(void *wbio, void *buff, int size) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_bio_should_retry_(void *bio) MANAPIHTTP_NOEXCEPT override;
+        int ssl_bio_should_retry(void *bio) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_bio_write_(void *rbio, const void *buff, int size) MANAPIHTTP_NOEXCEPT override;
+        int ssl_bio_write(void *rbio, const void *buff, int size) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_read_early_data_(void *ssl, void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT override;
+        int ssl_read_early_data(void *ssl, void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT override;
 
-        int ssl_write_early_data_(void *ssl, const void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT override ;
+        int ssl_write_early_data(void *ssl, const void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT override ;
 
-        bool ssl_early_data_is_enabled_(void *ctx) MANAPIHTTP_NOEXCEPT override;
+        bool ssl_early_data_is_enabled(void *ctx) MANAPIHTTP_NOEXCEPT override;
 
         int recv_setup_connection(const shared_conn &conn, tls_connection_t *data) MANAPIHTTP_NOEXCEPT override;
 

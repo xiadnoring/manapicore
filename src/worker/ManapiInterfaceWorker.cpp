@@ -1,54 +1,41 @@
 #include "worker/ManapiInterfaceWorker.hpp"
 #include "../include/ManapiUtils.hpp"
 
-manapi::net::worker::interface_worker::interface_worker(std::shared_ptr<net::worker::base_http> site,manapi::net::worker::worker_data_t* data, manapi::net::http::config *config)
-    : site_(std::move(site)), config_(config), worker_data_(data), worker_pool_id_(0), global_() {
-    this->deep_worker_id_ = 0;
-    this->flags_ = 0;
+manapi::net::worker::interface_worker::interface_worker() {
+    this->m_deep_worker_id = 0;
+    this->m_flags = 0;
+    this->m_worker_pool_id = 0;
 }
 
 manapi::net::worker::interface_worker::~interface_worker() {
-    if (this->global_.cleanup_global_cb) {
-        this->global_.cleanup_global_cb(&this->global_, this);
+    if (this->m_global.cleanup_global_cb) {
+        this->m_global.cleanup_global_cb(&this->m_global, this);
     }
 }
 
 void manapi::net::worker::interface_worker::wrk_global(wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT {
-    this->global_ = *data;
+    this->m_global = *data;
 }
 
 manapi::net::worker::wrk_interface_global_t * manapi::net::worker::interface_worker::wrk_global() MANAPIHTTP_NOEXCEPT {
-    return &this->global_;
-}
-
-
-const std::shared_ptr<manapi::net::worker::base_http> & manapi::net::worker::interface_worker::site() MANAPIHTTP_NOEXCEPT {
-    return this->site_;
-}
-
-manapi::net::http::config *manapi::net::worker::interface_worker::config() MANAPIHTTP_NOEXCEPT {
-    return this->config_;
+    return &this->m_global;
 }
 
 int manapi::net::worker::interface_worker::worker_flags() MANAPIHTTP_NOEXCEPT {
-    return this->flags_;
+    return this->m_flags;
 }
 
 
 void manapi::net::worker::interface_worker::worker_pool_id(std::size_t worker_pool_id) MANAPIHTTP_NOEXCEPT {
-    this->worker_pool_id_ = worker_pool_id;
+    this->m_worker_pool_id = worker_pool_id;
 }
 
 std::size_t manapi::net::worker::interface_worker::worker_pool_id() const MANAPIHTTP_NOEXCEPT {
-    return this->worker_pool_id_;
+    return this->m_worker_pool_id;
 }
 
 std::size_t manapi::net::worker::interface_worker::deep_worker_id() const MANAPIHTTP_NOEXCEPT {
-    return this->deep_worker_id_;
-}
-
-manapi::net::worker::worker_data_t* manapi::net::worker::interface_worker::worker_data() MANAPIHTTP_NOEXCEPT {
-    return this->worker_data_;
+    return this->m_deep_worker_id;
 }
 
 manapi::future<manapi::status> manapi::net::worker::interface_worker::init(std::size_t deep) {
@@ -59,5 +46,13 @@ manapi::future<manapi::status> manapi::net::worker::interface_worker::init(std::
 void manapi::net::worker::interface_worker::stop(manapi::stoken token) {
     this->m_token.next( std::move( token ) );
     this->m_token.unref();
+}
+
+void manapi::net::worker::interface_worker::setup(std::shared_ptr<net::worker::base_http> site,
+                                                  std::shared_ptr<manapi::net::worker::worker_data_t> worker_data,
+                                                  std::shared_ptr<manapi::net::http::config> config) {
+    this->m_config = std::move(config);
+    this->m_worker_data = std::move(worker_data);
+    this->m_site = std::move(site);
 }
 

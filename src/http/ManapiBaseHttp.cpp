@@ -494,7 +494,7 @@ void manapi::net::http::internal::send_response(std::unique_ptr<response> res) {
         auto const cdata = res->connection_data();
 
         if (!features.compress.empty() && !(res->partial_enabled() && res->contains_ranges())) {
-            auto pool = http::server::cast(cdata->worker->site().get());
+            auto pool = http::server::cast(cdata->worker->m_site.get());
             features.compressor = pool->compressor (features.compress);
         }
 
@@ -502,7 +502,7 @@ void manapi::net::http::internal::send_response(std::unique_ptr<response> res) {
         // set time
         res->header(std::string{H_DATE}, std::format("{:%a, %d %b %Y %H:%M:%S} GMT", std::chrono::time_point_cast<std::chrono::seconds>(manapi::time::current_time(false).get_sys_time()))).unwrap();
         if (res->request_data()->http < versions::HTTP_v2) {
-            auto const keepalive = cdata->worker->config()->keep_alive;
+            auto const keepalive = cdata->worker->m_config->keep_alive;
             if (keepalive) {
                 if (! (st = res->header(std::string{H_CONNECTION}, std::string{H_KEEP_ALIVE}))) {
                     goto finish;
@@ -608,8 +608,8 @@ manapi::future<void> manapi::net::http::internal::send_response_file(std::unique
             bool is_ok = false;
 
             try {
-                auto rhs = co_await ::manapi__compress_file(std::dynamic_pointer_cast<manapi::net::http::server>(cdata->worker->site()), &resfile,
-                    http::server::cast(cdata->worker->site().get())->config_cache_dir(), &features);
+                auto rhs = co_await ::manapi__compress_file(std::dynamic_pointer_cast<manapi::net::http::server>(cdata->worker->m_site), &resfile,
+                    http::server::cast(cdata->worker->m_site.get())->config_cache_dir(), &features);
                 if (rhs.ok()) {
                     is_ok = true;
                 }
@@ -1237,7 +1237,7 @@ void manapi::net::http::internal::send_response_sync_cb(std::unique_ptr<response
                             auto const cdata = res->connection_data();
 
                             if (http_v1_1_is_chunked_data(res.get())) {
-                                auto bufres = manapi::async::current()->memory_fabric().buffer (
+                                auto bufres = manapi::async::current()->memory_fabric()->buffer (
                                     std::max<std::size_t>(res->config()->buffer_size, 64));
                                 auto buffer = bufres.unwrap();
                                 while (!finish) {
@@ -1258,7 +1258,7 @@ void manapi::net::http::internal::send_response_sync_cb(std::unique_ptr<response
                                 }
                             }
                             else {
-                                auto slices = cdata->worker->bufferpool().slice(4096 * 16).unwrap();
+                                auto slices = manapi::async::memory_fabric()->slice(4096 * 16).unwrap();
                                 while (!finish) {
                                     std::size_t total = 0;
                                     for (auto it = slices.begin(); it != slices.end() && !finish; ) {
@@ -1293,6 +1293,8 @@ void manapi::net::http::internal::send_response_sync_cb(std::unique_ptr<response
                                         co_return;
                                 }
                             }
+
+                            cdata->cb->call(true);
                         }
                         catch (std::exception const &e) {
                             manapi_log_error("%s failed due to %s", "send_response_sync_cb()", e.what());
@@ -1319,9 +1321,8 @@ void manapi::net::http::internal::send_response_stream_cb(std::unique_ptr<respon
         }
 
         if (http_v1_1_is_chunked_data(res.get())) {
-            auto err = res->header(std::string{http::H_TRANSFER_ENCODING}, "chunked");
-            if (!err)
-                return;
+            auto st = res->header(std::string{http::H_TRANSFER_ENCODING}, "chunked");
+            if (!st) return;
         }
 
         auto task = mask_response(res.get(), false);
@@ -1345,24 +1346,22 @@ void manapi::net::http::internal::send_response_stream_cb(std::unique_ptr<respon
                         manapi::async::run ([res = std::move(res), cb_async = std::move(cb_async)] () mutable
                             -> manapi::future<> {
                             if (http_v1_1_is_chunked_data(res.get())) {
-                                co_await cb_async([cdata = res->connection_data()]
-                                    (slice_view buffs, bool fin)
+                                co_await cb_async(manapi::net::http::response_stream(+[]
+                                    ( net::http::response *res, slice_view buffs, bool fin)
                                     -> manapi::future<ssize_t> {
-                                    auto chunk_err = co_await send_http_v1_1_chunked_data(cdata, buffs, fin);
+                                    auto chunk_err = co_await send_http_v1_1_chunked_data(res->connection_data(), buffs, fin);
                                     if (!chunk_err) {
                                         manapi_log_trace(manapi::debug::LOG_TRACE_HIGH, "%s failed due to %.*s", "send_response_stream_cb()",
                                             chunk_err.msg().size(), chunk_err.msg().data());
                                         co_return -1;
                                     }
                                     co_return static_cast<ssize_t>(buffs.size());
-                                });
+                                }, res.get()));
                             }
                             else {
-                                co_await cb_async([cdata = res->connection_data()]
-                                    (slice_view buffs, bool fin)
-                                    -> manapi::future<ssize_t> {
-                                    co_return co_await cdata->worker->fwrite(cdata->conn, buffs, fin);
-                                });
+                                co_await cb_async(manapi::net::http::response_stream(+[]
+                                        ( net::http::response *res, slice_view buffs, bool fin)
+                                    -> manapi::future<ssize_t> { return res->connection_data()->worker->fwrite(res->connection_data()->conn, buffs, fin); }, res.get()));
                             }
                             res->connection_data()->cb->call(true);
                         });
@@ -1417,7 +1416,7 @@ void manapi::net::http::internal::send_response_async_cb(std::unique_ptr<respons
                         -> manapi::future<> {
                         try {
                             auto cdata = res->connection_data();
-                            auto buffer = manapi::async::current()->memory_fabric().slice(65536).unwrap();
+                            auto buffer = manapi::async::current()->memory_fabric()->slice(65536).unwrap();
 
                             bool finish = false;
 
@@ -1428,9 +1427,8 @@ void manapi::net::http::internal::send_response_async_cb(std::unique_ptr<respons
                                         manapi_log_trace(manapi::debug::LOG_TRACE_HIGH, "%s: %s", "send_response_async_cb()", "cb returned an invalid length");
                                         co_return;
                                     }
-                                    auto res = buffer.subslice(0, static_cast<std::size_t>(rhs));
-                                    res.unwrap();
-                                    auto chunk_err = co_await send_http_v1_1_chunked_data(cdata, res.unwrap(), finish);
+                                    auto zres = buffer.subslice(0, static_cast<std::size_t>(rhs));
+                                    auto chunk_err = co_await send_http_v1_1_chunked_data(cdata, zres.unwrap(), finish);
                                     if (!chunk_err) {
                                         manapi_log_trace(manapi::debug::LOG_TRACE_HIGH, "%s failed due to %.*s", "send_response_async_cb()",
                                             chunk_err.msg().size(), chunk_err.msg().data());
@@ -1447,11 +1445,9 @@ void manapi::net::http::internal::send_response_async_cb(std::unique_ptr<respons
                                         co_return;
                                     }
 
-                                    auto res = buffer.subslice(0, static_cast<std::size_t>(rhs));
-                                    res.unwrap();
-
+                                    auto zres = buffer.subslice(0, static_cast<std::size_t>(rhs));
                                     rhs = co_await cdata->worker->fwrite(cdata->conn,
-                                        res.unwrap(), finish);
+                                        zres.unwrap(), finish);
 
                                     if (rhs <= 0)
                                         co_return;
@@ -1462,6 +1458,7 @@ void manapi::net::http::internal::send_response_async_cb(std::unique_ptr<respons
                                         cursor = 0;
                                 }
                             }
+                            cdata->cb->call(true);
                         }
                         catch (std::exception const &e) {
                             manapi_log_error("%s failed due to %s", "send_response_async_cb()", e.what());
@@ -1494,8 +1491,8 @@ manapi::future<void> manapi::net::http::internal::send_file(std::unique_ptr<resp
     auto const cdata = res->connection_data();
     std::size_t constexpr block_size = manapi::object_pool::area_size() * 16;
 
-    auto write_block = cdata->worker->bufferpool().slice(block_size).unwrap();
-    auto read_block = cdata->worker->bufferpool().slice(block_size).unwrap();
+    auto write_block = manapi::async::memory_fabric()->slice(block_size).unwrap();
+    auto read_block = manapi::async::memory_fabric()->slice(block_size).unwrap();
 
     co_await manapi::async::parallel_wait ([&] (manapi::reference<manapi::async::parallel_t> parallel_st) -> manapi::future<> {
         std::size_t current = static_cast<std::size_t>(f->tellg());

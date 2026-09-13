@@ -62,6 +62,9 @@ manapi::net::http::config::config(const json &config) : server_addr{} {
     this->transport = get_config_param<std::string>(config, "transport", "tcp");
     this->max_shutdown_time = get_config_param<uint32_t>(config, "max_shutdown_time", 5);
 
+    if (!this->max_merge_buffer_stack)
+        this->max_merge_buffer_stack = 1;
+
     if (config.contains("ssl") && config["ssl"].is_object())
         this->ssl = config["ssl"];
     else

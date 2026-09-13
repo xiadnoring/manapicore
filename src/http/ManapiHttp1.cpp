@@ -40,7 +40,6 @@ bool manapi::net::http::http_v1_1_is_token_char (const char &c) MANAPIHTTP_NOEXC
 }
 
 int manapi::net::http::http_v1_1_work(http_v1_1_t *ctx/*, request_data_t *req, http::config *config*/, const char **nbuffer, std::size_t *nsize) MANAPIHTTP_NOEXCEPT {
-            // ctx->request_data->buffer = site->bufferpool()->get();
     auto &req = ctx->req;
     auto &config = ctx->config;
     try {
@@ -654,8 +653,7 @@ int manapi::net::http::http_v1_1_chunked_read(http_v1_1_chunked_t *ctx/*, http::
                         worker->feed_event(conn, ev::READ, buffer + pos, copy, nullptr /* no way :( */);
                     }
                     else {
-                        if (static_cast<ssize_t>(copy) != worker::base::connection_io_send(&ctx->top, buffer + pos, copy,
-                            &worker->bufferpool(), config->buffer_size, &ctx->top_sz, 0)) {
+                        if (static_cast<ssize_t>(copy) != worker::base::connection_io_send(&ctx->top, buffer + pos, copy, config->buffer_size, &ctx->top_sz, 0)) {
                             return EHTTP_V1_1_CHUNKED_ERR;
                         }
                     }

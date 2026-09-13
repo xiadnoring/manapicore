@@ -5,17 +5,15 @@
 namespace manapi::net::worker {
     class interface_worker : public worker::base {
     public:
-        interface_worker (std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* worker_data, manapi::net::http::config *config);
+        interface_worker ();
 
         ~interface_worker () override;
 
-        void wrk_global (wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT;
+        void setup ( std::shared_ptr<net::worker::base_http> site, std::shared_ptr<manapi::net::worker::worker_data_t> worker_data, std::shared_ptr<manapi::net::http::config> config );
 
-        wrk_interface_global_t *wrk_global () MANAPIHTTP_NOEXCEPT;
+        void wrk_global (wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT override;
 
-        const std::shared_ptr<net::worker::base_http> &site () MANAPIHTTP_NOEXCEPT override;
-
-        net::http::config *config () MANAPIHTTP_NOEXCEPT override;
+        wrk_interface_global_t *wrk_global () MANAPIHTTP_NOEXCEPT override;
 
         MANAPIHTTP_NODISCARD int worker_flags () MANAPIHTTP_NOEXCEPT;
 
@@ -25,25 +23,17 @@ namespace manapi::net::worker {
 
         MANAPIHTTP_NODISCARD std::size_t deep_worker_id () const MANAPIHTTP_NOEXCEPT;
 
-        manapi::net::worker::worker_data_t *worker_data () MANAPIHTTP_NOEXCEPT override;
-
         manapi::future<status> init(std::size_t deep) override;
 
         void stop(manapi::stoken token) override;
     protected:
-        int flags_;
+        int m_flags;
 
-        manapi::net::worker::worker_data_t *worker_data_;
+        wrk_interface_global_t m_global;
 
-        wrk_interface_global_t global_;
+        std::size_t m_worker_pool_id;
 
-        std::shared_ptr<net::worker::base_http> site_;
-
-        manapi::net::http::config *config_;
-
-        std::size_t worker_pool_id_;
-
-        std::size_t deep_worker_id_;
+        std::size_t m_deep_worker_id;
 
         manapi::stoken m_token;
     };

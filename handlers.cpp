@@ -17,7 +17,7 @@ void init_http_server(std::shared_ptr<manapi::net::http::server> router, std::st
         -> manapi::future<> {
         auto z = manapi::math::random (0, 2);
         resp.compress(z == 0 ? "zstd" : (z == 1 ? "br" : "gzip"));
-        resp.compress_enabled(true);
+        resp.compress_enabled(false);
         co_return;
     });
 
@@ -130,11 +130,11 @@ void init_http_server(std::shared_ptr<manapi::net::http::server> router, std::st
 
     router->POST ("/uploadtest", [] (manapi::net::http::request &req, manapi::net::http::response &resp)
         -> manapi::future<> {
-        co_return resp.callback_stream([&req] (manapi::net::http::response::resp_stream_cb cb) -> manapi::future<> {
+        co_return resp.callback_stream([&req] (manapi::net::http::response_stream stream) -> manapi::future<> {
             ssize_t result = 0;
             auto c = std::chrono::steady_clock::now();
             try {
-                (co_await req.callback_sync([&c, &result, &cb] (const char *buffer, std::size_t size, bool fin)
+                (co_await req.callback_sync([&c, &result, &stream] (const char *buffer, std::size_t size, bool fin)
                     -> ssize_t {
                     result += (ssize_t)(size);
                     if (c + std::chrono::seconds (1) <= std::chrono::steady_clock::now()) {
@@ -153,14 +153,14 @@ void init_http_server(std::shared_ptr<manapi::net::http::server> router, std::st
             std::string err = std::format("{}\n", ((double)result / 1024 / 1024) / ((double)bb.count()/1000));
             auto b = manapi::slice::create(err.size()).unwrap();
             b.copy_from(err.data(), 0, err.size());
-            co_await cb(b, true);
+            co_await stream.fwrite (b, true);
         }).unwrap();
     });
 
 
     router->GET("/download", [] (manapi::net::http::request &req, manapi::net::http::response &resp)
         -> manapi::future<> {
-        co_return resp.file("/home/Timur/Desktop/WorkSpace/oneworld/test.ISO").unwrap();
+        co_return resp.file("/home/timur/Загрузки/bigfile").unwrap();
     });
 
     router->POST ("/echo", [] (manapi::net::http::request &req, manapi::net::http::response &resp)
@@ -170,13 +170,13 @@ void init_http_server(std::shared_ptr<manapi::net::http::server> router, std::st
                 std::string{req.header(manapi::net::http::H_CONTENT_LENGTH).unwrap()}).unwrap();
 
         std::size_t sss = 0;
-        co_return resp.callback_stream([&sss, &resp, &req] (manapi::net::http::response::resp_stream_cb cb) -> manapi::future<> {
+        co_return resp.callback_stream([&sss, &resp, &req] (manapi::net::http::response_stream stream) -> manapi::future<> {
             auto fs = manapi::fs::fstream::create ("/home/Timur/Downloads/VideoDownloader/ufa.mp4").unwrap();
             auto rhs = co_await fs->open(manapi::ev::FS_O_RDONLY);
             rhs.unwrap();
-            (co_await req.callback_async([&sss, cb = std::move(cb), fs] (manapi::slice_view buffs, bool fin) mutable
+            (co_await req.callback_async([&sss, stream, fs] (manapi::slice_view buffs, bool fin) mutable
                 -> manapi::future<ssize_t> {
-                auto buffs2 = manapi::async::current()->memory_fabric().slice(buffs.size()).unwrap();
+                auto buffs2 = manapi::async::current()->memory_fabric()->slice(buffs.size()).unwrap();
                 buffs2.resize(buffs.size());
                 assert(buffs.size() == buffs2.size());
                 auto res = co_await fs->fread(buffs2);
@@ -189,7 +189,7 @@ void init_http_server(std::shared_ptr<manapi::net::http::server> router, std::st
 
                 //sum += size;
                 //std::cout << sum << " " << size << " " << fin << "\n";
-                auto result = co_await cb (buffs, fin);
+                auto result = co_await stream.fwrite (buffs, fin);
                 sss+=(std::size_t)result;
                 fs->seekg((ssize_t)fs->tellg() - (ssize_t)buffs2.size() + (ssize_t)result);
                 co_return result;
@@ -200,11 +200,11 @@ void init_http_server(std::shared_ptr<manapi::net::http::server> router, std::st
 
     router->POST ("/uploadasynctest", [] (manapi::net::http::request &req, manapi::net::http::response &resp)
         -> manapi::future<> {
-        co_return resp.callback_stream([&req] (manapi::net::http::response::resp_stream_cb cb) -> manapi::future<> {
+        co_return resp.callback_stream([&req] (manapi::net::http::response_stream stream) -> manapi::future<> {
             std::size_t result = 0;
             auto c = std::chrono::steady_clock::now();
             try {
-                (co_await req.callback_async([&c, &result, &cb] (manapi::slice_view buffs, bool fin)
+                (co_await req.callback_async([&c, &result, &stream] (manapi::slice_view buffs, bool fin)
                     -> manapi::future<ssize_t> {
                     result += buffs.size();
                     if (c + std::chrono::seconds (1) <= std::chrono::steady_clock::now()) {
@@ -223,7 +223,7 @@ void init_http_server(std::shared_ptr<manapi::net::http::server> router, std::st
             std::string err = std::format("{}\n", ((double)result / 1024 / 1024) / ((double)bb.count()/1000));
             auto b =manapi::slice::create(err.size()).unwrap();
             b.copy_from(err.data(), 0, err.size());
-            co_await cb(b, true);
+            co_await stream.fwrite (b, true);
         }).unwrap();
     });
 

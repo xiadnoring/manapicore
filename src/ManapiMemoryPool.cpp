@@ -135,7 +135,7 @@ manapi::object_pool::object_pool() {
 
 manapi::object_pool::~object_pool() = default;
 
-static int object_pool_malloc (manapi::object_pool_data_t *data, void **ptr, std::size_t *ptr_size, std::size_t suggested) {
+static int manapi__object_pool_malloc (manapi::object_pool_data_t *data, void **ptr, std::size_t *ptr_size, std::size_t suggested) {
     auto const lvl = bufflen2level(suggested);
     if (lvl == BUFF_LEVEL_0) {
         *ptr = nullptr;
@@ -206,7 +206,7 @@ manapi::status_or<manapi::slice> manapi::object_pool::slice(std::size_t suggeste
         void *buffptr{nullptr};
         std::size_t buffsize;
 
-        if (::object_pool_malloc(this->data.get(), &buffptr, &buffsize, object_pool::area_size())) {
+        if (::manapi__object_pool_malloc(this->data.get(), &buffptr, &buffsize, object_pool::area_size())) {
             delete []static_cast<char*>(buffptr);
             return status_resource_exhausted();
         }
@@ -232,7 +232,7 @@ manapi::status_or<manapi::slice> manapi::object_pool::slice(std::size_t suggeste
         void *buffptr{nullptr};
         std::size_t buffsize;
 
-        if (::object_pool_malloc(this->data.get(), &buffptr, &buffsize, left)) {
+        if (::manapi__object_pool_malloc(this->data.get(), &buffptr, &buffsize, left)) {
             delete []static_cast<char*>(buffptr);
             return status_resource_exhausted();
         }
@@ -257,66 +257,11 @@ manapi::status_or<manapi::bytebuffer> manapi::object_pool::buffer(std::size_t mi
 manapi::status_or<manapi::bytebuffer> manapi::object_pool::buffer(std::size_t suggested) {
     void *buffer{nullptr};
     std::size_t size;
-    if (::object_pool_malloc (this->data.get(), &buffer, &size, suggested)) {
+    if (::manapi__object_pool_malloc (this->data.get(), &buffer, &size, suggested)) {
         delete []static_cast<char*>(buffer);
         return status_resource_exhausted();
     }
-    return manapi::bytebuffer (buffer, suggested, size, bytebuffer::BYTEBUFFER_FLAG_OBJECT_POOL);
-}
-
-void * manapi::object_pool::alloc(std::size_t size) MANAPIHTTP_NOEXCEPT {
-    void *buffer;
-    std::size_t rhs;
-    //assert(size <= 65536);
-    if (::object_pool_malloc (this->data.get(), &buffer, &rhs, size + 1)) {
-        delete []static_cast<char*>(buffer);
-        return nullptr;
-    }
-    auto const lvl = static_cast<char>(bufflen2level(rhs));
-    *static_cast<char*>(buffer) = lvl;
-    return static_cast<char*>(buffer) + 1;
-}
-
-void * manapi::object_pool::realloc(void *ptr, std::size_t size) MANAPIHTTP_NOEXCEPT {
-    if (!ptr)
-        return this->alloc(size);
-
-    //assert(size <= 65536);
-    auto const p = (static_cast<char *> (ptr) - 1);
-    auto const lvl = static_cast<int>(static_cast<uint8_t>(*p));
-    if (lvl) {
-        auto const len = level2bufflen(lvl);
-        if (size < len)
-            return ptr;
-        auto n = this->alloc(size);
-        if (!n)
-            return nullptr;
-        memcpy (n, ptr, len - 1);
-        this->free(p, len);
-        return n;
-    }
-    else {
-        auto n = this->alloc(size);
-        if (!n)
-            return nullptr;
-        memcpy (n, ptr, size);
-        delete []static_cast<char*>(p);
-        return n;
-    }
-}
-
-void manapi::object_pool::free (void *pointer) MANAPIHTTP_NOEXCEPT {
-    if (!pointer)
-        return;
-
-    auto const p = (static_cast<char *> (pointer) - 1);
-    auto const lvl = static_cast<int>(static_cast<uint8_t>(*p));
-    if (!lvl || lvl == BUFF_LEVEL_MAX) {
-        delete []static_cast<char*>(p);
-        return;
-    }
-    auto const len = level2bufflen(lvl);
-    this->free(p, len);
+    return manapi::bytebuffer (buffer, suggested, size);
 }
 
 void manapi::object_pool::free(void *pointer, std::size_t size) MANAPIHTTP_NOEXCEPT {
@@ -348,6 +293,6 @@ int manapi::object_pool::mem_type(std::size_t size) MANAPIHTTP_NOEXCEPT {
 }
 
 manapi::bytebuffer manapi::object_pool::buffer(void *pointer, std::size_t suggested) {
-    return manapi::bytebuffer (pointer, suggested, suggested, manapi::bytebuffer::BYTEBUFFER_FLAG_OBJECT_POOL);
+    return manapi::bytebuffer (pointer, suggested, suggested);
 }
 

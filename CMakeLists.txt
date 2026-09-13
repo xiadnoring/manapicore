@@ -16,6 +16,7 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.24.0")
 endif ()
 
 include(CTest)
+include(GNUInstallDirs)
 
 if (WIN32)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -210,7 +211,7 @@ else ()
     # set (LIBUV_FOUND OFF)
     if (NOT LIBUV_FOUND)
         if (MANAPIHTTP_DEPENDENCY_FETCH)
-            set(MANAPIHTTP_LIBUV_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/lib/libuv)
+            set(MANAPIHTTP_LIBUV_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libuv)
             if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
                 set(MANAPIHTTP_LIBUV_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}uv${CMAKE_SHARED_LIBRARY_SUFFIX}")
             else ()
@@ -220,7 +221,7 @@ else ()
             if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
                 set(LIBUV_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/uv/${MANAPIHTTP_LIBUV_LIBNAME}")
             else ()
-                set(LIBUV_LIBRARIES "${MANAPIHTTP_LIBUV_INSTALL_DIR}/lib/${MANAPIHTTP_LIBUV_LIBNAME}")
+                set(LIBUV_LIBRARIES "${MANAPIHTTP_LIBUV_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_LIBUV_LIBNAME}")
             endif ()
 
             set(LIBUV_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_LIBUV_INSTALL_DIR}/include>)
@@ -256,7 +257,7 @@ else ()
 
         if (NOT GMP_FOUND)
             if (MANAPIHTTP_DEPENDENCY_FETCH)
-                set(MANAPIHTTP_GMP_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/lib/gmp)
+                set(MANAPIHTTP_GMP_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/gmp)
                 if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
                     set(MANAPIHTTP_GMP_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}gmp${CMAKE_SHARED_LIBRARY_SUFFIX}")
                 else ()
@@ -266,7 +267,7 @@ else ()
                 if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
                     set(GMP_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/gmp/${MANAPIHTTP_GMP_LIBNAME}")
                 else ()
-                    set(GMP_LIBRARIES "${MANAPIHTTP_GMP_INSTALL_DIR}/lib/${MANAPIHTTP_GMP_LIBNAME}")
+                    set(GMP_LIBRARIES "${MANAPIHTTP_GMP_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_GMP_LIBNAME}")
                 endif ()
 
                 set(GMP_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_GMP_INSTALL_DIR}/include>)
@@ -303,7 +304,7 @@ else ()
         #set(ZLIB_FOUND OFF)
         if (NOT ZLIB_FOUND)
             if (MANAPIHTTP_DEPENDENCY_FETCH)
-                set(MANAPIHTTP_ZLIB_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/lib/zlib)
+                set(MANAPIHTTP_ZLIB_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/zlib)
                 if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
                     set(MANAPIHTTP_ZLIB_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}z${CMAKE_SHARED_LIBRARY_SUFFIX}")
                 else ()
@@ -313,7 +314,7 @@ else ()
                 if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
                     set(ZLIB_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/z/${MANAPIHTTP_ZLIB_LIBNAME}")
                 else ()
-                    set(ZLIB_LIBRARIES "${MANAPIHTTP_ZLIB_INSTALL_DIR}/lib/${MANAPIHTTP_ZLIB_LIBNAME}")
+                    set(ZLIB_LIBRARIES "${MANAPIHTTP_ZLIB_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_ZLIB_LIBNAME}")
                 endif ()
 
                 set(ZLIB_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_ZLIB_INSTALL_DIR}/include>)
@@ -350,7 +351,7 @@ else ()
         endif ()
         if (NOT OPENSSL_FOUND)
             if (MANAPIHTTP_DEPENDENCY_FETCH)
-                set(MANAPIHTTP_OPENSSL_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/lib/openssl)
+                set(MANAPIHTTP_OPENSSL_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/openssl)
 
 
                 if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
@@ -403,7 +404,7 @@ else ()
         # set(CURL_FOUND OFF)
         if (NOT CURL_FOUND)
             if (MANAPIHTTP_DEPENDENCY_FETCH)
-                set(MANAPIHTTP_CURL_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/lib/curl)
+                set(MANAPIHTTP_CURL_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/curl)
 
                 if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
                     set(MANAPIHTTP_CURL_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}curl${CMAKE_SHARED_LIBRARY_SUFFIX}")
@@ -414,7 +415,7 @@ else ()
                 if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
                     set(CURL_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/curl/${MANAPIHTTP_CURL_LIBNAME}")
                 else ()
-                    set(CURL_LIBRARIES "${MANAPIHTTP_CURL_INSTALL_DIR}/lib/${MANAPIHTTP_CURL_LIBNAME}")
+                    set(CURL_LIBRARIES "${MANAPIHTTP_CURL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_CURL_LIBNAME}")
                 endif ()
 
                 set(CURL_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_CURL_INSTALL_DIR}/include>)
@@ -522,13 +523,14 @@ else ()
                     set(MANAPIHTTP_LIBNGHTTP2_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}nghttp2${CMAKE_STATIC_LIBRARY_SUFFIX}")
                 endif ()
 
+                set(MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libnghttp2)
+
                 if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
                     set(LIBNGHTTP2_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/nghttp2/${MANAPIHTTP_LIBNGHTTP2_LIBNAME}")
                 else ()
-                    set(LIBNGHTTP2_LIBRARIES "${MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR}/lib/${MANAPIHTTP_LIBNGHTTP2_LIBNAME}")
+                    set(LIBNGHTTP2_LIBRARIES "${MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_LIBNGHTTP2_LIBNAME}")
                 endif ()
 
-                set(MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/lib/libnghttp2)
                 set(LIBNGHTTP2_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR}/include>)
 
                 ExternalProject_Add(
@@ -565,13 +567,14 @@ else ()
                     set(MANAPIHTTP_LIBNGHTTP3_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}nghttp3${CMAKE_STATIC_LIBRARY_SUFFIX}")
                 endif ()
 
+                set(MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libnghttp3)
+
                 if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
                     set(LIBNGHTTP3_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/nghttp3/${MANAPIHTTP_LIBNGHTTP3_LIBNAME}")
                 else ()
-                    set(LIBNGHTTP3_LIBRARIES "${MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR}/lib/${MANAPIHTTP_LIBNGHTTP3_LIBNAME}")
+                    set(LIBNGHTTP3_LIBRARIES "${MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_LIBNGHTTP3_LIBNAME}")
                 endif ()
 
-                set(MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/lib/libnghttp3)
 
                 set(LIBNGHTTP3_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR}/include>)
 
@@ -792,12 +795,9 @@ set(MANAPIHTTP_HTTP_FILES
         src/crypto/ManapiAEAD.cpp
         src/crypto/ManapiHKDF.cpp
         src/crypto/ManapiAES.cpp
-        include/utils/ManapiMultithreadStorage.hpp
-        src/utils/ManapiMultithreadStorage.cpp
         include/ManapiGrpc.hpp
         src/ManapiGrpc.cpp
         include/utils/ManapiConfig.hpp
-        src/utils/ManapiConfig.cpp
         src/include/ManapiInternalGrpc.hpp
         include/ManapiDns.hpp
         src/ManapiDns.cpp
@@ -1369,8 +1369,6 @@ else ()
             $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-ggdb>
     )
 
-    include(GNUInstallDirs)
-
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
     if (MANAPIHTTP_INSTALL_ARCH)
@@ -1411,6 +1409,7 @@ else ()
     #    export(TARGETS ${PROJECT_NAME} FILE ManapiHttpConfig.cmake)
 endif ()
 
+# lib must be replaced with CMAKE_INSTALL_LIBDIR
 #include("${manapihttp_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapihttp/manapihttp-config.cmake")
 #
 #set_target_properties(manapihttp::manapihttp PROPERTIES

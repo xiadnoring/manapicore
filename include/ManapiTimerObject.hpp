@@ -19,7 +19,7 @@ namespace manapi {
 
     class event_loop;
 
-    class timerpool;
+    class timer_pool;
 
     class timer {
     public:

@@ -80,8 +80,8 @@ namespace manapi {
     class logger;
 
     class event_loop : public std::enable_shared_from_this<event_loop> {
-        friend async::context;
-        friend timerpool;
+        friend context;
+        friend timer_pool;
 
         event_loop();
     public:
@@ -96,7 +96,7 @@ namespace manapi {
             FLAG_WORKER_THREAD = 1<<0
         };
 
-        static manapi::ev::status_or<std::shared_ptr<event_loop>> create (int flags, std::shared_ptr<mthreadpool> taskpool, std::shared_ptr<timerpool> tmpool, std::shared_ptr<manapi::logger> logger);
+        static manapi::ev::status_or<std::shared_ptr<event_loop>> create (int flags, std::shared_ptr<mthread_pool> taskpool, std::shared_ptr<timer_pool> tmpool, std::shared_ptr<manapi::logger> logger);
 
         ~event_loop();
 
@@ -296,7 +296,7 @@ namespace manapi {
 
         void stop_watcher (std::shared_ptr<ev::tcp> s) MANAPIHTTP_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const std::shared_ptr<ethreadpool> &taskpool () const MANAPIHTTP_NOEXCEPT;
+        MANAPIHTTP_NODISCARD const std::shared_ptr<ethread_pool> &taskpool () const MANAPIHTTP_NOEXCEPT;
 #if MANAPIHTTP_CURL_DEPENDENCY
         manapi::status watch_curl (void *shared_curl, std::move_only_function<void(int result)> cb) MANAPIHTTP_NOEXCEPT;
 
@@ -360,11 +360,11 @@ namespace manapi {
 
         int m_flags;
 
-        std::shared_ptr<ethreadpool> m_etaskpool;
+        std::shared_ptr<ethread_pool> m_etaskpool;
 
         std::unique_ptr<uv_loop_t> m_loop;
 
-        std::shared_ptr<mthreadpool> m_taskpool;
+        std::shared_ptr<mthread_pool> m_taskpool;
 
         std::unordered_map <size_t, int> m_finish_ids_cbs;
 

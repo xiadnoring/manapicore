@@ -2,9 +2,10 @@
 
 #include "../json/ManapiJson.hpp"
 
-namespace manapi::internal {
+namespace manapi {
     class config_interface {
     public:
+        virtual ~config_interface () = default;
 
         template<typename T>
         requires(std::is_same_v<std::string, T>)

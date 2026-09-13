@@ -59,10 +59,10 @@ namespace manapi::net {
         manapi::future<ssize_t> onrecv_multipart_ (slice_view buffs);
         manapi::future<ssize_t> onrecv_urlencoded_ (slice_view buffs);
 
-        onparam_cb_t onparam_cb_;
-        ondata_cb_t ondata_cb_;
-        onrecv_cb_t onrecv_cb_;
-        formdata_recv_ctx_t ctx_;
+        onparam_cb_t m_onparam_cb;
+        ondata_cb_t m_ondata_cb;
+        onrecv_cb_t m_onrecv_cb;
+        formdata_recv_ctx_t m_ctx;
     };
 
     class formdata_send {

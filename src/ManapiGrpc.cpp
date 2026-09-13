@@ -11,6 +11,7 @@
 #include "ManapiDns.hpp"
 #include "fs/ManapiFilesystem.hpp"
 #include "http/ManapiHttpUtils.hpp"
+#include "std/ManapiThreadsMutex.hpp"
 #include "./include/ManapiInternalGrpc.hpp"
 #include "./include/ManapiUtils.hpp"
 #include "std/ManapiRef.hpp"
@@ -67,7 +68,7 @@ struct wgrpc_thread_local_storage_t {
     std::unordered_set<manapi::net::wgrpc::net_listener *> wgrpc_tcp_listeners;
     std::size_t current_connect_index = 0;
     std::size_t current_task_index = 0;
-    std::shared_ptr<manapi::async::cthread> ctx;
+    std::shared_ptr<manapi::cthread> ctx;
 };
 
 struct wgrpc_static_storage_t {
@@ -128,7 +129,7 @@ wgrpc_static_storage_t &static_wgrpc_storage () {
 }
 
 struct wgrpc_current_ctx_deleter_t {
-    wgrpc_current_ctx_deleter_t (std::shared_ptr<manapi::async::cthread> ctx) {
+    wgrpc_current_ctx_deleter_t (std::shared_ptr<manapi::cthread> ctx) {
         assert(!current_wgrpc_storage().ctx);
         current_wgrpc_storage().ctx = std::move(ctx);
     }
@@ -148,7 +149,7 @@ static std::unordered_map<std::size_t, std::uintptr_t>::iterator wgrpc_connect_f
 
 static void unbind_net_listener (manapi::ev::shared_tcp conn, manapi::async::shared_cthread ev, manapi::net::wgrpc::resolve_callback_t<absl::Status> on_shutdown) {
     try {
-        auto &s = manapi::async::internal::current_();
+        auto &s = manapi::async::try_current();
 
         if (!conn)
             return;
@@ -244,7 +245,7 @@ static bool task_handle_cancel (grpc_event_engine::experimental::EventEngine::Ta
     return true;
 }
 
-static bool task_handle_cancel (manapi::async::cthread *t, std::size_t idx) {
+static bool task_handle_cancel (manapi::cthread *t, std::size_t idx) {
     grpc_event_engine::experimental::EventEngine::TaskHandle handle{};
     handle.keys[0] = reinterpret_cast<std::intptr_t>(t);
     handle.keys[1] = static_cast<std::intptr_t>(idx);
@@ -273,7 +274,7 @@ static bool task_connect_cancel (grpc_event_engine::experimental::EventEngine::C
     return true;
 }
 
-static bool task_connect_cancel (manapi::async::cthread *t, std::size_t idx) {
+static bool task_connect_cancel (manapi::cthread *t, std::size_t idx) {
     grpc_event_engine::experimental::EventEngine::ConnectionHandle handle{};
     handle.keys[0] = reinterpret_cast<std::intptr_t>(t);
     handle.keys[1] = static_cast<std::intptr_t>(idx);
@@ -341,7 +342,7 @@ public:
 #   endif
 
 bool manapi::net::wgrpc::event_engine_wrapper::Cancel(TaskHandle handle) {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (reinterpret_cast <std::intptr_t>(ctx.get()) == handle.keys[0]) {
         return task_handle_cancel(handle);
@@ -363,7 +364,7 @@ bool manapi::net::wgrpc::event_engine_wrapper::Cancel(TaskHandle handle) {
     {
         std::lock_guard<std::mutex> lk (data.mx);
 
-        (reinterpret_cast<async::cthread *>(handle.keys[0]))->eventloop()->custom_callback([&data] (event_loop *ev)
+        (reinterpret_cast<manapi::cthread *>(handle.keys[0]))->eventloop()->custom_callback([&data] (event_loop *ev)
             -> void {
             try { data.res = data.engine->Cancel(*data.handle_); }
             catch (...) { data.err = std::current_exception(); }
@@ -435,7 +436,7 @@ absl::Status manapi::net::wgrpc::net_listener::Start() {
 void manapi::net::wgrpc::net_listener::shutdown(net_listener *id, manapi::ev::shared_tcp conn, manapi::net::wgrpc::resolve_callback_t<absl::Status> on_shutdown_cb, async::shared_cthread ev) MANAPIHTTP_NOEXCEPT  {
     try {
         if (conn) {
-            auto &s = async::internal::current_();
+            auto &s = async::try_current();
             if (s == ev) {
                 current_wgrpc_storage().wgrpc_tcp_listeners.erase(id);
                 unbind_net_listener(std::move(conn), ev, std::move(on_shutdown_cb));
@@ -484,7 +485,7 @@ void manapi::net::wgrpc::dns_resolved::LookupHostname(LookupHostnameCallback on_
 grpc_event_engine::experimental::EventEngine::DNSResolver::LookupTaskHandle manapi::net::wgrpc::dns_resolved::LookupHostname(LookupHostnameCallback on_resolve, absl::string_view name, absl::string_view default_port, grpc_event_engine::experimental::EventEngine::Duration timeout) {
 #endif
 #if true || MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
-    auto ctx = manapi::async::internal::current_();
+    auto ctx = manapi::async::try_current();
     if (!ctx) {
         ctx = current_wgrpc_storage().ctx;
     }
@@ -774,7 +775,7 @@ void manapi::net::wgrpc::net_endpoint::init_() {
 
                 size = 65536 - this->buffer.Length();
             }
-            auto bufres = manapi::async::current()->memory_fabric().buffer(size);
+            auto bufres = manapi::async::current()->memory_fabric()->buffer(size);
             if (bufres.ok()) {
                 auto buffer = bufres.unwrap();
                 buf->len = buffer.realsize();
@@ -793,7 +794,7 @@ std::shared_ptr<grpc_event_engine::experimental::EventEngine::Endpoint::Telemetr
 
 static void unbind_net_endpoint (manapi::ev::shared_tcp conn, manapi::async::shared_cthread ev) MANAPIHTTP_NOEXCEPT {
     try {
-        auto &s = manapi::async::internal::current_();
+        auto &s = manapi::async::try_current();
         if (s == ev) {
             if (conn->is_active())
                 conn->read_stop();
@@ -840,7 +841,7 @@ const ReadArgs *args
 bool manapi::net::wgrpc::net_endpoint::Read2(resolve_callback_t<absl::Status> &on_read, grpc_event_engine::experimental::SliceBuffer *buffer, const ReadArgs *args
 #endif
 ) {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (ctx == this->ev) {
         auto const already = this->buffer.Length();
@@ -947,7 +948,7 @@ bool manapi::net::wgrpc::net_endpoint::Write2(manapi::net::wgrpc::resolve_callba
 #endif
 ) {
 
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (ctx == this->ev) {
         std::size_t carret = 0;
@@ -1071,7 +1072,7 @@ void manapi::net::wgrpc::net_endpoint::Read(manapi::net::wgrpc::resolve_callback
                                             const grpc_event_engine::experimental::EventEngine::Endpoint::ReadArgs *args) {
     auto res = this->Read2(on_read, buffer, args);
     if (res) {
-        auto &ctx = manapi::async::internal::current_();
+        auto &ctx = manapi::async::try_current();
         assert(!!ctx && !!on_read);
 
         ctx->etaskpool()->append_task ([on_read = std::move(on_read)] () mutable -> void {
@@ -1086,7 +1087,7 @@ void manapi::net::wgrpc::net_endpoint::Write(manapi::net::wgrpc::resolve_callbac
                                              const grpc_event_engine::experimental::EventEngine::Endpoint::WriteArgs *args) {
     auto res = this->Write2(on_writable, data, args);
     if (res) {
-        auto &ctx = manapi::async::internal::current_();
+        auto &ctx = manapi::async::try_current();
         assert(!!ctx && !!on_writable);
 
         ctx->etaskpool()->append_task ([on_writable = std::move(on_writable)] () mutable -> void {
@@ -1118,7 +1119,7 @@ grpc_event_engine::experimental::EventEngine::ConnectionHandle manapi::net::wgrp
     const grpc_event_engine::experimental::EndpointConfig &args,
     grpc_event_engine::experimental::MemoryAllocator memory_allocator, Duration timeout) {
 
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (ctx) {
         std::unique_ptr<wgrpc_connection_data_t> data (new wgrpc_connection_data_t{});
@@ -1326,7 +1327,7 @@ grpc_event_engine::experimental::EventEngine::ConnectionHandle manapi::net::wgrp
 }
 
 void manapi::net::wgrpc::event_engine_wrapper::Run(manapi::net::wgrpc::resolve_callback_t<> closure) {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (ctx)
         ctx->etaskpool()->append_task(std::move(closure));
@@ -1352,7 +1353,7 @@ void manapi::net::wgrpc::event_engine_wrapper::Run(manapi::net::wgrpc::resolve_c
 }
 
 void manapi::net::wgrpc::event_engine_wrapper::Run(Closure *closure) {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
     //assert(ctx);
     if (ctx)
         ctx->etaskpool()->append_task([closure] ()
@@ -1380,7 +1381,7 @@ void manapi::net::wgrpc::event_engine_wrapper::Run(Closure *closure) {
 }
 
 bool manapi::net::wgrpc::event_engine_wrapper::CancelConnect(ConnectionHandle handle) {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (reinterpret_cast<std::intptr_t>(ctx.get()) == handle.keys[0]) {
         return task_connect_cancel (handle);
@@ -1401,7 +1402,7 @@ bool manapi::net::wgrpc::event_engine_wrapper::CancelConnect(ConnectionHandle ha
     {
         std::lock_guard<std::mutex> lk (data.mx);
 
-        (reinterpret_cast <async::cthread*>(handle.keys[0]))->eventloop()->custom_callback([&data] (event_loop *ev)
+        (reinterpret_cast <manapi::cthread*>(handle.keys[0]))->eventloop()->custom_callback([&data] (event_loop *ev)
             -> void {
             try {
                 data.res = data.engine->CancelConnect(*data.handle);
@@ -1424,7 +1425,7 @@ bool manapi::net::wgrpc::event_engine_wrapper::CancelConnect(ConnectionHandle ha
 absl::StatusOr<std::unique_ptr<grpc_event_engine::experimental::EventEngine::Listener>> manapi::net::wgrpc::event_engine_wrapper::CreateListener(Listener::AcceptCallback on_accept,
     manapi::net::wgrpc::resolve_callback_t<absl::Status> on_shutdown, const grpc_event_engine::experimental::EndpointConfig &config,
     std::unique_ptr<grpc_event_engine::experimental::MemoryAllocatorFactory> memory_allocator_factory) {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (ctx) {
         auto b = std::make_unique<net_listener>(std::move(on_shutdown));
@@ -1606,7 +1607,7 @@ static void manapi__wgrpc_run_after (std::size_t indx, manapi::net::wgrpc::event
 }
 
 grpc_event_engine::experimental::EventEngine::TaskHandle manapi::net::wgrpc::event_engine_wrapper::RunAfter(Duration when, Closure *closure) {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (ctx) {
         TaskHandle task{};
@@ -1698,7 +1699,7 @@ grpc_event_engine::experimental::EventEngine::TaskHandle manapi::net::wgrpc::eve
 }
 
 grpc_event_engine::experimental::EventEngine::TaskHandle manapi::net::wgrpc::event_engine_wrapper::RunAfter(Duration when, manapi::net::wgrpc::resolve_callback_t<> closure) {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
 
     if (ctx) {
         TaskHandle task{};
@@ -1789,7 +1790,7 @@ grpc_event_engine::experimental::EventEngine::TaskHandle manapi::net::wgrpc::eve
 }
 
 bool manapi::net::wgrpc::event_engine_wrapper::IsWorkerThread() {
-    return !manapi::async::internal::current_();
+    return !manapi::async::try_current();
 }
 #if MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
 absl::StatusOr<std::unique_ptr<grpc_event_engine::experimental::EventEngine::DNSResolver>> manapi::net::wgrpc::event_engine_wrapper::GetDNSResolver(const DNSResolver::ResolverOptions &options) {
@@ -1917,7 +1918,7 @@ manapi::status manapi::net::wgrpc::server_ctx::enable_threadpool(bool status) MA
 }
 
 void manapi::net::wgrpc::server_ctx::clean() MANAPIHTTP_NOEXCEPT {
-    auto &ctx = manapi::async::internal::current_();
+    auto &ctx = manapi::async::try_current();
     auto &zb = ::current_wgrpc_storage();
 
     if (ctx) {
@@ -2014,7 +2015,7 @@ manapi::future<manapi::status> manapi::net::wgrpc::server::config_object(manapi:
 }
 
 manapi::future<manapi::status> manapi::net::wgrpc::server::start(std::move_only_function<manapi::status(grpc::ServerBuilder &b, grpc::Service *arg)> cb, grpc::Service* service) {
-    using ci = manapi::internal::config_interface;
+    using ci = manapi::config_interface;
     auto res = manapi::status_ok();
     try {
         if (this->m_data->flags & MANAPI_GRPC_SERVER_IS_RUNNING ||

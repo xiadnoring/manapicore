@@ -85,7 +85,7 @@ static std::atomic<std::size_t> bbbb = 0;
 //                co_return;
 //            });
 //        });
-//        if (manapi::async::internal::current_()) {
+//        if (manapi::async::try_current()) {
 //            cb();
 //        }
 //        else {
@@ -124,7 +124,7 @@ static std::atomic<std::size_t> bbbb = 0;
 //        co_return co_await promise ([&] (promise::resolve_t resolve) -> void {
 //            try {
 //                this->stub_->async()->SayHello(&context, &request, &reply, [ctx = manapi::async::current(), &reply, resolve = std::move(resolve)] (grpc::Status status) mutable {
-//                    if (manapi::async::internal::current_() == ctx) {
+//                    if (manapi::async::try_current() == ctx) {
 //                        if (status.ok()) {
 //                            resolve(reply.message());
 //                            return;
@@ -178,15 +178,15 @@ int main () {
     try { threads = (size_t)std::stoi(manapi::process::get_env("MANAPIHTTP_THREADS").unwrap()); }
     catch (...) {  }
 
-    manapi::async::context::threadpoolfs(threads);
-    manapi::async::context::gbs(manapi::async::context::blockedsignals());
+    manapi::context::threadpoolfs(threads);
+    manapi::context::gbs(manapi::context::blockedsignals());
 
     size_t loops = 0;
     try { loops = (size_t)std::stoi(manapi::process::get_env("MANAPIHTTP_LOOPS").unwrap()); }
     catch (...) {  }
     manapi::init_tools::log_name_enable("all", true);
 
-    auto ctx = manapi::async::context::create(loops + 1).unwrap();
+    auto ctx = manapi::context::create(loops + 1).unwrap();
 
     std::atomic<int> a = 0;
     std::atomic<int> thrcnt = 0;
@@ -305,7 +305,7 @@ int main () {
                 co_return resp.text(std::format("ip: {} port: {} online: {} requests: {}",
                     req.ip_data().ip,
                     req.ip_data().port,
-                    server_ctx->storage().worker_data.count.load(),
+                    server_ctx->storage().worker_data->count.load(),
                     a.load())).unwrap();
             }).unwrap();
 
@@ -451,10 +451,10 @@ int main () {
             router->GET ("/free", [&a] (manapi::net::http::request &req, manapi::net::http::response &resp)
                 -> manapi::future<> {
                 manapi::init_tools::ev_library_init();
-                manapi::async::current()->memory_fabric().clear();
+                manapi::async::current()->memory_fabric()->clear();
                 resp.compress_enabled(false);
                 co_return resp.text(std::format("requests: {}; active: {}", a.load(),
-                    resp.connection_data()->worker->worker_data()->count.load())).unwrap();
+                    resp.connection_data()->worker->m_worker_data->count.load())).unwrap();
             }).unwrap();
 
             init_http_server (router, folder);

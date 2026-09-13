@@ -4,7 +4,6 @@
 
 #include "../json/ManapiJson.hpp"
 #include "../std/ManapiThreadsMutex.hpp"
-#include "../utils/ManapiMultithreadStorage.hpp"
 #include "../worker/ManapiHttpBase.hpp"
 
 namespace manapi::net::worker {
@@ -25,7 +24,7 @@ namespace manapi::net::http {
             manapi::json data;
             std::mutex mx;
             manapi::async::tmutex wmx;
-            net::worker::worker_data_t worker_data;
+            std::shared_ptr<net::worker::worker_data_t> worker_data;
         };
 
         server_ctx ();

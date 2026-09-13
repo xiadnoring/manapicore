@@ -43,15 +43,9 @@ namespace manapi::net::worker {
 
         ~http_v2 () override;
 
-        manapi::net::worker::worker_data_t *worker_data() MANAPIHTTP_NOEXCEPT override;
-
         wrk_interface_global_t *wrk_global() MANAPIHTTP_NOEXCEPT override;
 
         void wrk_global(wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT override;
-
-        http::config *config() MANAPIHTTP_NOEXCEPT override;
-
-        const std::shared_ptr<worker::base_http> &site() MANAPIHTTP_NOEXCEPT override;
 
         void waiting(const shared_conn &conn, bool state) MANAPIHTTP_NOEXCEPT override;
 
@@ -84,7 +78,7 @@ namespace manapi::net::worker {
 
         bytebuffer recv_first_buffer(const shared_conn &conn) MANAPIHTTP_NOEXCEPT override;
     private:
-        http_v2_callbacks_t *callbacks;
-        worker::base *w;
+        http_v2_callbacks_t *m_callbacks;
+        worker::base *m_w;
     };
 }

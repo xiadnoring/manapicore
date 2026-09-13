@@ -4,17 +4,19 @@
 #include "./ManapiBaseWorker.hpp"
 #include "./ManapiTimerObject.hpp"
 
-#define MANAPIHTTP_WORKER_EVENT_LOOP(n__) n__->speed_min_delay = (this->config()->speed_check_delay); \
+#define MANAPIHTTP_WORKER_EVENT_LOOP(n__) n__->speed_min_delay = (this->m_config->speed_check_delay); \
 auto const prev = std::exchange(n__->flags, ((n__->flags & (~CONN_MASK_UPDATE))) | (flags & CONN_MASK_UPDATE)); \
 if (n__->flags & CONN_EVENT_LOCKED) return prev; \
-n__->flags |= CONN_EVENT_LOCKED; auto status = n__->flags; \
+n__->flags |= CONN_EVENT_LOCKED; int status; if (n__->flags & CONN_EVENT_FORCE) { status = (n__->flags); n__->flags ^= CONN_EVENT_FORCE; } \
+else { status = (n__->flags & !prev); } int flags_before__ = n__->flags; \
 while (true)
-#define MANAPIHTTP_WORKER_EVENT_LOOP_STREAM(n__) n__->speed_min_delay = (this->config()->speed_stream_check_delay); \
+#define MANAPIHTTP_WORKER_EVENT_LOOP_STREAM(n__) n__->speed_min_delay = (this->m_config->speed_stream_check_delay); \
 auto const prev = std::exchange(n__->flags, ((n__->flags & (~CONN_MASK_UPDATE))) | (flags & CONN_MASK_UPDATE)); \
 if (n__->flags & CONN_EVENT_LOCKED) return prev; \
-n__->flags |= CONN_EVENT_LOCKED; auto status = n__->flags; \
+n__->flags |= CONN_EVENT_LOCKED; int status; if (n__->flags & CONN_EVENT_FORCE) { status = (n__->flags); n__->flags ^= CONN_EVENT_FORCE; } \
+else { status = (n__->flags & !prev); } int flags_before__ = n__->flags; \
 while (true)
-#define MANAPIHTTP_WORKER_EVENT_BREAK(n__) if (status != n__->flags) { status = n__->flags; continue; }\
+#define MANAPIHTTP_WORKER_EVENT_BREAK(n__) if (flags_before__ != n__->flags) { status = n__->flags; continue; }\
 assert (n__->flags & CONN_EVENT_LOCKED); n__->flags ^= CONN_EVENT_LOCKED;  break;
 
 namespace manapi::net::worker {
@@ -66,9 +68,9 @@ namespace manapi::net::worker {
 
         void waiting(const shared_conn &conn, bool state) MANAPIHTTP_NOEXCEPT;
 
-        void flush_read_ (worker::base *w, const shared_conn &conn, connection_prepared_t *data) MANAPIHTTP_NOEXCEPT;
+        void flush_read (worker::base *w, const shared_conn &conn, connection_prepared_t *data) MANAPIHTTP_NOEXCEPT;
 
-        int flush_read2_ (http::config *config, const shared_conn &conn, connection_prepared_t *data, bool force) MANAPIHTTP_NOEXCEPT;
+        int flush_read2 (http::config *config, const shared_conn &conn, connection_prepared_t *data, bool force) MANAPIHTTP_NOEXCEPT;
 
         bool is_writable (http::config *config, const shared_conn &conn, connection_prepared_t *data) MANAPIHTTP_NOEXCEPT;
 

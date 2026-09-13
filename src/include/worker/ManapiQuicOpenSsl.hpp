@@ -19,11 +19,11 @@ namespace manapi::net::worker {
 
         struct quic_stream_t;
     public:
-        openssl_quic (std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata, manapi::net::http::config *config);
+        openssl_quic ();
 
         ~openssl_quic() override;
 
-        static std::shared_ptr<worker::openssl_quic> create (std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata, manapi::net::http::config* config);
+        static std::shared_ptr<worker::openssl_quic> create ();
 
         manapi::future<status> init(std::size_t deep) override;
 
@@ -73,9 +73,9 @@ namespace manapi::net::worker {
 
         void remove_poll_id (std::size_t poll_id) MANAPIHTTP_NOEXCEPT;
 
-        void flush_read_ (const shared_conn &conn, quic_stream_t *data) MANAPIHTTP_NOEXCEPT;
+        void flush_read (const shared_conn &conn, quic_stream_t *data) MANAPIHTTP_NOEXCEPT;
 
-        void flush_write_ (const shared_conn &conn, quic_stream_t *data) MANAPIHTTP_NOEXCEPT;
+        void flush_write (const shared_conn &conn, quic_stream_t *data) MANAPIHTTP_NOEXCEPT;
 
         void update_limit_rate () MANAPIHTTP_NOEXCEPT;
 
@@ -99,7 +99,7 @@ namespace manapi::net::worker {
 
         void conn_processing (SSL *client) MANAPIHTTP_NOEXCEPT;
 
-        int try_init_conn_ (const shared_conn &conn) MANAPIHTTP_NOEXCEPT;
+        int try_init_conn (const shared_conn &conn) MANAPIHTTP_NOEXCEPT;
 
         std::unordered_map <std::string, std::map<std::uintptr_t, shared_conn>, manapi::text_hash, std::equal_to<>> conns_;
     private:
@@ -107,19 +107,18 @@ namespace manapi::net::worker {
 
         static int select_alpn (SSL *ssl, const unsigned char **out, unsigned char *out_len, const unsigned char *in, unsigned int in_len, void *arg);
 
-        std::size_t pending_writes = 0;
-        BIO *rbio;
-        BIO *wbio;
-        std::shared_ptr<net::worker::pool_t> pool_data_;
-        std::size_t deep_worker_id_;
-        std::vector<SSL_POLL_ITEM> polls_;
-        manapi::timer update_limit_timer;
-        std::unique_ptr<ev::timer> t_;
-        std::string alpn_ossltest_;
-        void *ctx;
-        void *listener;
-        SSL_POLL_ITEM* current_poll;
-        std::size_t current_poll_id;
+        std::size_t m_pending_writes = 0;
+        BIO *m_rbio;
+        BIO *m_wbio;
+        std::shared_ptr<net::worker::pool_t> m_pool_data;
+        std::vector<SSL_POLL_ITEM> m_polls;
+        manapi::timer m_update_limit_timer;
+        std::unique_ptr<ev::timer> m_t;
+        std::string m_alpn_ossltest;
+        void *m_ctx;
+        void *m_listener;
+        SSL_POLL_ITEM* m_current_poll;
+        std::size_t m_current_poll_id;
     };
 }
 #   endif

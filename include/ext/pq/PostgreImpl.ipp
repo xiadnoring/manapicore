@@ -455,7 +455,7 @@ manapi::future<manapi::ev::status> manapi::ext::pq::connection::connect(std::str
 
         this->m_data->conn.reset(PQconnectStart(uri.data()));
 
-        status = co_await connect_psql_ (token);
+        status = co_await connect_psql (token);
         if (!status) {
             goto err;
         }
@@ -527,7 +527,7 @@ manapi::future<manapi::ev::status> manapi::ext::pq::connection::connect(const ch
 
         this->m_data->conn.reset(PQconnectdbParams(keywords, values, 1));
 
-        status = co_await connect_psql_ (token);
+        status = co_await connect_psql (token);
         if (!status) {
             //goto err;
         }
@@ -554,7 +554,7 @@ manapi::future<manapi::ext::pq::status_or<manapi::ext::pq::result>> manapi::ext:
         auto lk = co_await this->m_data->mx.lock_guard();
 
         if (!this->connected()) {
-            manapi::unwrap(co_await this->connect_psql_(token));
+            manapi::unwrap(co_await this->connect_psql(token));
         }
 
         if (!PQsendQueryParams(this->m_data->conn.get(), command, static_cast<int>(nParams), paramTypes, paramValues, paramLengths, paramFormats, 1)) {
@@ -646,7 +646,7 @@ std::move_only_function<manapi::future<>(notification notify)> cb) MANAPIHTTP_NO
         this->m_data->notify_cb = std::move(cb);
 }
 
-manapi::future<manapi::ev::status> manapi::ext::pq::connection::connect_psql_(manapi::ctoken token) MANAPIHTTP_NOEXCEPT {
+manapi::future<manapi::ev::status> manapi::ext::pq::connection::connect_psql(manapi::ctoken token) MANAPIHTTP_NOEXCEPT {
     manapi::ev::status status = manapi::ev::status_ok();
     try {
         if (!this->m_data->conn) {

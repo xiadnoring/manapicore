@@ -57,9 +57,9 @@ namespace manapi {
          */
         MANAPIHTTP_NODISCARD bool is_last () const;
     private:
-        slice_part_t *part;
+        slice_part_t *m_part;
 
-        slice_base *base_;
+        slice_base *m_base;
     };
 
 
@@ -99,17 +99,17 @@ namespace manapi {
          */
         MANAPIHTTP_NODISCARD bool is_last () const;
     private:
-        slice_part_t *part;
-        slice_base const *base_;
+        slice_part_t *m_part;
+        slice_base const *m_base;
     };
 
     struct slice_data_t {
-        std::size_t size_;
-        std::size_t shift_;
-        std::size_t rshift_;
-        slice_part_t *first;
-        slice_part_t *last;
-        uint32_t count;
+        std::size_t m_size;
+        std::size_t m_shift;
+        std::size_t m_rshift;
+        slice_part_t *m_first;
+        slice_part_t *m_last;
+        uint32_t m_count;
     };
 
     class slice_base : protected slice_data_t {

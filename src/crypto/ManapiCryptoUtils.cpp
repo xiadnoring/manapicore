@@ -20,7 +20,7 @@
 #   include "Wincrypt.h"
 #endif
 
-static manapi::status random_string_ (char *rnd, std::size_t len) {
+static manapi::status manapi__random_string (char *rnd, std::size_t len) {
     try {
 #ifdef _WIN32
         HCRYPTPROV h_crypt_prov;
@@ -54,9 +54,9 @@ static manapi::status random_string_ (char *rnd, std::size_t len) {
         return manapi::status_resource_exhausted();
     }
     catch (std::exception const &e) {
-        manapi_log_error("%s due to %s", "random_string_:Failed", e.what());
+        manapi_log_error("%s due to %s", "manapi__random_string:Failed", e.what());
     }
-    return manapi::status_internal("random_string_:Failed");
+    return manapi::status_internal("manapi__random_string:Failed");
 }
 
 #if MANAPIHTTP_OPENSSL_DEPENDENCY
@@ -119,7 +119,7 @@ manapi::status_or<std::string> manapi::crypto::random_string(std::size_t len) {
         std::string rnd;
         rnd.resize(len);
 
-        auto err = ::random_string_(rnd.data(), rnd.size());
+        auto err = ::manapi__random_string(rnd.data(), rnd.size());
         if (err.ok())
             return std::move(rnd);
 

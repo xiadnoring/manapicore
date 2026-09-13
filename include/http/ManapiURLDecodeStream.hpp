@@ -8,6 +8,7 @@ namespace manapi::net::http {
     class url_decode_stream {
     public:
         url_decode_stream();
+
         ~url_decode_stream();
         /**
          *
@@ -21,16 +22,19 @@ namespace manapi::net::http {
          * @return 0 on succes, <0 on error
          */
         int operator << (std::string_view data);
+
         std::vector<std::string> result ();
+
         int divided();
     private:
-        int handle_char_ (const char &c);
-        void cleanup_uri_ ();
+        int handle_char (const char &c);
 
-        char hex_symbols[2];
-        char hex_index;
+        void cleanup_uri ();
 
-        std::vector<std::string> result_;
-        int divided_;
+        char m_hex_symbols[2];
+        char m_hex_index;
+
+        std::vector<std::string> m_result;
+        int m_divided;
     };
 }

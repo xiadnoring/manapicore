@@ -33,7 +33,7 @@ enum json_builder_flags {
 
 #define JSON_BUILDER_DEFAULT_FLAG (JSON_FLAG_FIN)
 
-static constexpr auto js_is_space = [] {
+static constexpr auto manapi__js_is_space = [] {
     std::array<bool, 256> tbl{};
     tbl[' ']  = true;
     tbl['\t'] = true;
@@ -42,7 +42,7 @@ static constexpr auto js_is_space = [] {
     return tbl;
 }();
 
-static constexpr auto js_is_space2 = [] {
+static constexpr auto manapi__js_is_space2 = [] {
     std::array<bool, 256> tbl{};
     tbl[' ']  = true;
     tbl['\t'] = true;
@@ -54,7 +54,7 @@ static constexpr auto js_is_space2 = [] {
     return tbl;
 }();
 
-static constexpr auto utf8_octet_type = [] {
+static constexpr auto manapi__utf8_octet_type = [] {
     std::array<uint8_t, 256> tbl{};
     for (uint8_t i = 0; i < (uint8_t)256; i++) {
         if ((i & 0x80) == 0)        tbl[i] = 0;   // ASCII
@@ -67,7 +67,7 @@ static constexpr auto utf8_octet_type = [] {
     return tbl;
 }();
 
-static constexpr auto escape_table2 = [] {
+static constexpr auto manapi__escape_table2 = [] {
     std::array<char, 256> tbl{};
     tbl['t'] = '\t';
     tbl['n'] = '\n';
@@ -81,14 +81,14 @@ static constexpr auto escape_table2 = [] {
     return tbl;
 }();
 
-static constexpr auto is_valid_escape = [] {
+static constexpr auto manapi__is_valid_escape = [] {
     std::array<bool, 256> tbl{};
     tbl['t'] = tbl['n'] = tbl['r'] = tbl['f'] = tbl['b'] = true;
     tbl['\\'] = tbl['/'] = tbl['"'] = tbl['u'] = true;
     return tbl;
 }();
 
-static constexpr auto hex_to_val = [] {
+static constexpr auto manapi__hex_to_val = [] {
     std::array<uint8_t, 256> tbl{};
     for (uint8_t i = 0; i < (uint8_t)256; i++) tbl[i] = 0xFF; // invalid
     for (uint8_t i = '0'; i <= '9'; i++) tbl[i] = i - '0';
@@ -96,33 +96,33 @@ static constexpr auto hex_to_val = [] {
     for (uint8_t i = 'A'; i <= 'F'; i++) tbl[i] = i - 'A' + 10;
     return tbl;
 }();
-
-struct utf8_from_unicode_entry {
-    uint8_t bytes[3];
-    uint8_t len;
-};
-static constexpr auto utf8_from_unicode_table = [] {
-    // U+0000 - U+007F -> 1 байт: 0xxxxxxx
-    // U+0080 - U+07FF -> 2 байта: 110xxxxx 10xxxxxx
-    // U+0800 - U+FFFF -> 3 байта: 1110xxxx 10xxxxxx 10xxxxxx
-    std::array<utf8_from_unicode_entry, 0x10000> tbl{}; // 64K — только BMP
-    for (uint32_t cp = 0; cp < (uint32_t)0x10000; cp++) {
-        if (cp <= 0x7F) {
-            tbl[cp].bytes[0] = static_cast<uint8_t>(cp);
-            tbl[cp].len = 1;
-        } else if (cp <= 0x7FF) {
-            tbl[cp].bytes[0] = (uint8_t)(0xC0 | (cp >> 6));
-            tbl[cp].bytes[1] = (uint8_t)(0x80 | (cp & 0x3F));
-            tbl[cp].len = 2;
-        } else {
-            tbl[cp].bytes[0] = (uint8_t)(0xE0 | (cp >> 12));
-            tbl[cp].bytes[1] = (uint8_t)(0x80 | ((cp >> 6) & 0x3F));
-            tbl[cp].bytes[2] = (uint8_t)(0x80 | (cp & 0x3F));
-            tbl[cp].len = 3;
-        }
-    }
-    return tbl;
-}();
+//
+//struct utf8_from_unicode_entry {
+//    uint8_t bytes[3];
+//    uint8_t len;
+//};
+//static constexpr auto utf8_from_unicode_table = [] {
+//    // U+0000 - U+007F -> 1 байт: 0xxxxxxx
+//    // U+0080 - U+07FF -> 2 байта: 110xxxxx 10xxxxxx
+//    // U+0800 - U+FFFF -> 3 байта: 1110xxxx 10xxxxxx 10xxxxxx
+//    std::array<utf8_from_unicode_entry, 0x10000> tbl{}; // 64K — только BMP
+//    for (uint32_t cp = 0; cp < (uint32_t)0x10000; cp++) {
+//        if (cp <= 0x7F) {
+//            tbl[cp].bytes[0] = static_cast<uint8_t>(cp);
+//            tbl[cp].len = 1;
+//        } else if (cp <= 0x7FF) {
+//            tbl[cp].bytes[0] = (uint8_t)(0xC0 | (cp >> 6));
+//            tbl[cp].bytes[1] = (uint8_t)(0x80 | (cp & 0x3F));
+//            tbl[cp].len = 2;
+//        } else {
+//            tbl[cp].bytes[0] = (uint8_t)(0xE0 | (cp >> 12));
+//            tbl[cp].bytes[1] = (uint8_t)(0x80 | ((cp >> 6) & 0x3F));
+//            tbl[cp].bytes[2] = (uint8_t)(0x80 | (cp & 0x3F));
+//            tbl[cp].len = 3;
+//        }
+//    }
+//    return tbl;
+//}();
 
 struct manapi::json_builder::data_t {
     uint32_t skip_types{};
@@ -139,7 +139,7 @@ struct manapi::json_builder::data_t {
     manapi::json_error::status st;
 };
 
-enum json_report_error {
+enum json_report_errors {
     JSON_REPORT_INLD_CHAR = 0,
     JSON_REPORT_DUP_KEY,
     JSON_REPORT_UNEXP_END,
@@ -158,7 +158,7 @@ enum json_report_error {
 //     return manapi::json_error::status_invalid_argument("json: unexpected end of JSON input at", data->i, {});
 // }
 
-static manapi::json_error::status json_report_error (::json_report_error z, std::string_view n, std::size_t posj, manapi::json_builder::data_t *data) {
+static manapi::json_error::status json_report_error (::json_report_errors z, std::string_view n, std::size_t posj, manapi::json_builder::data_t *data) {
     const char *msg;
     switch (z) {
         case JSON_REPORT_INLD_CHAR: msg = "json:invalid char"; break;
@@ -172,7 +172,7 @@ static manapi::json_error::status json_report_error (::json_report_error z, std:
 
 static int json_builder_check_end(manapi::json_builder::data_t *data, std::string_view plain_text, size_t &j) {
     std::size_t start = j;
-    while (j < plain_text.size() && js_is_space[static_cast<unsigned char>(plain_text[j])]) {
+    while (j < plain_text.size() && manapi__js_is_space[static_cast<unsigned char>(plain_text[j])]) {
         j++;
     }
 
@@ -345,7 +345,7 @@ static int json_builder_check_type(manapi::json_builder::data_t *data, std::stri
         for (; j < plain_text.size(); data->i++, j++) {
             const char c = plain_text.at(j);
 
-            if (js_is_space[static_cast<unsigned char>(c)])
+            if (manapi__js_is_space[static_cast<unsigned char>(c)])
                 continue;
 
             data->paths.push_back(manapi::json_mask_path_t {});
@@ -678,7 +678,7 @@ static int json_builder_build_string(manapi::json_builder::data_t *data, std::st
     std::size_t sz;
     auto &p = data->paths.back().p;
 
-    auto& ctx = manapi::async::internal::current_();
+    auto& ctx = manapi::async::try_current();
     if (ctx) sz = manapi::async::memory_fabric()->area_size();
     else sz = std::numeric_limits<std::size_t>::max();
 
@@ -725,12 +725,12 @@ static int json_builder_build_string(manapi::json_builder::data_t *data, std::st
         if (data->flags & JSON_FLAG_ESCAPED) {
             data->flags ^= JSON_FLAG_ESCAPED;
 
-            if (is_valid_escape[c])  {
+            if (manapi__is_valid_escape[c])  {
                 if (c == 'u') {
                     data->utf[4] = 1;   // \uXXXX
                     continue;
                 }
-                c = (uint8_t)escape_table2[c];
+                c = (uint8_t)manapi__escape_table2[c];
             } else {
                 data->st = manapi::json_error::status_invalid_argument(
                     "json: bad escaped character", data->i - 1,
@@ -739,7 +739,7 @@ static int json_builder_build_string(manapi::json_builder::data_t *data, std::st
             }
         }
         else if (data->utf[4] != 0) {
-            uint8_t val = hex_to_val[c];
+            uint8_t val = manapi__hex_to_val[c];
             if (val != 0xFF)  {
                 data->utf[data->utf[4]++ - 1] = val;
 
@@ -809,7 +809,7 @@ static int json_builder_build_string(manapi::json_builder::data_t *data, std::st
         if (data->flags & JSON_FLAG_OPENED_QUOTE)  {
             bf->push_back(static_cast<char>(c));
         } else {
-            if (!js_is_space[c]) {
+            if (!manapi__js_is_space[c]) {
                 data->st = ::json_report_error(JSON_REPORT_INLD_CHAR, plain_text, j, data);
                 return 1;
             }
@@ -885,7 +885,7 @@ static int json_builder_build_numeric(manapi::json_builder::data_t *data, std::s
 
     if (data->buffer.empty()) {
         start = j;
-        while (j < plain_text.size() && js_is_space[static_cast<uint8_t> (plain_text[j])]) {
+        while (j < plain_text.size() && manapi__js_is_space[static_cast<uint8_t> (plain_text[j])]) {
             j++;
         }
 
@@ -900,7 +900,7 @@ static int json_builder_build_numeric(manapi::json_builder::data_t *data, std::s
     data->buffer.append(plain_text.data() + start, j - start);
     data->i += j - start;
 
-    if (j != plain_text.size() && !js_is_space2[static_cast<uint8_t> (plain_text[j])]) {
+    if (j != plain_text.size() && !manapi__js_is_space2[static_cast<uint8_t> (plain_text[j])]) {
         data->state = JSON_CALLBACK_BUILD_NUMERIC_STRING;
         return 0;
     }
@@ -949,7 +949,7 @@ static int json_builder_build_numeric_string(manapi::json_builder::data_t *data,
 
     if (data->buffer.empty()) {
         start = j;
-        while (j < plain_text.size() && js_is_space[static_cast<uint8_t> (plain_text[j])]) {
+        while (j < plain_text.size() && manapi__js_is_space[static_cast<uint8_t> (plain_text[j])]) {
             j++;
         }
 
@@ -957,7 +957,7 @@ static int json_builder_build_numeric_string(manapi::json_builder::data_t *data,
     }
 
     start = j;
-    while (j < plain_text.size() && !js_is_space2[static_cast<unsigned char>(plain_text[j])]) {
+    while (j < plain_text.size() && !manapi__js_is_space2[static_cast<unsigned char>(plain_text[j])]) {
         j++;
     }
 
@@ -997,7 +997,7 @@ static int json_builder_build_object(manapi::json_builder::data_t *data, std::st
     if (z->is_null()) {
         start = j;
 
-        while (j < plain_text.size() && js_is_space[static_cast<uint8_t>(plain_text[j])])
+        while (j < plain_text.size() && manapi__js_is_space[static_cast<uint8_t>(plain_text[j])])
             j++;
 
         data->i += j - start;
@@ -1019,7 +1019,7 @@ static int json_builder_build_object(manapi::json_builder::data_t *data, std::st
 
     while (j < plain_text.size()) {
         start = j;
-        while (j < plain_text.size() && js_is_space[static_cast<uint8_t>(plain_text[j])])
+        while (j < plain_text.size() && manapi__js_is_space[static_cast<uint8_t>(plain_text[j])])
             j++;
 
         data->i += j - start;
@@ -1144,7 +1144,7 @@ static int json_builder_build_array(manapi::json_builder::data_t *data, std::str
     if (z->is_null()) {
 
         start = j;
-        while (j < plain_text.size() && js_is_space[static_cast<unsigned char>(plain_text[j])]) {
+        while (j < plain_text.size() && manapi__js_is_space[static_cast<unsigned char>(plain_text[j])]) {
             j++;
         }
 
@@ -1168,7 +1168,7 @@ static int json_builder_build_array(manapi::json_builder::data_t *data, std::str
     while (j < plain_text.size()) {
 
         start = j;
-        while (j < plain_text.size() && js_is_space[static_cast<unsigned char>(plain_text[j])]) {
+        while (j < plain_text.size() && manapi__js_is_space[static_cast<unsigned char>(plain_text[j])]) {
             j++;
         }
 

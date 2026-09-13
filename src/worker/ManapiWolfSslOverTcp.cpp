@@ -76,26 +76,26 @@ static std::string wgenerate_alpn_ossltest (const std::vector<std::string_view> 
 }
 
 manapi::net::worker::WolfSSL_TLS::WolfSSL_TLS(std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata, manapi::net::http::config *config) : TLS (std::move(site), (wdata), config) {
-    this->ssl_error_none_ = WOLFSSL_ERROR_NONE;
-    this->ssl_error_syscall_ = WOLFSSL_ERROR_SYSCALL;
-    this->ssl_error_want_read_ = WOLFSSL_ERROR_WANT_READ;
-    this->ssl_error_want_write_ = WOLFSSL_ERROR_WANT_WRITE;
-    this->ssl_error_zero_return_ = WOLFSSL_ERROR_ZERO_RETURN;
-    this->ssl_error_ssl_ = WOLFSSL_ERROR_SSL;
-    this->ssl_recv_shutdown_ = WOLFSSL_RECEIVED_SHUTDOWN;
-    this->ssl_send_shutdown_ = WOLFSSL_SENT_SHUTDOWN;
-    this->ssl_shutdown_sucess = WOLFSSL_SUCCESS;
-    this->ssl_shutdown_fatal_error = WOLFSSL_FATAL_ERROR;
-    this->ssl_shutdown_not_done = WOLFSSL_SHUTDOWN_NOT_DONE;
+    this->m_ssl_error_none = WOLFSSL_ERROR_NONE;
+    this->m_ssl_error_syscall = WOLFSSL_ERROR_SYSCALL;
+    this->m_ssl_error_want_read = WOLFSSL_ERROR_WANT_READ;
+    this->m_ssl_error_want_write = WOLFSSL_ERROR_WANT_WRITE;
+    this->m_ssl_error_zero_return = WOLFSSL_ERROR_ZERO_RETURN;
+    this->m_ssl_error_ssl = WOLFSSL_ERROR_SSL;
+    this->m_ssl_recv_shutdown = WOLFSSL_RECEIVED_SHUTDOWN;
+    this->m_ssl_send_shutdown = WOLFSSL_SENT_SHUTDOWN;
+    this->m_ssl_shutdown_success = WOLFSSL_SUCCESS;
+    this->m_ssl_shutdown_fatal_error = WOLFSSL_FATAL_ERROR;
+    this->m_ssl_shutdown_not_done = WOLFSSL_SHUTDOWN_NOT_DONE;
     this->pool_data_ = nullptr;
 #if 0
-    this->early_data_read_error_ = WOLFSSL_READ_EARLY_DATA_ERROR;
-    this->early_data_read_finish_ = WOLFSSL_READ_EARLY_DATA_FINISH;
-    this->early_data_read_success_ = WOLFSSL_READ_EARLY_DATA_SUCCESS;
+    this->m_early_data_read_error = WOLFSSL_READ_EARLY_DATA_ERROR;
+    this->m_early_data_read_finish = WOLFSSL_READ_EARLY_DATA_FINISH;
+    this->m_early_data_read_success = WOLFSSL_READ_EARLY_DATA_SUCCESS;
 #else
-    this->early_data_read_error_ = 0;
-    this->early_data_read_finish_ = 1;
-    this->early_data_read_success_ = 2;
+    this->m_early_data_read_error = 0;
+    this->m_early_data_read_finish = 1;
+    this->m_early_data_read_success = 2;
 #endif
 }
 
@@ -177,15 +177,15 @@ void manapi::net::worker::WolfSSL_TLS::stop(manapi::stoken token) {
     TLS::stop(std::move(token));
 }
 
-bool manapi::net::worker::WolfSSL_TLS::ssl_is_init_fininshed_(void *ssl) MANAPIHTTP_NOEXCEPT {
+bool manapi::net::worker::WolfSSL_TLS::ssl_is_init_fininshed(void *ssl) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_is_init_finished(static_cast<WOLFSSL *>(ssl));
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_get_error_(void *ssl, int rhs) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_get_error(void *ssl, int rhs) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_get_error(static_cast<WOLFSSL *>(ssl), rhs);
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_accept_(void *ssl) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_accept(void *ssl) MANAPIHTTP_NOEXCEPT {
     auto const rhs = wolfSSL_accept(static_cast<WOLFSSL *>(ssl));
 
 #if MANAPIHTTP_WOLFSSL_WITH_ALPN
@@ -216,51 +216,51 @@ int manapi::net::worker::WolfSSL_TLS::ssl_accept_(void *ssl) MANAPIHTTP_NOEXCEPT
     return rhs;
 }
 
-void * manapi::net::worker::WolfSSL_TLS::ssl_new_(void *ctx) MANAPIHTTP_NOEXCEPT {
+void * manapi::net::worker::WolfSSL_TLS::ssl_new(void *ctx) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_new(static_cast<WOLFSSL_CTX *>(ctx));
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_write_(void *ssl, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_write(void *ssl, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_write(static_cast<WOLFSSL *>(ssl), buff, size);
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_read_(void *ssl, void *buff, int size) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_read(void *ssl, void *buff, int size) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_read(static_cast<WOLFSSL *>(ssl), buff, size);
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_shutdown_(void *ssl) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_shutdown(void *ssl) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_shutdown(static_cast<WOLFSSL *>(ssl));
 }
 
-void manapi::net::worker::WolfSSL_TLS::ssl_set_shutdown_(void *ssl, int flags) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::WolfSSL_TLS::ssl_set_shutdown(void *ssl, int flags) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_set_shutdown(static_cast<WOLFSSL *>(ssl), flags);
 }
 
-void manapi::net::worker::WolfSSL_TLS::ssl_free_(void *ssl) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::WolfSSL_TLS::ssl_free(void *ssl) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_free(static_cast<WOLFSSL *>(ssl));
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_bio_read_(void *wbio, void *buff, int size) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_bio_read(void *wbio, void *buff, int size) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_BIO_read(static_cast<WOLFSSL_BIO*>(wbio), buff, static_cast<int>(size));
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_bio_should_retry_(void *bio) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_bio_should_retry(void *bio) MANAPIHTTP_NOEXCEPT {
     return true;
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_bio_write_(void *rbio, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_bio_write(void *rbio, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
     return wolfSSL_BIO_write(static_cast<WOLFSSL_BIO*>(rbio), buff, static_cast<int>(size));
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_read_early_data_(void *ssl, void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_read_early_data(void *ssl, void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
 #if 0
     return wolfSSL_read_early_data(static_cast<WOLFSSL*>(ssl), buf, num, readbytes);
 #else
-    return this->early_data_read_finish_;
+    return this->m_early_data_read_finish;
 #endif
 }
 
-int manapi::net::worker::WolfSSL_TLS::ssl_write_early_data_(void *ssl, const void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::WolfSSL_TLS::ssl_write_early_data(void *ssl, const void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
 #if 0
     return wolfSSL_write_early_data(static_cast<WOLFSSL*>(ssl), buf, num, readbytes);
 #else
@@ -268,7 +268,7 @@ int manapi::net::worker::WolfSSL_TLS::ssl_write_early_data_(void *ssl, const voi
 #endif
 }
 
-bool manapi::net::worker::WolfSSL_TLS::ssl_early_data_is_enabled_(void *ctx) MANAPIHTTP_NOEXCEPT {
+bool manapi::net::worker::WolfSSL_TLS::ssl_early_data_is_enabled(void *ctx) MANAPIHTTP_NOEXCEPT {
 #if 0
     return true;
 #else
@@ -325,7 +325,7 @@ manapi::status_or<void *> manapi::net::worker::WolfSSL_TLS::ssl_create_context(s
 
     manapi::status status;
     try {
-        using ci = manapi::internal::config_interface;
+        using ci = manapi::config_interface;
         std::string_view ret;
         auto const cipher_list = ci::get_config_param<std::string>(this->config_->ssl, "ciphers", {});
         auto const ssl_v2 = ci::get_config_param<bool>(this->config_->ssl, "ssl_v2", false);
@@ -364,7 +364,7 @@ manapi::status_or<void *> manapi::net::worker::WolfSSL_TLS::ssl_create_context(s
             wolfSSL_CTX_set_session_cache_mode(ctx, WOLFSSL_SESS_CACHE_SERVER);
 #if MANAPIHTTP_WOLFSSL_WITH_ALPN
             if (!wolfSSL_CTX_set_session_id_context(ctx,
-                reinterpret_cast<const unsigned char *>(&this->ssl_session_ctx_id), sizeof(this->ssl_session_ctx_id)))
+                reinterpret_cast<const unsigned char *>(&this->m_ssl_session_ctx_id), sizeof(this->m_ssl_session_ctx_id)))
                 goto err;
 #endif
         }
@@ -421,7 +421,7 @@ err:
 
 manapi::status manapi::net::worker::WolfSSL_TLS::ssl_configure_context(void *ctx, worker::pool_t *pool_data, std::size_t deeplvl) MANAPIHTTP_NOEXCEPT {
     try {
-        using ci = manapi::internal::config_interface;
+        using ci = manapi::config_interface;
 
         auto verify_peer = ci::get_config_param<bool>(this->config_->ssl, "verify_peer", true);
         auto cert = ci::get_config_param<std::string>(this->config_->ssl, "cert", {});
@@ -453,7 +453,7 @@ manapi::status manapi::net::worker::WolfSSL_TLS::ssl_configure_context(void *ctx
         {
             /* alpns */
             auto list = manapi::string::split(alpns, ',');
-            auto config_list = this->config()->alpns();
+            auto config_list = this->m_config->alpns();
 
             list.insert(list.end(), config_list.begin(), config_list.end());\
             ctx_data->alpn = (wgenerate_alpn_ossltest(list));

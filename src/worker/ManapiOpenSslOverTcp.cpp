@@ -158,29 +158,27 @@ BIO_METHOD *BIO_manapi_mem () MANAPIHTTP_NOEXCEPT {
     return c;
 }
 
-manapi::net::worker::OpenSSL_TLS::OpenSSL_TLS(std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata, manapi::net::http::config *config) : TLS (std::move(site), (wdata), config) {
-    this->ssl_error_none_ = SSL_ERROR_NONE;
-    this->ssl_error_syscall_ = SSL_ERROR_SYSCALL;
-    this->ssl_error_want_read_ = SSL_ERROR_WANT_READ;
-    this->ssl_error_want_write_ = SSL_ERROR_WANT_WRITE;
-    this->ssl_error_zero_return_ = SSL_ERROR_ZERO_RETURN;
-    this->ssl_error_ssl_ = SSL_ERROR_SSL;
-    this->ssl_recv_shutdown_ = SSL_RECEIVED_SHUTDOWN;
-    this->ssl_send_shutdown_ = SSL_SENT_SHUTDOWN;
-    this->early_data_read_error_ = SSL_READ_EARLY_DATA_ERROR;
-    this->early_data_read_finish_ = SSL_READ_EARLY_DATA_FINISH;
-    this->early_data_read_success_ = SSL_READ_EARLY_DATA_SUCCESS;
-    this->ssl_shutdown_sucess = 1;
-    this->ssl_shutdown_fatal_error = -128;
-    this->ssl_shutdown_not_done = 0;
-
-    this->pool_data_ = nullptr;
+manapi::net::worker::OpenSSL_TLS::OpenSSL_TLS() : TLS () {
+    this->m_ssl_error_none = SSL_ERROR_NONE;
+    this->m_ssl_error_syscall = SSL_ERROR_SYSCALL;
+    this->m_ssl_error_want_read = SSL_ERROR_WANT_READ;
+    this->m_ssl_error_want_write = SSL_ERROR_WANT_WRITE;
+    this->m_ssl_error_zero_return = SSL_ERROR_ZERO_RETURN;
+    this->m_ssl_error_ssl = SSL_ERROR_SSL;
+    this->m_ssl_recv_shutdown = SSL_RECEIVED_SHUTDOWN;
+    this->m_ssl_send_shutdown = SSL_SENT_SHUTDOWN;
+    this->m_early_data_read_error = SSL_READ_EARLY_DATA_ERROR;
+    this->m_early_data_read_finish = SSL_READ_EARLY_DATA_FINISH;
+    this->m_early_data_read_success = SSL_READ_EARLY_DATA_SUCCESS;
+    this->m_ssl_shutdown_success = 1;
+    this->m_ssl_shutdown_fatal_error = -128;
+    this->m_ssl_shutdown_not_done = 0;
 }
 
 manapi::net::worker::OpenSSL_TLS::~OpenSSL_TLS() {
-    if (this->pool_data_) {
-        std::lock_guard<std::mutex> lk (this->pool_data_->mx);
-        auto &wdata = this->pool_data_->data[this->deep_worker_id_];
+    if (this->m_pool_data) {
+        std::lock_guard<std::mutex> lk (this->m_pool_data->mx);
+        auto &wdata = this->m_pool_data->data[this->m_deep_worker_id];
         if (wdata.ref) {
             if (!(--wdata.ref)) {
                 auto ctx_data = static_cast<openssl_tls_worker_ctx_t *> (wdata.data);
@@ -193,8 +191,8 @@ manapi::net::worker::OpenSSL_TLS::~OpenSSL_TLS() {
     }
 }
 
-std::shared_ptr<manapi::net::worker::OpenSSL_TLS> manapi::net::worker::OpenSSL_TLS::create(std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata, manapi::net::http::config* config) {
-    auto worker = std::make_shared<worker::OpenSSL_TLS>(std::move(site), (wdata), config);
+std::shared_ptr<manapi::net::worker::OpenSSL_TLS> manapi::net::worker::OpenSSL_TLS::create() {
+    auto worker = std::make_shared<worker::OpenSSL_TLS>();
     return std::move(worker);
 }
 
@@ -231,31 +229,32 @@ manapi::future<manapi::status> manapi::net::worker::OpenSSL_TLS::init(std::size_
     if (!res.ok())
         co_return std::move(res);
 
-    this->deep_worker_id_ = deep;
+    this->m_deep_worker_id = deep;
 
     try {
-        this->pool_data_ = this->worker_data_->pools[this->worker_pool_id_];
-        std::lock_guard<std::mutex> lk (this->pool_data_->mx);
 
-        if (this->pool_data_->data.size() <= deep)
-            this->pool_data_->data.resize(deep + 1);
+        this->m_pool_data = this->m_worker_data->pools[this->m_worker_pool_id];
+        std::lock_guard<std::mutex> lk (this->m_pool_data->mx);
 
-        if (!(this->pool_data_->data[deep].ref))
-            this->pool_data_->data[deep].data = new openssl_tls_worker_ctx_t{};
+        if (this->m_pool_data->data.size() <= deep)
+            this->m_pool_data->data.resize(deep + 1);
 
-        auto ctx_data = static_cast<openssl_tls_worker_ctx_t *>(this->pool_data_->data[deep].data);
-        this->pool_data_->data[deep].ref++;
+        if (!(this->m_pool_data->data[deep].ref))
+            this->m_pool_data->data[deep].data = new openssl_tls_worker_ctx_t{};
+
+        auto ctx_data = static_cast<openssl_tls_worker_ctx_t *>(this->m_pool_data->data[deep].data);
+        this->m_pool_data->data[deep].ref++;
 
         if (!ctx_data->sessions_flush_timer) {
             ctx_data->sessions_flush_timer = manapi::async::current()->timerpool()->append_interval_sync(
-                10000, manapi::TIMER_IMPORTANT,[ctx_data, &mx = this->pool_data_->mx](const manapi::timer& t)
+                10000, manapi::TIMER_IMPORTANT,[ctx_data, &mx = this->m_pool_data->mx](const manapi::timer& t)
                     ->void {
                 ssl_flush_sessions (mx, ctx_data);
             }).unwrap();
         }
 
         if (!ctx_data->ctx) {
-            auto strtls = this->config_->get_config_param<std::string> (this->config_->ssl, "tls", "1.3");
+            auto strtls = this->m_config->get_config_param<std::string> (this->m_config->ssl, "tls", "1.3");
             std::size_t tls_version = http::versions::TLS_v1_3;
             if (strtls == "1.3") tls_version = http::versions::TLS_v1_3;
             else if (strtls == "1.2") tls_version = http::versions::TLS_v1_2;
@@ -268,7 +267,7 @@ manapi::future<manapi::status> manapi::net::worker::OpenSSL_TLS::init(std::size_
             if (!res.ok())
                 co_return std::move(res);
         }
-        this->ctx = ctx_data->ctx;
+        this->m_ctx = ctx_data->ctx;
         co_return status_ok();
     }
     catch (std::exception const &e) {
@@ -277,71 +276,71 @@ manapi::future<manapi::status> manapi::net::worker::OpenSSL_TLS::init(std::size_
     co_return status_internal("openssl_tls:Failed");
 }
 
-bool manapi::net::worker::OpenSSL_TLS::ssl_is_init_fininshed_(void *ssl) MANAPIHTTP_NOEXCEPT {
+bool manapi::net::worker::OpenSSL_TLS::ssl_is_init_fininshed(void *ssl) MANAPIHTTP_NOEXCEPT {
     ERR_clear_error();
     return SSL_is_init_finished(static_cast<SSL*>(ssl));
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_get_error_(void *ssl, int rhs) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_get_error(void *ssl, int rhs) MANAPIHTTP_NOEXCEPT {
     return SSL_get_error(static_cast<SSL*>(ssl), rhs);
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_accept_(void *ssl) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_accept(void *ssl) MANAPIHTTP_NOEXCEPT {
     ERR_clear_error();
     return SSL_accept(static_cast<SSL*>(ssl));
 }
 
-void * manapi::net::worker::OpenSSL_TLS::ssl_new_(void *ctx) MANAPIHTTP_NOEXCEPT {
+void * manapi::net::worker::OpenSSL_TLS::ssl_new(void *ctx) MANAPIHTTP_NOEXCEPT {
     ERR_clear_error();
     return SSL_new(static_cast<SSL_CTX*>(ctx));
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_write_(void *ssl, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_write(void *ssl, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
     ERR_clear_error();
     return SSL_write(static_cast<SSL*>(ssl), buff, size);
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_read_(void *ssl, void *buff, int size) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_read(void *ssl, void *buff, int size) MANAPIHTTP_NOEXCEPT {
     ERR_clear_error();
     return SSL_read(static_cast<SSL*>(ssl), buff, size);
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_shutdown_(void *ssl) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_shutdown(void *ssl) MANAPIHTTP_NOEXCEPT {
     ERR_clear_error();
     return SSL_shutdown(static_cast<SSL*>(ssl));
 }
 
-void manapi::net::worker::OpenSSL_TLS::ssl_set_shutdown_(void *ssl, int flags) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::OpenSSL_TLS::ssl_set_shutdown(void *ssl, int flags) MANAPIHTTP_NOEXCEPT {
     SSL_set_shutdown(static_cast<SSL*>(ssl), flags);
 }
 
-void manapi::net::worker::OpenSSL_TLS::ssl_free_(void *ssl) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::OpenSSL_TLS::ssl_free(void *ssl) MANAPIHTTP_NOEXCEPT {
     SSL_free(static_cast<SSL*>(ssl));
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_bio_read_(void *wbio, void *buff, int size) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_bio_read(void *wbio, void *buff, int size) MANAPIHTTP_NOEXCEPT {
     return BIO_read(static_cast<BIO*>(wbio), buff, static_cast<int>(size));
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_bio_write_(void *rbio, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_bio_write(void *rbio, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
     return BIO_write(static_cast<BIO*>(rbio), buff, static_cast<int>(size));
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_bio_should_retry_(void *bio) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_bio_should_retry(void *bio) MANAPIHTTP_NOEXCEPT {
     return BIO_should_retry(static_cast<BIO*>(bio));
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_read_early_data_(void *ssl, void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_read_early_data(void *ssl, void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
     ERR_clear_error();
     return SSL_read_early_data(static_cast<SSL*>(ssl), buf, num, readbytes);
 }
 
-int manapi::net::worker::OpenSSL_TLS::ssl_write_early_data_(void *ssl, const void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::OpenSSL_TLS::ssl_write_early_data(void *ssl, const void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
     ERR_clear_error();
     return SSL_write_early_data(static_cast<SSL*>(ssl), buf, num, readbytes);
 }
 
-bool manapi::net::worker::OpenSSL_TLS::ssl_early_data_is_enabled_(void *ctx) MANAPIHTTP_NOEXCEPT {
+bool manapi::net::worker::OpenSSL_TLS::ssl_early_data_is_enabled(void *ctx) MANAPIHTTP_NOEXCEPT {
     return SSL_CTX_get_max_early_data(static_cast<SSL_CTX*>(ctx)) > 0;
 }
 
@@ -487,20 +486,19 @@ err:
 }
 
 
-manapi::status_or<void *> manapi::net::worker::OpenSSL_TLS::ssl_create_context(size_t version) {
-    if (this->ctx)
-        return this->ctx;
+manapi::status_or<void *> manapi::net::worker::OpenSSL_TLS::ssl_create_context(std::size_t version) {
+    if (this->m_ctx) return this->m_ctx;
 
-    auto const cipher_list = this->config_->get_config_param<std::string>(this->config_->ssl, "ciphers", {});
-    auto const ssl_v2 = this->config_->get_config_param<bool>(this->config_->ssl, "ssl_v2", false);
-    auto const ssl_v3 = this->config_->get_config_param<bool>(this->config_->ssl, "ssl_v3", false);
-    auto const ticket = this->config_->get_config_param<bool>(this->config_->ssl, "ticket", true);
-    auto const sess_timeout = this->config_->get_config_param<uint32_t>(this->config_->ssl, "sess_timeout", 300);
-    auto const sess_cache = this->config_->get_config_param<bool>(this->config_->ssl, "sess_cache", true);
-    auto const sess_cache_size = this->config_->get_config_param<uint32_t>(this->config_->ssl, "sess_cache_size", 1024 * 20);
-    auto const max_early_data = this->config_->get_config_param<uint32_t>(this->config_->ssl, "max_early_data", 0);
+    auto const cipher_list = this->m_config->get_config_param<std::string>(this->m_config->ssl, "ciphers", {});
+    auto const ssl_v2 = this->m_config->get_config_param<bool>(this->m_config->ssl, "ssl_v2", false);
+    auto const ssl_v3 = this->m_config->get_config_param<bool>(this->m_config->ssl, "ssl_v3", false);
+    auto const ticket = this->m_config->get_config_param<bool>(this->m_config->ssl, "ticket", true);
+    auto const sess_timeout = this->m_config->get_config_param<uint32_t>(this->m_config->ssl, "sess_timeout", 300);
+    auto const sess_cache = this->m_config->get_config_param<bool>(this->m_config->ssl, "sess_cache", true);
+    auto const sess_cache_size = this->m_config->get_config_param<uint32_t>(this->m_config->ssl, "sess_cache_size", 1024 * 20);
+    auto const max_early_data = this->m_config->get_config_param<uint32_t>(this->m_config->ssl, "max_early_data", 0);
 
-    this->ssl_session_ctx_id = 1;
+    this->m_ssl_session_ctx_id = 1;
 
     const SSL_METHOD *method;
     SSL_CTX *ctx;
@@ -531,11 +529,11 @@ manapi::status_or<void *> manapi::net::worker::OpenSSL_TLS::ssl_create_context(s
     SSL_CTX_set_app_data(ctx, this);
 
     auto ktls = http::config::get_config_param<bool>(
-        this->config_->ssl, "ktls", true);
+        this->m_config->ssl, "ktls", true);
     auto single_dh_use = http::config::get_config_param<bool>(
-        this->config_->ssl, "single_dh_use", false);
+        this->m_config->ssl, "single_dh_use", false);
     auto ktls_tx_zerocopy_senfile = http::config::get_config_param<bool>(
-        this->config_->ssl, "ktls_tx_zerocopy_senfile", true);
+        this->m_config->ssl, "ktls_tx_zerocopy_senfile", true);
 
 #ifdef SSL_OP_ENABLE_KTLS
     if (ktls)
@@ -580,7 +578,7 @@ manapi::status_or<void *> manapi::net::worker::OpenSSL_TLS::ssl_create_context(s
         SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_SERVER);
 
         if (!SSL_CTX_set_session_id_context(ctx,
-            reinterpret_cast<const unsigned char *>(&this->ssl_session_ctx_id), sizeof(this->ssl_session_ctx_id)))
+            reinterpret_cast<const unsigned char *>(&this->m_ssl_session_ctx_id), sizeof(this->m_ssl_session_ctx_id)))
             goto err;
 
         // SSL_CTX_sess_set_get_cb(ctx, ssl_get_session);
@@ -629,18 +627,14 @@ manapi::status_or<void *> manapi::net::worker::OpenSSL_TLS::ssl_create_context(s
         for (uint32_t i = 0; i < inlen;j++) {
             uint32_t plen = in[i++];
             std::string_view buff (reinterpret_cast<const char *>(in) + i, reinterpret_cast<const char *>(in) + i + plen);
-            if ((buff == "h3" && worker->config_->contains_http_version(http::versions::HTTP_v3))
-                || (buff == "h2" && worker->config_->contains_http_version(http::versions::HTTP_v2))
-                || (buff == "http/1.1" && worker->config_->contains_http_version(http::versions::HTTP_v1_1))
-                || (buff == "http/1.0" && worker->config_->contains_http_version(http::versions::HTTP_v1_0))
-                || (buff == "http/0.9" && worker->config_->contains_http_version(http::versions::HTTP_v0_9)))
-                goto choise;
+            if ((buff == "h3" && worker->m_config->contains_http_version(http::versions::HTTP_v3))
+                || (buff == "h2" && worker->m_config->contains_http_version(http::versions::HTTP_v2))
+                || (buff == "http/1.1" && worker->m_config->contains_http_version(http::versions::HTTP_v1_1))
+                || (buff == "http/1.0" && worker->m_config->contains_http_version(http::versions::HTTP_v1_0))
+                || (buff == "http/0.9" && worker->m_config->contains_http_version(http::versions::HTTP_v0_9))) {
 
-            i += plen;
-            continue;
-            choise: {
-                if (worker->global_.alpn_cb) {
-                    auto rhs = worker->global_.alpn_cb(&worker->global_, buff.data(), buff.size(), worker);
+                if (worker->m_global.alpn_cb) {
+                    auto rhs = worker->m_global.alpn_cb(&worker->m_global, buff.data(), buff.size(), worker);
                     if (rhs < 0)
                         return SSL_TLSEXT_ERR_ALERT_FATAL;
 
@@ -651,7 +645,11 @@ manapi::status_or<void *> manapi::net::worker::OpenSSL_TLS::ssl_create_context(s
                 *out = reinterpret_cast<const unsigned char *> (buff.data());
                 *outlen = static_cast<uint8_t>(buff.size());
                 return SSL_TLSEXT_ERR_OK;
+
             }
+
+            i += plen;
+            continue;
         }
 
         return SSL_TLSEXT_ERR_ALERT_FATAL;
@@ -672,9 +670,9 @@ err:
 manapi::status manapi::net::worker::OpenSSL_TLS::ssl_configure_context(void*ctx) {
     ERR_clear_error();
 
-    auto verify_peer = this->config_->get_config_param<bool>(this->config_->ssl, "verify_peer", true);
-    auto cert = this->config_->get_config_param<std::string>(this->config_->ssl, "cert", {});
-    auto key = this->config_->get_config_param<std::string>(this->config_->ssl, "key", {});
+    auto verify_peer = this->m_config->get_config_param<bool>(this->m_config->ssl, "verify_peer", true);
+    auto cert = this->m_config->get_config_param<std::string>(this->m_config->ssl, "cert", {});
+    auto key = this->m_config->get_config_param<std::string>(this->m_config->ssl, "key", {});
 
     if (SSL_CTX_use_certificate_file(static_cast<SSL_CTX*>(ctx), cert.data(), SSL_FILETYPE_PEM) <= 0)
         return status_failed_precondition("openssl_tls:Cannot use cert file");

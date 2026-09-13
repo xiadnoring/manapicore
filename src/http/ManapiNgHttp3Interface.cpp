@@ -239,14 +239,14 @@ static ssize_t ng_wrk_http3_write (const manapi::net::worker::shared_conn &conn,
 
     while (nbuff) {
         if (s->buff.empty()) {
-            auto sbuff_res = manapi::async::current()->memory_fabric().buffer(s->ctx->gctx->worker->config()->buffer_size);
+            auto sbuff_res = manapi::async::current()->memory_fabric()->buffer(s->ctx->gctx->worker->m_config->buffer_size);
             if (!sbuff_res)
                 return -1;
 
             s->buff = sbuff_res.unwrap();
         }
 
-        s->buff.remove_shift();
+        s->buff.reset_shift();
         auto const copy = std::min<std::size_t> (s->buff.size(), buff->len);
         auto status = s->buff.resize(copy);
         if (!status)
@@ -282,7 +282,7 @@ static ssize_t ng_wrk_http3_write (const manapi::net::worker::shared_conn &conn,
             break;
         }
 
-        s->buff.remove_shift();
+        s->buff.reset_shift();
         status = s->buff.resize(s->buff.realsize());
         if (!status)
             goto err;
@@ -670,7 +670,7 @@ static int ng_wrk_http3_end_headers (nghttp3_conn *conn, int64_t stream_id, int 
                     // this->event_on(conn, std::unique_ptr<worker_watcher_cb>(nullptr));
                     // this->event_flags(conn, 0);
 
-                    cdata->router = manapi::net::http::server::cast(s->ctx->gctx->worker->site().get())->handler(req_ptr);
+                    cdata->router = manapi::net::http::server::cast(s->ctx->gctx->worker->m_site.get())->handler(req_ptr);
                     manapi::net::http::internal::handle_income_request(std::move(cdata), status);
                 }
                 catch (std::exception const &e) {
@@ -699,7 +699,7 @@ static int ng_wrk_http3_end_stream (nghttp3_conn *conn, int64_t stream_id, void 
     auto sconn = s->s;
     // assert(sconn);
 
-    auto const config = s->ctx->gctx->worker->config();
+    auto const config = s->ctx->gctx->worker->m_config.get();
 
     s->flags |= manapi::net::worker::base::CONN_RECV_END;
 
@@ -733,9 +733,9 @@ static int ng_wrk_http3_recv_data (nghttp3_conn *conn, int64_t stream_id, const 
     auto sconn = s->s;
     // assert(sconn);
 
-    auto const config = s->ctx->gctx->worker->config();
+    auto const config = s->ctx->gctx->worker->m_config.get();
 
-    auto rhs = manapi::net::worker::base::connection_io_send(&s->top->recv, reinterpret_cast<const char*>(data), datalen, &s->ctx->gctx->worker->bufferpool(),
+    auto rhs = manapi::net::worker::base::connection_io_send(&s->top->recv, reinterpret_cast<const char*>(data), datalen,
         config->buffer_size, &s->top->recv_size, WORKER_MAX_CNT);
 
     if (rhs != static_cast<ssize_t>(datalen))
@@ -762,7 +762,7 @@ static int ng_wrk_http3_recv_header (nghttp3_conn *conn, int64_t stream_id, int3
     int ret = 0;
 
     try {
-        auto config = s->ctx->gctx->worker->config();
+        auto config = s->ctx->gctx->worker->m_config;
         auto name_vec = nghttp3_rcbuf_get_buf(name);
         auto value_vec = nghttp3_rcbuf_get_buf(value);
 
@@ -814,7 +814,7 @@ static int ng_wrk_http3_recv_trailer (nghttp3_conn *conn, int64_t stream_id, int
     int ret = 0;
 
     try {
-        auto config = s->ctx->gctx->worker->config();
+        auto config = s->ctx->gctx->worker->m_config;
 
         auto name_vec = nghttp3_rcbuf_get_buf(name);
         auto value_vec = nghttp3_rcbuf_get_buf(value);
@@ -1060,7 +1060,7 @@ static int ng_wrk_http3_init (const manapi::net::worker::shared_conn &conn, mana
         auto global_ctx = static_cast<manapi::net::worker::ng_wrk_http3_ctx_global_t *> (global->data);
         tp->gctx = global_ctx;
 
-        auto const config = tp->gctx->worker->config();
+        auto const config = tp->gctx->worker->m_config;
 
         nghttp3_settings_default(&tp->h3_settings);
 
@@ -1295,9 +1295,9 @@ manapi::status manapi::net::worker::ng_wrk_http3_global_init(manapi::net::worker
         // tp->worker->init(0);
         tp->worker = w;
 
-        auto config = w->config();
+        auto config = w->m_config;
 
-        typedef manapi::internal::config_interface cv;
+        typedef manapi::config_interface cv;
 
         auto const quic_debug = cv::get_config_param<bool>(config->quic, "debug", false);
 
@@ -1345,7 +1345,7 @@ static int ng_wrk_http3_on_read_stream (const manapi::net::worker::shared_conn &
     if (!s)
         return manapi::ERR_OK;
 
-    auto const config = s->ctx->gctx->worker->config();
+    auto const config = s->ctx->gctx->worker->m_config.get();
 
     if (auto const rhs = manapi::net::worker::http_v3_flush_recv (config, conn, s, false))
         return rhs;
@@ -1410,7 +1410,7 @@ static bool ng_wrk_http3_is_writable (const manapi::net::worker::shared_conn &co
     auto const s = MANAPI_NGHTTP3_AS_STREAM (conn->wrk.data);
 
     //auto const s = conn->as<http_v2_stream_t>();
-    //auto const config = http_v2_ctx->gctx->base_worker->config();
+    //auto const config = http_v2_ctx->gctx->base_worker->m_config;
 
     //return nghttp2_session_want_write(http_v2_ctx->ctx.get());
     return s->ctx->gctx->worker->is_writable(conn);

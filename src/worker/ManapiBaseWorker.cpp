@@ -36,7 +36,7 @@ ssize_t manapi::net::worker::base::sync_write_ex(const shared_conn &conn, manapi
 #endif
     std::size_t sz = 0;
     buffs.slices_buffs(slices, count, &sz);
-    return this->sync_write_ex(conn, slices, count, sz, finish, maxcnt);
+    return this->sync_write_ex(conn, slices, count, sz, finish && count == buffs.slices_size(), maxcnt);
 }
 
 ssize_t manapi::net::worker::base::sync_write_ex(const shared_conn &conn, const void *buff, std::size_t size, bool finish, std::size_t maxcnt) MANAPIHTTP_NOEXCEPT {
@@ -54,7 +54,7 @@ ssize_t manapi::net::worker::base::sync_write(const shared_conn &conn, slice_vie
     ev::buff_t slices[count];
 #endif
     buffs.slices_buffs(slices, count);
-    return this->sync_write(conn, slices, count, finish);
+    return this->sync_write(conn, slices, count, finish && buffs.slices_size() == count);
 }
 
 ssize_t manapi::net::worker::base::sync_write(const shared_conn &conn, const void *buff, std::size_t size, bool finish) MANAPIHTTP_NOEXCEPT {
@@ -78,8 +78,7 @@ manapi::future<ssize_t> write_internal (manapi::net::worker::base *w, ssize_t rh
 
     typedef manapi::async::promise_sync<ssize_t> promise;
 
-    if (rhs)
-        co_return rhs;
+    if (rhs) co_return rhs;
 
     w->waiting(conn, true);
 
@@ -102,12 +101,6 @@ manapi::future<ssize_t> write_internal (manapi::net::worker::base *w, ssize_t rh
         rhs = co_await promise ([&write_data]
             (promise::resolve_t resolve, promise::reject_t reject)
             -> void {
-            // if (write_data.w->is_send_pending(*write_data.conn)) {
-            //     resolve(0);
-            //     return;
-            // }
-            //auto top = (*write_data.conn)->as<connection_prepared_t>()->top.get();
-            //assert(top->cur_send_size != top->send_size);
             write_data.resolve=std::move(resolve);
             write_data.prev_cb = write_data.w->event_on(*write_data.conn, [&write_data]
                 (const shared_conn &conn, int flags, const char *buffer, ssize_t nsize, ibuffpool_t *p) -> void {
@@ -351,10 +344,6 @@ manapi::net::worker::connection::ipdata_t * manapi::net::worker::base::ipdata(wo
     return conn->ipdata.get();
 }
 
-manapi::object_pool & manapi::net::worker::base::bufferpool() MANAPIHTTP_NOEXCEPT {
-    return manapi::async::current()->memory_fabric();
-}
-
 int64_t manapi::net::worker::base::stream_id(const shared_conn & s) MANAPIHTTP_NOEXCEPT {
     return 0;
 }
@@ -432,7 +421,7 @@ void manapi::net::worker::base::connection_io_merge(connection_io_part *dest, co
     }
 }
 
-ssize_t manapi::net::worker::base::connection_io_send(connection_io_part *top, const char *buffer, std::size_t size, object_pool *bufferpool, uint32_t buffer_size, uint32_t *cnt, std::size_t max_cnt) MANAPIHTTP_NOEXCEPT {
+ssize_t manapi::net::worker::base::connection_io_send(connection_io_part *top, const char *buffer, std::size_t size, uint32_t buffer_size, uint32_t *cnt, std::size_t max_cnt) MANAPIHTTP_NOEXCEPT {
     try {
         std::size_t rhs = 0;
         while (rhs != size) {
@@ -451,7 +440,7 @@ ssize_t manapi::net::worker::base::connection_io_send(connection_io_part *top, c
                 if (cnt && prepared::buffs_is_full(top, *cnt, max_cnt))
                     break;
 
-                auto bufres = bufferpool->buffer(buffer_size);
+                auto bufres = manapi::async::memory_fabric()->buffer(buffer_size);
                 if (!bufres.ok())
                     return -1;
 
@@ -487,7 +476,7 @@ ssize_t manapi::net::worker::base::connection_io_send(connection_io_part *top, c
     return -1;
 }
 
-int manapi::net::worker::base::connection_io_send_start(connection_io_part *top, const char *buffer, std::size_t size, object_pool *bufferpool, uint32_t buffer_size, ibuffpool_t *buff, uint32_t *cnt) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::base::connection_io_send_start(connection_io_part *top, const char *buffer, std::size_t size, uint32_t buffer_size, ibuffpool_t *buff, uint32_t *cnt) MANAPIHTTP_NOEXCEPT {
     try {
         if (top->deque && top->deque_current >= size) {
             top->deque_current -= static_cast<uint32_t>(size);
@@ -504,7 +493,7 @@ int manapi::net::worker::base::connection_io_send_start(connection_io_part *top,
             buff->shift_add(static_cast<uint32_t>(buff->size() - size));
         }
         else {
-            auto bufres = bufferpool->buffer (size, buffer_size);
+            auto bufres = manapi::async::memory_fabric()->buffer (size, buffer_size);
             if (!bufres.ok())
                 return ERR_INTERNAL;
 
@@ -573,10 +562,9 @@ ssize_t manapi::net::worker::base::buffs_cut_by_size(ev::buff_t *buff, uint32_t 
     return static_cast<ssize_t>(size);
 }
 
-int manapi::net::worker::base::call_user_callback(worker_watcher_cb *cb, const shared_conn & conn, int flags, const char *buffer, std::size_t nsize, ibuffpool_t *p) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::base::call_user_callback(worker_watcher_cb &cb, const shared_conn & conn, int flags, const char *buffer, std::size_t nsize, ibuffpool_t *p) MANAPIHTTP_NOEXCEPT {
     try {
-        if (cb && *cb)
-            cb->operator()(conn, flags, buffer, nsize, p);
+        if (cb) cb(conn, flags, buffer, nsize, p);
         return manapi::ERR_OK;
     }
     catch (std::exception const &e) {
@@ -586,10 +574,10 @@ int manapi::net::worker::base::call_user_callback(worker_watcher_cb *cb, const s
     return manapi::ERR_ABORTED;
 }
 
-void manapi::net::worker::base::feed_event_read_(const shared_conn &conn, worker_watcher_cb *cb, connection_io_part *recv, uint32_t *recv_size, int conn_flags, int flags, const char *buff, std::size_t size, ibuffpool_t *p) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::base::feed_event_read(const shared_conn &conn, worker_watcher_cb &cb, connection_io_part *recv, uint32_t *recv_size, int conn_flags, int flags, const char *buff, std::size_t size, ibuffpool_t *p) MANAPIHTTP_NOEXCEPT {
     try {
         bool processed = false;
-        if (conn_flags & ev::READ && cb) {
+        if (conn_flags & ev::READ) {
             if (flags & manapi::net::worker::base::CONN_TOP_READ) {
                 if (conn_flags & ev::READ) {
                     manapi::net::worker::base::call_user_callback(cb, conn, flags, buff, size, p);
@@ -605,12 +593,12 @@ void manapi::net::worker::base::feed_event_read_(const shared_conn &conn, worker
         }
         if (!processed && size) {
             if (conn_flags & CONN_TOP_READ) {
-                auto rhs = connection_io_send_start(recv, buff, size, &this->bufferpool(), this->config()->buffer_size, p, recv_size);
+                auto rhs = connection_io_send_start(recv, buff, size,  this->m_config->buffer_size, p, recv_size);
                 if (!rhs)
                     goto err;
             }
             else {
-                auto rhs = connection_io_send(recv, buff, size, &this->bufferpool(), this->config()->buffer_size, recv_size, WORKER_MAX_CNT);
+                auto rhs = connection_io_send(recv, buff, size, this->m_config->buffer_size, recv_size, WORKER_MAX_CNT);
                 if (rhs < 0)
                     goto err;
             }

@@ -6,7 +6,7 @@
 #include "ManapiDebug.hpp"
 #include "json/ManapiJsonInternal.hpp"
 
-#define BIT_AT(n, i, t) ((n >> (sizeof(t) * 8 - (i + 1))) & 1)
+#define MANAPI__BIT_AT(n, i, t) ((n >> (sizeof(t) * 8 - (i + 1))) & 1)
 
 static const unsigned char hextable[] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0,       /* 0x30 - 0x3f */
@@ -105,7 +105,7 @@ uint32_t manapi::unicode::count_of_octet(unsigned char c) {
         return 1;
 
     for (; i < 8; i++) {
-        if (BIT_AT(c, i, char) == 0) {
+        if (MANAPI__BIT_AT(c, i, char) == 0) {
             return i;
         }
     }

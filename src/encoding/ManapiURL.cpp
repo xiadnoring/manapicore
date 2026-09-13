@@ -5,7 +5,19 @@
 #include "encoding/ManapiUnicode.hpp"
 #include "../include/ManapiUtils.hpp"
 
-const std::set<char> manapi::encoding::url_allowed_symbols = {'-', '_', '.', '~', '!', '*', '\'', '(', ')', ';', '/', '?', ':', '@', '&', '=', '+', '$', ',', '.', '#', '[', ']', '%'};
+static constexpr auto manapi__url_allowed_symbols = [] {
+    std::array<bool, 256> tbl{};
+    tbl['-'] = tbl['_'] = tbl['.'] = tbl['~'] = tbl['!'] = tbl['*']
+        = tbl['\''] = tbl['*'] = tbl['('] = tbl[')'] = tbl[';'] = tbl['/'] = tbl['?']
+        = tbl[':'] = tbl['@'] = tbl['&'] = tbl['='] = tbl['+'] = tbl['$'] = tbl[',']
+        = tbl['.'] =tbl['#'] = tbl['['] = tbl[']'] = tbl['%'] = true;
+
+    for (uint8_t c = '0'; c <= '9'; c++) tbl[c] = true;
+    for (uint8_t c = 'a'; c <= 'z'; c++) tbl[c] = true;
+    for (uint8_t c = 'A'; c <= 'Z'; c++) tbl[c] = true;
+
+    return tbl;
+}();
 
 void manapi::encoding::encode_url(std::string &dest, std::string_view str) {
     std::ostringstream escaped;
@@ -78,6 +90,6 @@ std::string manapi::encoding::decode_url(std::string_view str) {
     return std::move(dest);
 }
 
-bool manapi::encoding::url_allowed_symbol(const char &c) {
-    return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || url_allowed_symbols.contains(c);
+bool manapi::encoding::url_allowed_symbol(char c) {
+    return manapi__url_allowed_symbols[ static_cast<uint8_t> (c) ];
 }

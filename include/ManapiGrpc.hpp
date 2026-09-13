@@ -9,7 +9,6 @@
 
 #include "./utils/ManapiConfig.hpp"
 #include "./std/ManapiContext.hpp"
-#include "./utils/ManapiMultithreadStorage.hpp"
 #include "./std/ManapiStopToken.hpp"
 
 

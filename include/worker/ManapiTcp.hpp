@@ -11,13 +11,7 @@ namespace manapi::net::worker {
 
     class TCP : public worker::interface_worker {
     public:
-
-        enum connection_status {
-            CONN_TCP_RESERVED     = 256,
-            CONN_LIMIT_RATE     = 512,
-        };
-
-        TCP (std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata, manapi::net::http::config *config);
+        TCP ();
 
         ~TCP () override;
 
@@ -27,9 +21,9 @@ namespace manapi::net::worker {
 
         void onaccept(const std::shared_ptr<ev::tcp> &watcher, int status) MANAPIHTTP_NOEXCEPT;
 
-        virtual void onrecv (const std::shared_ptr<ev::tcp> &watcher, const worker::shared_conn &conn, ibuffpool_t buffer) MANAPIHTTP_NOEXCEPT;
+        virtual void onrecv (const std::shared_ptr<ev::tcp> &watcher, const worker::shared_conn &conn, ibuffpool_t &&buffer) MANAPIHTTP_NOEXCEPT;
 
-        static std::shared_ptr<worker::TCP> create (std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata, manapi::net::http::config *config);
+        static std::shared_ptr<worker::TCP> create ();
 
         virtual shared_conn accept (const ev::shared_tcp &w, shared_conn (*init_cb) (void *user_data), void *user_data) MANAPIHTTP_NOEXCEPT;
 
@@ -55,46 +49,42 @@ namespace manapi::net::worker {
 
         bytebuffer recv_first_buffer(const shared_conn &conn) MANAPIHTTP_NOEXCEPT override ;
     protected:
-        virtual void read_start_ (const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT;
+        virtual void read_start (const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT;
 
-        virtual void read_stop_ (const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT;
+        virtual void read_stop (const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT;
 
-        virtual int flush_write_ (const shared_conn &connection, bool flush = false) MANAPIHTTP_NOEXCEPT;
+        virtual int flush_write (const shared_conn &connection, bool flush = false) MANAPIHTTP_NOEXCEPT;
 
-        void flush_read_ (const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT;
+        void flush_read (const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT;
 
         void update_limit_rate () MANAPIHTTP_NOEXCEPT;
 
-        void timeout_ (shared_conn conn) MANAPIHTTP_NOEXCEPT;
+        void on_timeout (shared_conn conn) MANAPIHTTP_NOEXCEPT;
 
         virtual void update_limit_rate_connection (const shared_conn &sconn) MANAPIHTTP_NOEXCEPT;
 
         bool is_writable(const shared_conn &conn) MANAPIHTTP_NOEXCEPT override;
 
-        // bool is_send_pending(const shared_conn & conn) const MANAPIHTTP_NOEXCEPT override;
+        virtual int on_accept (const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT;
 
-        virtual int onaccept_event_ (const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT;
+        int on_reaccept (const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT;
 
-        int onreaccept_event_ (const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT;
-
-        int onaccept_bind_ (const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT;
+        int on_accept_bind (const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT;
 
         virtual int conn_after_write (const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT;
 
-        ev::shared_tcp watcher_accept_;
-    protected:
-        conns_by_ip ips;
+        ev::shared_tcp m_watcher_accept;
+    
+        conns_by_ip m_ips;
     private:
         static shared_conn connection_init_cb (void *user_data) MANAPIHTTP_NOEXCEPT;
 
         static void connection_interface_eraser (worker::connection *ptr) MANAPIHTTP_NOEXCEPT;
 
-        sockaddr_storage sockaddrin{};
+        sockaddr_storage m_sockaddrin;
 
-        addrinfo *local;
+        addrinfo *m_local;
 
-        timer limit_rate_timer{};
-
-        timeval recv_timeout{}, send_timeout{};
+        timer m_limit_rate_timer;
     };
 }

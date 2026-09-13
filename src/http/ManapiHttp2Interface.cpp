@@ -69,7 +69,7 @@ static int default_wrk_http2(const manapi::net::worker::shared_conn &conn, int f
         }
 
         if (flags & manapi::ev::READ) {
-            auto const config = w->config();
+            auto const config = w->m_config.get();
             while (true) {
                 rhs = manapi::net::http::http_v2_work(http_v2_ctx, config, &buffer, &nsize);
                 switch (rhs) {
@@ -139,7 +139,7 @@ static int default_wrk_http2(const manapi::net::worker::shared_conn &conn, int f
                                         // this->event_on(conn, std::unique_ptr<worker_watcher_cb>(nullptr));
                                         // this->event_flags(conn, 0);
 
-                                        cdata->router = manapi::net::http::server::cast(w->site().get())->handler(req_ptr);
+                                        cdata->router = manapi::net::http::server::cast(w->m_site.get())->handler(req_ptr);
                                         manapi::net::http::internal::handle_income_request(std::move(cdata), status);
                                     }
                                     catch (std::exception const &e) {

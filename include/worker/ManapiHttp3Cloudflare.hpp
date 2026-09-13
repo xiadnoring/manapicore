@@ -25,11 +25,11 @@ namespace manapi::net::worker {
 
         struct connection_stream_t;
 
-        http_v3_cloudflare_quiche(std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata,manapi::net::http::config * config);
+        http_v3_cloudflare_quiche();
 
         ~http_v3_cloudflare_quiche() override;
 
-        static std::shared_ptr<worker::http_v3_cloudflare_quiche> create (std::shared_ptr<net::worker::base_http> site, manapi::net::worker::worker_data_t* wdata, manapi::net::http::config* config);
+        static std::shared_ptr<worker::http_v3_cloudflare_quiche> create ();
 
         manapi::future<manapi::status> init(std::size_t deep) override;
 
@@ -51,19 +51,15 @@ namespace manapi::net::worker {
 
         void feed_event(const shared_conn &conn, int flags, const char *buff, std::size_t size, ibuffpool_t *p) MANAPIHTTP_NOEXCEPT override;
 
-        // bool is_send_pending(const shared_conn &conn) const MANAPIHTTP_NOEXCEPT override;
-
         bool is_writable(const shared_conn &conn) MANAPIHTTP_NOEXCEPT override;
 
         MANAPIHTTP_NODISCARD std::size_t recv_count(const shared_conn &conn) const MANAPIHTTP_NOEXCEPT override;
 
         bytebuffer recv_first_buffer(const shared_conn &conn) MANAPIHTTP_NOEXCEPT override;
 
-        static void flush_connection_closed_ (const shared_conn &conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT;
+        static void flush_connection_closed (const shared_conn &conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT;
 
-        static void force_close_ (shared_conn conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT;
-    protected:
-        int flags;
+        static void force_close (shared_conn conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT;
     private:
         static manapi::future<int> cloudflare_wrk_http3_send_response (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w, manapi::net::http::response* res, bool finish);
 
@@ -73,41 +69,43 @@ namespace manapi::net::worker {
 
         virtual void update_limit_rate_stream (const shared_conn &conn) MANAPIHTTP_NOEXCEPT;
 
-        static void flush_write_ (const shared_conn &conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT;
+        static void flush_write (const shared_conn &conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT;
 
-        int flush_read_buffers_ (const shared_conn &conn, connection_stream_t *s) MANAPIHTTP_NOEXCEPT;
+        int flush_read_buffers (const shared_conn &conn, connection_stream_t *s) MANAPIHTTP_NOEXCEPT;
 
-        int flush_read_ (const shared_conn &stream) MANAPIHTTP_NOEXCEPT;
+        int flush_read (const shared_conn &stream) MANAPIHTTP_NOEXCEPT;
 
         void wrk_global(wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT override;
 
-        void reset_all_streams_ (connection_t *conn_data) MANAPIHTTP_NOEXCEPT;
+        void reset_all_streams (connection_t *conn_data) MANAPIHTTP_NOEXCEPT;
 
         connection::ipdata_t *ipdata(worker::connection *conn) MANAPIHTTP_NOEXCEPT override;
 
-        static void quiche_timeout_ (manapi::timer t, const shared_conn &connection) MANAPIHTTP_NOEXCEPT;
+        static void on_quiche_timeout (manapi::timer t, const shared_conn &connection) MANAPIHTTP_NOEXCEPT;
 
-        static int grab_headers_ (uint8_t *name, size_t name_len, uint8_t *value, size_t value_len, void *argp) MANAPIHTTP_NOEXCEPT;
+        static int grab_headers (uint8_t *name, size_t name_len, uint8_t *value, size_t value_len, void *argp) MANAPIHTTP_NOEXCEPT;
 
-        static bool validate_token_ (char *token, size_t token_len, char *odcid, size_t *odcid_len, const sockaddr *sockaddr_src, const socklen_t &sockaddr_len) MANAPIHTTP_NOEXCEPT;
+        static bool validate_token (char *token, size_t token_len, char *odcid, size_t *odcid_len, const sockaddr *sockaddr_src, const socklen_t &sockaddr_len) MANAPIHTTP_NOEXCEPT;
 
-        static int gen_mint_token_ (char *dcid, size_t dcid_len, char *token, size_t *token_len, const sockaddr *sockaddr_src, const socklen_t &sockaddr_len) MANAPIHTTP_NOEXCEPT;
+        static int gen_mint_token (char *dcid, size_t dcid_len, char *token, size_t *token_len, const sockaddr *sockaddr_src, const socklen_t &sockaddr_len) MANAPIHTTP_NOEXCEPT;
 
-        int quiche_flush_egress_(connection_t *data) MANAPIHTTP_NOEXCEPT;
+        int quiche_flush_egress(connection_t *data) MANAPIHTTP_NOEXCEPT;
 
         void waiting(const shared_conn &conn, bool state) MANAPIHTTP_NOEXCEPT override;
 
-        static void quiche_timeout_again_(connection_t *connection) MANAPIHTTP_NOEXCEPT;
+        static void quiche_timeout_again(connection_t *connection) MANAPIHTTP_NOEXCEPT;
 
         static void connection_interface_eraser (worker::connection *ptr) MANAPIHTTP_NOEXCEPT;
 
         static void stream_interface_eraser (worker::connection *ptr) MANAPIHTTP_NOEXCEPT;
 
-        std::map <std::array<char, 17>, std::map<std::string, shared_conn, std::less<>>> connections;
-
-        quiche_config *quiche_config_{nullptr};
-        quiche_h3_config *quiche_h3_config_{nullptr};
-        manapi::timer limit_rate_timer{};
+        std::map <std::array<char, 17>, std::map<std::string, shared_conn, std::less<>>> m_connections;
+        
+        quiche_config *m_quiche_config;
+        
+        quiche_h3_config *m_quiche_h3_config;
+        
+        manapi::timer m_limit_rate_timer;
     };
 }
 

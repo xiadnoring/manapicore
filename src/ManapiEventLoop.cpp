@@ -33,7 +33,7 @@ static_assert(manapi::ev::READ == CURL_POLL_IN && manapi::ev::WRITE == CURL_POLL
 #define MANAPIHTTP_EV_UNWATCHER(classname, ctxname) void manapi::event_loop::event_loop::stop_watcher_ptr(ev::classname *w) MANAPIHTTP_NOEXCEPT { \
     if (w) { \
         w->unbind(+[](uv_handle_t *handle) -> void { std::unique_ptr<ev::internal::ctxname>  data (static_cast<ev::internal::ctxname *>(handle->data)); \
-        handle->data = nullptr; if (data) { data->s_.reset(); } }); \
+        handle->data = nullptr; if (data) { data->m_s.reset(); } }); \
     } }
 
 #define MANAPIHTTP_EV_CANCEL(classname, ctxname) void manapi::event_loop::event_loop::stop_watcher_ptr(ev::classname *w) MANAPIHTTP_NOEXCEPT { \
@@ -43,7 +43,7 @@ static_assert(manapi::ev::READ == CURL_POLL_IN && manapi::ev::WRITE == CURL_POLL
 #define MANAPIHTTP_EV_UNWATCHER2(classname, ctxname) void manapi::event_loop::event_loop::stop_watcher_ptr(ev::classname *w) MANAPIHTTP_NOEXCEPT { \
     if (w) { \
         w->unbind(+[](uv_handle_t *handle) -> void { std::unique_ptr<ev::internal::ctxname> data (static_cast<ev::internal::ctxname *>(handle->data)); \
-        handle->data = nullptr; if (data) { if (data->close_cb) { MANAPIHTTP_EV_TRY_CALLBACK data->close_cb(data->s_); MANAPIHTTP_EV_CATCH_CALLBACK("close") } data->s_.reset(); } }); \
+        handle->data = nullptr; if (data) { if (data->close_cb) { MANAPIHTTP_EV_TRY_CALLBACK data->close_cb(data->m_s); MANAPIHTTP_EV_CATCH_CALLBACK("close") } data->m_s.reset(); } }); \
     } }
 
 enum event_loop_flags {
@@ -62,38 +62,38 @@ namespace manapi::ev::internal {
 #endif
 
     struct async_ctx {
-        std::shared_ptr<ev::async> s_;
+        std::shared_ptr<ev::async> m_s;
         ev::async_cb cb;
     };
 
     struct timer_ctx  {
-        std::shared_ptr<ev::timer> s_;
+        std::shared_ptr<ev::timer> m_s;
         ev::timer_cb cb;
     };
 
     struct prepare_ctx {
-        std::shared_ptr<ev::prepare> s_;
+        std::shared_ptr<ev::prepare> m_s;
         ev::prepare_cb cb;
     };
 
     struct check_ctx {
-        std::shared_ptr<ev::check> s_;
+        std::shared_ptr<ev::check> m_s;
         ev::check_cb cb;
     };
 
     struct idle_ctx {
-        std::shared_ptr<ev::idle> s_;
+        std::shared_ptr<ev::idle> m_s;
         ev::idle_cb cb;
     };
 
     struct io_ctx {
-        std::shared_ptr<ev::io> s_;
+        std::shared_ptr<ev::io> m_s;
         ev::io_cb cb;
     };
 
     struct tcp_ctx {
         char type;
-        std::shared_ptr<ev::tcp> s_;
+        std::shared_ptr<ev::tcp> m_s;
         close_cb_t<ev::tcp> close_cb;
     };
 
@@ -118,47 +118,47 @@ namespace manapi::ev::internal {
 
     struct udp_ctx {
         close_cb_t<ev::udp> close_cb;
-        std::shared_ptr<ev::udp> s_;
+        std::shared_ptr<ev::udp> m_s;
         ev::udp_cb recv;
         ev::udp_alloc_cb alloc_cb;
     };
 
     struct udp_send_ctx {
-        std::shared_ptr<ev::udp_send> s_;
+        std::shared_ptr<ev::udp_send> m_s;
         ev::udp_send_cb send;
     };
 
     struct write_ctx {
-        std::shared_ptr<ev::write> s_;
+        std::shared_ptr<ev::write> m_s;
         ev::write_cb write;
     };
 
     struct fs_ctx {
-        std::shared_ptr<ev::fs> s_;
+        std::shared_ptr<ev::fs> m_s;
         fs_cb cb;
         manapi::ctoken token;
     };
 
     struct random_ctx {
-        std::shared_ptr<ev::random> s_;
+        std::shared_ptr<ev::random> m_s;
         random_cb cb;
         manapi::ctoken token;
     };
 
     struct getaddrinfo_ctx {
-        std::shared_ptr<ev::getaddrinfo> s_;
+        std::shared_ptr<ev::getaddrinfo> m_s;
         getaddrinfo_cb cb;
         manapi::ctoken token;
     };
 
     struct getnameinfo_ctx {
-        std::shared_ptr<ev::getnameinfo> s_;
+        std::shared_ptr<ev::getnameinfo> m_s;
         getnameinfo_cb cb;
         manapi::ctoken token;
     };
 
     struct work_ctx {
-        std::shared_ptr<ev::work> s_;
+        std::shared_ptr<ev::work> m_s;
         work_cb cb;
         after_work_cb after_cb;
     };
@@ -216,7 +216,7 @@ void manapi::ev::callback_watcher_async (uv_async_t *s) MANAPIHTTP_NOEXCEPT {
         ->cb;
     if (cb) {
         MANAPIHTTP_EV_TRY_CALLBACK
-        cb(static_cast<manapi::ev::internal::async_ctx *> (s->data)->s_);
+        cb(static_cast<manapi::ev::internal::async_ctx *> (s->data)->m_s);
         MANAPIHTTP_EV_CATCH_CALLBACK("async")
     }
 }
@@ -227,7 +227,7 @@ void manapi::ev::callback_watcher_timer (uv_timer_t *s) MANAPIHTTP_NOEXCEPT {
         ->cb;
     if (cb) {
         MANAPIHTTP_EV_TRY_CALLBACK
-        cb (static_cast<manapi::ev::internal::timer_ctx *> (s->data)->s_);
+        cb (static_cast<manapi::ev::internal::timer_ctx *> (s->data)->m_s);
         MANAPIHTTP_EV_CATCH_CALLBACK("timer")
     }
 }
@@ -238,7 +238,7 @@ void manapi::ev::callback_watcher_io (uv_poll_t *s, int status, int revents) MAN
         ->cb;
     if (cb) {
         MANAPIHTTP_EV_TRY_CALLBACK
-        cb(static_cast<manapi::ev::internal::io_ctx *> (s->data)->s_, status, revents);
+        cb(static_cast<manapi::ev::internal::io_ctx *> (s->data)->m_s, status, revents);
         MANAPIHTTP_EV_CATCH_CALLBACK("io")
     }
 }
@@ -249,7 +249,7 @@ void manapi::ev::callback_watcher_idle (uv_idle_t *s) MANAPIHTTP_NOEXCEPT {
         ->cb;
     if (cb) {
         MANAPIHTTP_EV_TRY_CALLBACK
-        cb(static_cast<manapi::ev::internal::idle_ctx *> (s->data)->s_);
+        cb(static_cast<manapi::ev::internal::idle_ctx *> (s->data)->m_s);
         MANAPIHTTP_EV_CATCH_CALLBACK("idle")
     }
 }
@@ -260,7 +260,7 @@ void manapi::ev::callback_watcher_check (uv_check_t *s) MANAPIHTTP_NOEXCEPT {
         ->cb;
     if (cb) {
         MANAPIHTTP_EV_TRY_CALLBACK
-        (static_cast<manapi::ev::internal::check_ctx *> (s->data)->s_);
+        (static_cast<manapi::ev::internal::check_ctx *> (s->data)->m_s);
         MANAPIHTTP_EV_CATCH_CALLBACK("check")
     }
 }
@@ -271,7 +271,7 @@ void manapi::ev::callback_watcher_prepare (uv_prepare_t *s) MANAPIHTTP_NOEXCEPT 
         ->cb;
     if (cb) {
         MANAPIHTTP_EV_TRY_CALLBACK
-        cb (static_cast<manapi::ev::internal::prepare_ctx *> (s->data)->s_);
+        cb (static_cast<manapi::ev::internal::prepare_ctx *> (s->data)->m_s);
         MANAPIHTTP_EV_CATCH_CALLBACK("prepare")
     }
 }
@@ -282,7 +282,7 @@ void manapi::ev::callback_watcher_tcp_accept (uv_tcp_t *s, int status) MANAPIHTT
         ->connection;
     assert(cb && "ev:User callback wasn't set");
     MANAPIHTTP_EV_TRY_CALLBACK
-    cb (static_cast<manapi::ev::internal::tcp_accept_ctx *> (s->data)->s_, status);
+    cb (static_cast<manapi::ev::internal::tcp_accept_ctx *> (s->data)->m_s, status);
     MANAPIHTTP_EV_CATCH_CALLBACK("tcp accept")
 }
 
@@ -292,7 +292,7 @@ void manapi::ev::callback_watcher_tcp_read (uv_stream_t *s, ssize_t nread, const
         ->read;
     assert(cb && "ev:User callback wasn't set");
     MANAPIHTTP_EV_TRY_CALLBACK
-    cb(static_cast<manapi::ev::internal::tcp_connection_ctx *> (s->data)->s_, nread, buf);
+    cb(static_cast<manapi::ev::internal::tcp_connection_ctx *> (s->data)->m_s, nread, buf);
     MANAPIHTTP_EV_CATCH_CALLBACK("tcp read")
 }
 
@@ -302,7 +302,7 @@ void manapi::ev::callback_watcher_udp_recv (uv_udp_t *s, ssize_t nread, const uv
         ->recv;
     assert(cb && "ev:User callback wasn't set");
     MANAPIHTTP_EV_TRY_CALLBACK
-    cb(static_cast<manapi::ev::internal::udp_ctx *> (s->data)->s_, nread, buf, addr, m_flags);
+    cb(static_cast<manapi::ev::internal::udp_ctx *> (s->data)->m_s, nread, buf, addr, m_flags);
     MANAPIHTTP_EV_CATCH_CALLBACK("udp recv")
 }
 
@@ -313,7 +313,7 @@ void manapi::ev::callback_watcher_udp_send (uv_udp_send_t *s, int status) MANAPI
     auto &cb =ss->send;
     assert(cb && "ev:User callback wasn't set");
     MANAPIHTTP_EV_TRY_CALLBACK
-    cb (ss->s_, status);
+    cb (ss->m_s, status);
     MANAPIHTTP_EV_CATCH_CALLBACK("udp send")
 }
 
@@ -324,7 +324,7 @@ void manapi::ev::callback_watcher_write (uv_write_t *s, int status) MANAPIHTTP_N
     auto &cb = ss->write;
     assert(cb && "ev:User callback wasn't set");
     MANAPIHTTP_EV_TRY_CALLBACK
-    cb (ss->s_, status);
+    cb (ss->m_s, status);
     MANAPIHTTP_EV_CATCH_CALLBACK("write")
 }
 
@@ -352,7 +352,7 @@ void manapi::ev::callback_watcher_fs(uv_fs_t *req) MANAPIHTTP_NOEXCEPT {
         MANAPIHTTP_EV_TRY_CALLBACK
         auto ss = static_cast<manapi::ev::internal::fs_ctx *> (req->data);
         if (ss->cb) {
-            finish = ss->cb(ss->s_);
+            finish = ss->cb(ss->m_s);
         }
         MANAPIHTTP_EV_CATCH_CALLBACK("fs")
 
@@ -378,7 +378,7 @@ void manapi::ev::callback_watcher_random(uv_random_t *s, int status, void *buff,
         s->data = nullptr;
         MANAPIHTTP_EV_TRY_CALLBACK
         if (ss->cb)
-            ss->cb(ss->s_, status, buff, size);
+            ss->cb(ss->m_s, status, buff, size);
         MANAPIHTTP_EV_CATCH_CALLBACK("random")
         ss->token.disable();
     }
@@ -392,7 +392,7 @@ void manapi::ev::callback_watcher_getnameinfo(uv_getnameinfo_t *req, int status,
         req->data = nullptr;
         MANAPIHTTP_EV_TRY_CALLBACK
         if (s->cb)
-            s->cb(s->s_, status, hostname, service);
+            s->cb(s->m_s, status, hostname, service);
         MANAPIHTTP_EV_CATCH_CALLBACK("getnameinfo")
         s->token.disable();
     }
@@ -408,7 +408,7 @@ void manapi::ev::callback_watcher_getaddrinfo(uv_getaddrinfo_t *req, int status,
         req->data = nullptr;
         MANAPIHTTP_EV_TRY_CALLBACK
         if (s->cb)
-            s->cb(s->s_, status, res_own.release());
+            s->cb(s->m_s, status, res_own.release());
         MANAPIHTTP_EV_CATCH_CALLBACK("getaddrinfo")
         s->token.disable();
     }
@@ -423,7 +423,7 @@ void manapi::ev::callback_watcher_after_work(uv_work_t *req, int status) MANAPIH
         req->data = nullptr;
         MANAPIHTTP_EV_TRY_CALLBACK
         if (s->after_cb)
-            s->after_cb(s->s_, status);
+            s->after_cb(s->m_s, status);
         MANAPIHTTP_EV_CATCH_CALLBACK("after work")
     }
 }
@@ -436,7 +436,7 @@ void manapi::ev::callback_watcher_work(uv_work_t *req) MANAPIHTTP_NOEXCEPT {
         /* otherwise it was cancelled */
         MANAPIHTTP_EV_TRY_CALLBACK
         if (s->cb)
-            s->cb(s->s_);
+            s->cb(s->m_s);
         MANAPIHTTP_EV_CATCH_CALLBACK("work")
     }
 }
@@ -447,7 +447,7 @@ void manapi::ev::callback_watcher_tcp_connection_alloc(uv_handle_t *handle, size
     auto s = static_cast<manapi::ev::internal::tcp_connection_ctx *> (handle->data);
     assert((s->alloc_cb && "ev:User cb wasn't set"));
     MANAPIHTTP_EV_TRY_CALLBACK
-    s->alloc_cb(s->s_, suggested_size, buf);
+    s->alloc_cb(s->m_s, suggested_size, buf);
     MANAPIHTTP_EV_CATCH_CALLBACK("tcp conn alloc")
 }
 
@@ -456,7 +456,7 @@ void manapi::ev::callback_watcher_udp_alloc(uv_handle_t *handle, size_t suggeste
     auto s = static_cast<manapi::ev::internal::udp_ctx *> (handle->data);
     assert((s->alloc_cb && "ev:User cb wasn't set"));
     MANAPIHTTP_EV_TRY_CALLBACK
-    s->alloc_cb(s->s_, suggested_size, buf);
+    s->alloc_cb(s->m_s, suggested_size, buf);
     MANAPIHTTP_EV_CATCH_CALLBACK("tcp udp alloc")
 }
 
@@ -464,7 +464,7 @@ void manapi::ev::callback_close_cb(uv_handle_t *s) MANAPIHTTP_NOEXCEPT {
     assert(s->data && "ev:User data wasn't set");
 }
 
-static void manapi__event_loop_try_tasks(std::shared_ptr<manapi::ethreadpool> &tp,
+static void manapi__event_loop_try_tasks(std::shared_ptr<manapi::ethread_pool> &tp,
     const manapi::ev::shared_prepare &prepare_tasks,
     const manapi::ev::shared_idle &idle_tasks) {
     if (!tp->try_task()) {
@@ -576,7 +576,7 @@ manapi::event_loop::event_loop() {
     this->m_stopping_last = nullptr;
 }
 
-manapi::ev::status_or<std::shared_ptr<manapi::event_loop>> manapi::event_loop::create(int flags, std::shared_ptr<mthreadpool> taskpool, std::shared_ptr<timerpool> tmpool, std::shared_ptr<manapi::logger> logger) {
+manapi::ev::status_or<std::shared_ptr<manapi::event_loop>> manapi::event_loop::create(int flags, std::shared_ptr<mthread_pool> taskpool, std::shared_ptr<timer_pool> tmpool, std::shared_ptr<manapi::logger> logger) {
     std::shared_ptr<manapi::event_loop> ev;
     ev::status status;
 
@@ -623,7 +623,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::event_loop>> manapi::event_loop::c
 
         }).unwrap();
 
-        ev->m_etaskpool = std::make_shared<manapi::ethreadpool>();
+        ev->m_etaskpool = std::make_shared<manapi::ethread_pool>();
         ev->m_etaskpool->set_notify_cb([ev = ev.get()] () -> void {
             ev->m_idle_tasks->start();
             ev->m_prepare_tasks->start();
@@ -995,7 +995,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::tcp>> manapi::event_loop::crea
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
 
         ctx->type = 1;
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->connection = std::move(callback);
         ctx->close_cb = nullptr;
 
@@ -1018,7 +1018,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::tcp>> manapi::event_loop::crea
         if (auto rhs = w->bind(loop))
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
         ctx->type = 0;
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->read = std::move(read);
         ctx->alloc_cb = std::move(alloc_cb);
         ctx->close_cb = nullptr;
@@ -1071,7 +1071,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::udp>> manapi::event_loop::crea
         if (auto rhs = w->bind(loop)) {
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
         }
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->recv = std::move(recv);
         ctx->alloc_cb = std::move(alloc_cb);
 
@@ -1233,22 +1233,22 @@ void manapi::event_loop::stop_watcher(std::shared_ptr<ev::tcp> s) MANAPIHTTP_NOE
     if (data->type == 0) {
         s->unbind(+[] (uv_handle_t *s) -> void {
              auto data = static_cast<ev::internal::tcp_connection_ctx *>(s->data);
-             if (data->close_cb) { data->close_cb(data->s_); }
+             if (data->close_cb) { data->close_cb(data->m_s); }
              s->data = nullptr;
-             if (data) { data->s_.reset(); delete data; }
+             if (data) { data->m_s.reset(); delete data; }
          });
     }
     else {
         s->unbind(+[] (uv_handle_t *s) -> void {
             auto data = static_cast<ev::internal::tcp_accept_ctx *>(s->data);
-            if (data->close_cb) { data->close_cb(data->s_); }
+            if (data->close_cb) { data->close_cb(data->m_s); }
             s->data = nullptr;
-            if (data) { data->s_.reset(); delete data; }
+            if (data) { data->m_s.reset(); delete data; }
         });
     }
 }
 
-const std::shared_ptr<manapi::ethreadpool> &manapi::event_loop::taskpool() const MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::ethread_pool> &manapi::event_loop::taskpool() const MANAPIHTTP_NOEXCEPT {
     return this->m_etaskpool;
 }
 
@@ -1389,7 +1389,7 @@ void manapi::event_loop::interrupt(int sig) MANAPIHTTP_NOEXCEPT {
         }
         if (flg) {
             try {
-                auto current = manapi::async::internal::current_();
+                auto current = manapi::async::try_current();
                 if (current) {
                     current->etaskpool()->append_task([sig] ()
                         -> void { manapi::event_loop::interrupt(-sig); });
@@ -1538,7 +1538,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::io>> manapi::event_loop::creat
         if (const auto rhs = w->bind(loop, fd))
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
 
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
 
         w->data(ctx.release());
@@ -1560,7 +1560,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::idle>> manapi::event_loop::cre
             return ev::status_not_found("ev:loop");
         if (auto rhs = w->bind(loop))
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         w->data(ctx.release());
         return std::move(w);
@@ -1580,7 +1580,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::io>> manapi::event_loop::creat
             return ev::status_not_found("ev:loop");
         if (auto const rhs = w->bind(loop, sock))
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         w->data(ctx.release());
         return std::move(w);
@@ -1600,7 +1600,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::async>> manapi::event_loop::cr
             return ev::status_not_found("ev:loop");
         if (auto rhs = w->bind(loop))
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         w->data(ctx.release());
         return std::move(w);
@@ -1621,7 +1621,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::timer>> manapi::event_loop::cr
         if (auto rhs = w->bind(loop))
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
 
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         w->data(ctx.release());
         return std::move(w);
@@ -1642,7 +1642,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::prepare>> manapi::event_loop::
         if (auto rhs = w->bind(loop))
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
 
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         w->data(ctx.release());
         return std::move(w);
@@ -1669,7 +1669,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::fs>> manapi::event_loop::creat
             });
         }
 
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         ctx->token = std::move(token);
 
@@ -1703,7 +1703,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::getaddrinfo>> manapi::event_lo
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
         }
 
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         ctx->token = std::move(token);
 
@@ -1737,7 +1737,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::getnameinfo>> manapi::event_lo
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
         }
 
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         ctx->token = std::move(token);
 
@@ -1767,7 +1767,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::random>> manapi::event_loop::c
             token.disable();
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
         }
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->cb = std::move(callback);
         ctx->token = std::move(token);
 
@@ -1787,7 +1787,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::write>> manapi::event_loop::cr
         if (auto rhs = w->bind(reinterpret_cast <ev::stream_t *>(conn->custom()), bufs, nbuf)) {
             return manapi::ev::status_invalid_argument("ev:Bind failed", rhs);
         }
-        ctx->s_ = w;
+        ctx->m_s = w;
         ctx->write = std::move(callback);
         w->data(ctx.release());
         return std::move(w);
@@ -1805,7 +1805,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::udp_send>> manapi::event_loop:
         if (auto rhs = w->bind(conn->custom(), bufs, nbuf, addr))
             return ev::status_internal("eventloop:Bind failed", rhs);
 
-        ctx->s_ = w;
+        ctx->m_s = w;
         w->data(ctx.release());
 
         return std::move(w);
@@ -1826,7 +1826,7 @@ manapi::ev::status_or<manapi::ev::shared_work> manapi::event_loop::append_task(s
 
         auto w = std::make_shared<ev::work>();
 
-        std::unique_ptr<ev::internal::work_ctx> data_ctx (new ev::internal::work_ctx{.s_ = w, .cb = std::move(work), .after_cb = std::move(after_work)});
+        std::unique_ptr<ev::internal::work_ctx> data_ctx (new ev::internal::work_ctx{.m_s = w, .cb = std::move(work), .after_cb = std::move(after_work)});
 
         w->data(data_ctx.get());
 
@@ -1910,7 +1910,7 @@ void manapi::event_loop::event_loop::stop_watcher_ptr(ev::write *w) MANAPIHTTP_N
         w->data(nullptr);
         w->unbind();
         if (data) {
-            data->s_.reset();
+            data->m_s.reset();
         }
     }
 }
@@ -1921,7 +1921,7 @@ void manapi::event_loop::event_loop::stop_watcher_ptr(ev::udp_send *w) MANAPIHTT
         w->data( nullptr);
         w->unbind();
         if (data) {
-            data->s_.reset();
+            data->m_s.reset();
         }
     }
 }

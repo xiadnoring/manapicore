@@ -13,7 +13,7 @@
 #include "../include/ManapiHttpStructs.hpp"
 #include "../include/ManapiHttpInternal.hpp"
 
-static manapi::future<manapi::status> http_req_read_async_body_(manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_async_cb handler);
+static manapi::future<manapi::status> manapi__http_req_read_async_body(manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_async_cb handler);
 
 static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_sync_cb handler);
 
@@ -180,8 +180,8 @@ manapi::future<manapi::json_error::status_or<manapi::json>> manapi::net::http::r
 manapi::future<manapi::json_error::status_or<manapi::json>> manapi::net::http::request::json(uint32_t flags,manapi::json_mask *mask) {
     try {
         struct builder_callback_data_t {
-            manapi::json_builder *builder_;
-            json_error::status *status_;
+            manapi::json_builder *builder;
+            json_error::status *status;
         }
         data_callback{};
 
@@ -191,14 +191,14 @@ manapi::future<manapi::json_error::status_or<manapi::json>> manapi::net::http::r
 
             auto status = json_error::status_ok();
 
-            data_callback.builder_ = &builder;
-            data_callback.status_ = &status;
+            data_callback.builder = &builder;
+            data_callback.status = &status;
 
             auto res = co_await http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
                 [&data_callback] (const char *data, std::size_t size, bool fin)
                 -> ssize_t {
-                *data_callback.status_ = data_callback.builder_->parse(std::string_view (data, size));
-                if (!*data_callback.status_)
+                *data_callback.status = data_callback.builder->parse(std::string_view (data, size));
+                if (!*data_callback.status)
                     return -1;
 
                 return static_cast<ssize_t>(size);
@@ -218,14 +218,14 @@ manapi::future<manapi::json_error::status_or<manapi::json>> manapi::net::http::r
             auto status = json_error::status_ok();
             json_builder builder = json_builder ();
 
-            data_callback.builder_ = &builder;
-            data_callback.status_ = &status;
+            data_callback.builder = &builder;
+            data_callback.status = &status;
 
             auto res = co_await http_req_read_body_( this->m_worker.get(), this->m_conn, this->m_request_data,
                 [&data_callback] (const char *data, std::size_t size, bool fin)
             -> ssize_t {
-                *data_callback.status_ = data_callback.builder_->parse(std::string_view (data, size));
-                if (!*data_callback.status_)
+                *data_callback.status = data_callback.builder->parse(std::string_view (data, size));
+                if (!*data_callback.status)
                     return -1;
 
                 return static_cast<ssize_t>(size);
@@ -256,7 +256,7 @@ manapi::future<manapi::status> manapi::net::http::request::form (formdata_recv::
     try {
         formdata_recv fdata ([wrk = this->m_worker.get(), conn = this->m_conn, req_data = this->m_request_data]
                 (formdata_recv::req_data_cb_t cb) -> manapi::future<manapi::status> {
-            return ::http_req_read_async_body_ (wrk, conn, req_data, std::move(cb));
+            return ::manapi__http_req_read_async_body (wrk, conn, req_data, std::move(cb));
         });
         auto hit = this->m_request_data->headers.find(H_CONTENT_TYPE);
         co_return co_await fdata.get((hit == this->m_request_data->headers.end() ? std::string_view{} : hit->second),
@@ -273,7 +273,7 @@ manapi::future<manapi::status> manapi::net::http::request::callback_sync(onrecv_
 }
 
 manapi::future<manapi::status> manapi::net::http::request::callback_async(onrecv_async_cb callback) {
-    co_return co_await http_req_read_async_body_( this->m_worker.get(), this->m_conn, this->m_request_data,std::move(callback));
+    co_return co_await manapi__http_req_read_async_body( this->m_worker.get(), this->m_conn, this->m_request_data,std::move(callback));
 }
 
 manapi::future<manapi::status> manapi::net::http::request::file(std::string filepath, int flags) {
@@ -288,7 +288,7 @@ manapi::future<manapi::status> manapi::net::http::request::file(std::string file
     if (!res.ok())
         co_return status_unknown("formdata:Failed to open file");
 
-    res = co_await ::http_req_read_async_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
+    res = co_await ::manapi__http_req_read_async_body(this->m_worker.get(), this->m_conn, this->m_request_data,
         [f] (slice_view buffs, bool fin) mutable
             -> manapi::future<ssize_t> { return f->write(buffs); });
 
@@ -449,7 +449,7 @@ static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::
     manapi::status status;
     worker->waiting(*conn, true);
 
-    struct ctx_cb_t_ {
+    struct manapi__ctx_cb_t {
         net::worker::base *worker;
         request_data_t *req;
         promise::resolve_t resolve;
@@ -548,9 +548,9 @@ static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::
                     return;
 
                     finish: {
-                        auto const wrk_ = ctx_cb.worker;
-                        wrk_->event_on(conn, nullptr);
-                        wrk_->event_flags(conn, 0);
+                        auto const wrk = ctx_cb.worker;
+                        wrk->event_on(conn, nullptr);
+                        wrk->event_flags(conn, 0);
                     }
             };
 
@@ -576,14 +576,14 @@ static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::
     co_return std::move(status);
 }
 
-static manapi::future<manapi::status> http_req_read_async_body_(manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_async_cb handler) {
+static manapi::future<manapi::status> manapi__http_req_read_async_body(manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_async_cb handler) {
     using namespace manapi;
     using namespace manapi::net;
     using namespace manapi::net::http;
     using promise = manapi::async::promise_sync<manapi::status>;
     using handler_t = decltype(handler);
 
-    struct ctx_cb_t_ {
+    struct manapi__ctx_cb_t {
         net::worker::base *worker;
         request_data_t *req;
         promise::resolve_t resolve;
@@ -620,7 +620,7 @@ static manapi::future<manapi::status> http_req_read_async_body_(manapi::net::wor
                     }
 
                     if (m_flags & ev::READ) {
-                        slice buffs = ctx_cb.worker->bufferpool().slice(nsize).unwrap();
+                        slice buffs = manapi::async::memory_fabric()->slice(nsize).unwrap();
                         buffs.copy_from(buffer, 0, nsize).unwrap();
 
                         while (ctx_cb.worker->wrk_recv_count(ctx_cb.conn))
@@ -633,7 +633,7 @@ static manapi::future<manapi::status> http_req_read_async_body_(manapi::net::wor
                         ctx_cb.worker->event_toggle(conn, false, ev::READ);
                         ctx_cb.cnt++;
                         manapi::async::run (manapi::async::invoke(
-                            [] (const worker::shared_conn & conn, manapi::slice buffs, ctx_cb_t_ *ctx_cb, int m_flags) -> manapi::future<> {
+                            [] (const worker::shared_conn & conn, manapi::slice buffs, manapi__ctx_cb_t *ctx_cb, int m_flags) -> manapi::future<> {
                                 try {
 
                                     std::size_t size;
@@ -712,11 +712,11 @@ static manapi::future<manapi::status> http_req_read_async_body_(manapi::net::wor
                                 co_return;
 
                                 finish: {
-                                    auto const ctx_cb_ = ctx_cb;
-                                    ctx_cb_->worker->event_on(conn, nullptr);
-                                    ctx_cb_->worker->event_flags(conn, 0);
-                                    ctx_cb_->cnt--;
-                                    ctx_cb_->mx.unlock();
+                                    auto const zctx_cb = ctx_cb;
+                                    zctx_cb->worker->event_on(conn, nullptr);
+                                    zctx_cb->worker->event_flags(conn, 0);
+                                    zctx_cb->cnt--;
+                                    zctx_cb->mx.unlock();
                                 }
                         }, ctx_cb.conn, std::move(buffs), &ctx_cb, m_flags));
                     }
@@ -727,10 +727,10 @@ static manapi::future<manapi::status> http_req_read_async_body_(manapi::net::wor
 
                     return;
                     finish: {
-                        auto const wrk_ = ctx_cb.worker;
+                        auto const wrk = ctx_cb.worker;
 
-                        wrk_->event_on(conn, nullptr);
-                        wrk_->event_flags(conn, 0);
+                        wrk->event_on(conn, nullptr);
+                        wrk->event_flags(conn, 0);
                     }
             };
 

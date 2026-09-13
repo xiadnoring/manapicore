@@ -54,7 +54,7 @@ struct manapi::net::formdata_recv::formdata_recv_headers_t {
     std::string s1, s2;
 };
 
-manapi::net::formdata_recv::formdata_recv(onrecv_cb_t onrecv_cb) : ctx_(), onrecv_cb_(std::move(onrecv_cb)) {
+manapi::net::formdata_recv::formdata_recv(onrecv_cb_t onrecv_cb) : m_ctx(), m_onrecv_cb(std::move(onrecv_cb)) {
 }
 
 manapi::net::formdata_recv::~formdata_recv() = default;
@@ -64,11 +64,11 @@ manapi::net::formdata_recv::formdata_recv(formdata_recv &&n) MANAPIHTTP_NOEXCEPT
 manapi::net::formdata_recv & manapi::net::formdata_recv::operator=(formdata_recv &&n) MANAPIHTTP_NOEXCEPT = default;
 
 manapi::future<manapi::status> manapi::net::formdata_recv::get(std::string_view content_type, onparam_cb_t cb) {
-    assert(this->onparam_cb_ == nullptr);
+    assert(this->m_onparam_cb == nullptr);
     manapi::status status;
 
     try {
-        this->onparam_cb_ = std::move(cb);
+        this->m_onparam_cb = std::move(cb);
         int type = CONTENT_TYPE_NONE;
 
         {
@@ -89,7 +89,7 @@ manapi::future<manapi::status> manapi::net::formdata_recv::get(std::string_view 
                     goto finish;
                 }
 
-                this->ctx_.boundary = "\r\n--" + pit->second;
+                this->m_ctx.boundary = "\r\n--" + pit->second;
 
                 type = CONTENT_TYPE_MULTIPART_FORM_DATA;
             }
@@ -104,7 +104,7 @@ manapi::future<manapi::status> manapi::net::formdata_recv::get(std::string_view 
 
         switch (type) {
             case CONTENT_TYPE_MULTIPART_FORM_DATA: {
-                status = co_await this->onrecv_cb_ ([this] (slice_view buffs, bool fin) -> manapi::future<ssize_t> {
+                status = co_await this->m_onrecv_cb ([this] (slice_view buffs, bool fin) -> manapi::future<ssize_t> {
                         return this->onrecv_multipart_(buffs);
                 });
 
@@ -114,34 +114,34 @@ manapi::future<manapi::status> manapi::net::formdata_recv::get(std::string_view 
                 break;
             }
             case CONTENT_TYPE_APPLICATION_X_WWW_FORM_URLENCODED: {
-                status = co_await this->onrecv_cb_ ([this] (slice_view buffs, bool fin) -> manapi::future<ssize_t> {
+                status = co_await this->m_onrecv_cb ([this] (slice_view buffs, bool fin) -> manapi::future<ssize_t> {
                         return this->onrecv_urlencoded_(buffs);
                 });
 
                 if (!status)
                     goto finish;
 
-                if (this->ctx_.current != FORMDATA_URLEN_VALUE
-                    && this->ctx_.current != FORMDATA_URLEN_INIT) {
+                if (this->m_ctx.current != FORMDATA_URLEN_VALUE
+                    && this->m_ctx.current != FORMDATA_URLEN_INIT) {
                     status = status_invalid_argument("formdata:x-www-form-urlencoded data is not complete");
                     goto finish;
                 }
 
-                if (this->ctx_.current == FORMDATA_URLEN_VALUE) {
-                    auto ucb = this->onparam_cb_ (std::move(this->ctx_.hctx->s1));
+                if (this->m_ctx.current == FORMDATA_URLEN_VALUE) {
+                    auto ucb = this->m_onparam_cb (std::move(this->m_ctx.hctx->s1));
                     if (ucb) {
-                        auto const size = this->ctx_.hctx->s2.size();
+                        auto const size = this->m_ctx.hctx->s2.size();
 
                         slice b;
 
-                        b.push_back(this->ctx_.hctx->s2.data(), size);
+                        b.push_back(this->m_ctx.hctx->s2.data(), size);
 
                         if (static_cast<ssize_t>(size) != co_await ucb (slice_view(b), true)) {
                             status = status_invalid_argument("formdata:user callback returned an invalid result");
                             goto finish;
                         }
 
-                        this->ctx_.hctx->s2.resize(0);
+                        this->m_ctx.hctx->s2.resize(0);
                     }
                 }
 
@@ -157,8 +157,8 @@ manapi::future<manapi::status> manapi::net::formdata_recv::get(std::string_view 
     }
 
 finish:
-    this->onparam_cb_ = nullptr;
-    this->ondata_cb_ = nullptr;
+    this->m_onparam_cb = nullptr;
+    this->m_ondata_cb = nullptr;
     co_return std::move(status);
 }
 
@@ -228,57 +228,57 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
             auto buffer = static_cast<const char *>(buff_it.buffer());
 
             while (pos != size) {
-                repeat: switch (this->ctx_.current) {
+                repeat: switch (this->m_ctx.current) {
                     case FORMDATA_MULTI_INIT: {
-                        this->ctx_.current = FORMDATA_MULTI_BOUNDARY;
+                        this->m_ctx.current = FORMDATA_MULTI_BOUNDARY;
 
-                        this->ctx_.n1 = 2;
-                        this->ctx_.n2 = 0;
+                        this->m_ctx.n1 = 2;
+                        this->m_ctx.n2 = 0;
 
 
                         break;
                     }
                     case FORMDATA_MULTI_BOUNDARY: {
-                        auto const copy = std::min<uint32_t>(static_cast<uint32_t>(this->ctx_.boundary.size()) - this->ctx_.n1,
+                        auto const copy = std::min<uint32_t>(static_cast<uint32_t>(this->m_ctx.boundary.size()) - this->m_ctx.n1,
                             static_cast<uint32_t>(size - pos));
 
                         if (copy) {
-                            if (0 != strncmp (this->ctx_.boundary.data() + this->ctx_.n1, buffer + pos, copy)) {
+                            if (0 != strncmp (this->m_ctx.boundary.data() + this->m_ctx.n1, buffer + pos, copy)) {
                                 co_return -1;
                             }
                         }
 
-                        this->ctx_.n1 += copy;
+                        this->m_ctx.n1 += copy;
                         pos += copy;
 
-                        if (this->ctx_.n1 == this->ctx_.boundary.size()) {
-                            this->ctx_.n1 = 0;
-                            this->ctx_.current = FORMDATA_MULTI_R_OR_FIN;
+                        if (this->m_ctx.n1 == this->m_ctx.boundary.size()) {
+                            this->m_ctx.n1 = 0;
+                            this->m_ctx.current = FORMDATA_MULTI_R_OR_FIN;
                         }
 
                         break;
                     }
                     case FORMDATA_MULTI_HEADER_KEY: {
                         while (pos < size) {
-                            if (!this->ctx_.hctx->s1.empty() && this->ctx_.hctx->s1.back() == '\r') {
+                            if (!this->m_ctx.hctx->s1.empty() && this->m_ctx.hctx->s1.back() == '\r') {
                                 /**
                                  * RFC7230 (3.2.4) Field Parsing
                                  * Historically, HTTP header field values could be extended over multiple
                                  * lines by preceding each extra line with at least one space or horizontal tab (obs-fold).
                                  */
                                 if (buffer[pos] == '\n') {
-                                    if (this->ctx_.hctx->s1.size() != 1) {
+                                    if (this->m_ctx.hctx->s1.size() != 1) {
                                         co_return -1;
                                     }
 
-                                    this->ctx_.hctx->s1.pop_back();
+                                    this->m_ctx.hctx->s1.pop_back();
 
                                     pos ++;
 
-                                    this->ctx_.n2 = static_cast<uint32_t>(pos);
+                                    this->m_ctx.n2 = static_cast<uint32_t>(pos);
 
-                                    auto hit = this->ctx_.headers->find(http::H_CONTENT_DISPOSITION);
-                                    if (hit == this->ctx_.headers->end()) {
+                                    auto hit = this->m_ctx.headers->find(http::H_CONTENT_DISPOSITION);
+                                    if (hit == this->m_ctx.headers->end()) {
                                         co_return -1;
                                     }
 
@@ -293,10 +293,10 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                                     if (nit == hparams[0].params.end())
                                         co_return -1;
 
-                                    this->ondata_cb_ = this->onparam_cb_ (std::move(nit->second));
+                                    this->m_ondata_cb = this->m_onparam_cb (std::move(nit->second));
 
-                                    this->ctx_.current = FORMDATA_MULTI_DATA;
-                                    this->ctx_.next = FORMDATA_MULTI_ERR;
+                                    this->m_ctx.current = FORMDATA_MULTI_DATA;
+                                    this->m_ctx.next = FORMDATA_MULTI_ERR;
 
                                     goto repeat;
                                 }
@@ -305,7 +305,7 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                             }
 
                             if (buffer[pos] == '\r') {
-                                this->ctx_.hctx->s1.push_back(buffer[pos]);
+                                this->m_ctx.hctx->s1.push_back(buffer[pos]);
                                 pos++;
                                 continue;
                             }
@@ -317,12 +317,12 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                                  * optional leading whitespace, the field value, and optional trailing whitespace.
                                  */
 
-                                if (this->ctx_.hctx->s1 != http::H_CONTENT_DISPOSITION
-                                    && this->ctx_.hctx->s1 != http::H_CONTENT_TYPE)
+                                if (this->m_ctx.hctx->s1 != http::H_CONTENT_DISPOSITION
+                                    && this->m_ctx.hctx->s1 != http::H_CONTENT_TYPE)
                                     co_return -1;
 
                                 pos++;
-                                this->ctx_.current = FORMDATA_MULTI_HEADER_VALUE;
+                                this->m_ctx.current = FORMDATA_MULTI_HEADER_VALUE;
 
                                 break;
                             }
@@ -342,16 +342,16 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                                 co_return -1;
                             }
 
-                            if (this->ctx_.hctx->s1.size() > 24)
+                            if (this->m_ctx.hctx->s1.size() > 24)
                                 co_return -1;
 
-                            this->ctx_.hctx->s1.push_back(static_cast<char>(std::tolower(buffer[pos])));
+                            this->m_ctx.hctx->s1.push_back(static_cast<char>(std::tolower(buffer[pos])));
                             pos++;
                         }
                         break;
                     }
                     case FORMDATA_MULTI_HEADER_VALUE: {
-                        if (buffer[pos] == ' ' && this->ctx_.hctx->s2.empty()) {
+                        if (buffer[pos] == ' ' && this->m_ctx.hctx->s2.empty()) {
                             /**
                              * RFC7230 (3.2) Header Fields
                              * Optitional leading whitespace
@@ -360,23 +360,23 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                         }
 
                         while (pos < size) {
-                            if (!this->ctx_.hctx->s2.empty() && this->ctx_.hctx->s2.back() == '\r') {
+                            if (!this->m_ctx.hctx->s2.empty() && this->m_ctx.hctx->s2.back() == '\r') {
                                 if (buffer[pos] == '\n') {
-                                    this->ctx_.hctx->s2.pop_back();
+                                    this->m_ctx.hctx->s2.pop_back();
                                     pos++;
 
-                                    if (!this->ctx_.hctx->s2.empty() && this->ctx_.hctx->s2.back() == ' ') {
+                                    if (!this->m_ctx.hctx->s2.empty() && this->m_ctx.hctx->s2.back() == ' ') {
                                         /**
                                          * RFC7230 (3.2) Header Fields
                                          * Optitional trailing whitespace
                                          */
-                                        this->ctx_.hctx->s2.pop_back();
+                                        this->m_ctx.hctx->s2.pop_back();
                                     }
 
                                     /* insert */
-                                    auto it = this->ctx_.headers->find(this->ctx_.hctx->s1);
-                                    if (it == this->ctx_.headers->end()) {
-                                        this->ctx_.headers->insert({this->ctx_.hctx->s1, this->ctx_.hctx->s2});
+                                    auto it = this->m_ctx.headers->find(this->m_ctx.hctx->s1);
+                                    if (it == this->m_ctx.headers->end()) {
+                                        this->m_ctx.headers->insert({this->m_ctx.hctx->s1, this->m_ctx.hctx->s2});
                                     }
                                     else {
                                         /**
@@ -392,16 +392,16 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                                          */
 
                                         // it->second.push_back(',');
-                                        // it->second.append(this->ctx_.hctx->s2);
+                                        // it->second.append(this->m_ctx.hctx->s2);
 
                                         /* but there it isn't allowed */
                                         co_return -1;
                                     }
 
-                                    this->ctx_.hctx->s1.resize(0);
-                                    this->ctx_.hctx->s2.resize(0);
+                                    this->m_ctx.hctx->s1.resize(0);
+                                    this->m_ctx.hctx->s2.resize(0);
 
-                                    this->ctx_.current = FORMDATA_MULTI_HEADER_KEY;
+                                    this->m_ctx.current = FORMDATA_MULTI_HEADER_KEY;
 
                                     break;
                                 }
@@ -410,7 +410,7 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                             }
 
                             if (buffer[pos] == '\r') {
-                                this->ctx_.hctx->s2.push_back(buffer[pos]);
+                                this->m_ctx.hctx->s2.push_back(buffer[pos]);
                                 pos++;
                                 continue;
                             }
@@ -435,10 +435,10 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                                 co_return -1;
                             }
 
-                            if (this->ctx_.hctx->s2.size() > 128)
+                            if (this->m_ctx.hctx->s2.size() > 128)
                                 co_return -1;
 
-                            this->ctx_.hctx->s2.push_back(buffer[pos]);
+                            this->m_ctx.hctx->s2.push_back(buffer[pos]);
                             pos++;
                         }
                         break;
@@ -448,7 +448,7 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                             co_return -1;
                         }
                         pos++;
-                        this->ctx_.current = FORMDATA_MULTI_N;
+                        this->m_ctx.current = FORMDATA_MULTI_N;
                         break;
                     }
                     case FORMDATA_MULTI_N: {
@@ -456,15 +456,15 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                             co_return -1;
                         }
                         pos++;
-                        this->ctx_.current = this->ctx_.next;
-                        this->ctx_.next = FORMDATA_MULTI_ERR;
+                        this->m_ctx.current = this->m_ctx.next;
+                        this->m_ctx.next = FORMDATA_MULTI_ERR;
                         break;
                     }
                     case FORMDATA_MULTI_R_OR_FIN: {
-                        this->ctx_.n1 = 0;
+                        this->m_ctx.n1 = 0;
 
                         if (!slice_transfer.empty()) {
-                            if (static_cast<ssize_t>(slice_transfer.size()) != co_await this->ondata_cb_ (slice_view(slice_transfer), false)) {
+                            if (static_cast<ssize_t>(slice_transfer.size()) != co_await this->m_ondata_cb (slice_view(slice_transfer), false)) {
                                 manapi_log_trace(debug::LOG_TRACE_HIGH, "formdata:user callback returned an invalid result (size=%zu)", slice_transfer.size());
                                 co_return -1;
                             }
@@ -473,18 +473,18 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
 
                         if (buffer[pos] == '\r') {
                             pos++;
-                            this->ctx_.current = FORMDATA_MULTI_N;
-                            this->ctx_.next = FORMDATA_MULTI_HEADER_KEY;
+                            this->m_ctx.current = FORMDATA_MULTI_N;
+                            this->m_ctx.next = FORMDATA_MULTI_HEADER_KEY;
 
-                            this->ctx_.headers = std::make_unique<decltype(this->ctx_.headers)::element_type>();
-                            this->ctx_.hctx = std::make_unique<decltype(this->ctx_.hctx)::element_type>(
-                                decltype(this->ctx_.hctx)::element_type{});
+                            this->m_ctx.headers = std::make_unique<decltype(this->m_ctx.headers)::element_type>();
+                            this->m_ctx.hctx = std::make_unique<decltype(this->m_ctx.hctx)::element_type>(
+                                decltype(this->m_ctx.hctx)::element_type{});
 
                             break;
                         }
                         if (buffer[pos] == '-') {
                             pos++;
-                            this->ctx_.current = FORMDATA_MULTI_FINISH;
+                            this->m_ctx.current = FORMDATA_MULTI_FINISH;
                             break;
                         }
                         co_return -1;
@@ -495,26 +495,26 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                          * n2 - payload start position
                          */
 
-                        auto &n1 = this->ctx_.n1;
-                        auto &boundary = this->ctx_.boundary;
+                        auto &n1 = this->m_ctx.n1;
+                        auto &boundary = this->m_ctx.boundary;
 
                         while (pos != size) {
                             if (n1) {
                                 if (buffer[pos] == boundary[n1]) {
                                     // if (!n1) {
                                     //     auto const beyond = (pos - n1);
-                                    //     auto const copy = beyond - this->ctx_.n2;
+                                    //     auto const copy = beyond - this->m_ctx.n2;
                                     //     assert((copy >= 0));
-                                    //     slice_transfer.push_back(buffer + this->ctx_.n2, copy);
+                                    //     slice_transfer.push_back(buffer + this->m_ctx.n2, copy);
                                     //
-                                    //     this->ctx_.n2 = static_cast<int>(pos);
+                                    //     this->m_ctx.n2 = static_cast<int>(pos);
                                     // }
 
                                     n1++;
                                     pos++;
 
                                     if (n1 == boundary.size()) {
-                                        this->ctx_.current = FORMDATA_MULTI_R_OR_FIN;
+                                        this->m_ctx.current = FORMDATA_MULTI_R_OR_FIN;
                                         break;
                                     }
 
@@ -524,8 +524,8 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                                 if (n1) {
                                     if (pos < n1) {
                                         auto const copy = n1;
-                                        slice_transfer.push_back(this->ctx_.boundary.data(), copy);
-                                        this->ctx_.n2 = static_cast<uint32_t>(pos);
+                                        slice_transfer.push_back(this->m_ctx.boundary.data(), copy);
+                                        this->m_ctx.n2 = static_cast<uint32_t>(pos);
                                     }
 
                                     n1 = 0;
@@ -543,11 +543,11 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                         }
 
                         auto const beyond = (pos - n1);
-                        auto const copy = beyond - this->ctx_.n2;
+                        auto const copy = beyond - this->m_ctx.n2;
 
-                        slice_transfer.push_back(buffer + this->ctx_.n2, copy);
+                        slice_transfer.push_back(buffer + this->m_ctx.n2, copy);
 
-                        this->ctx_.n2 = 0;
+                        this->m_ctx.n2 = 0;
 
                         break;
                     }
@@ -557,11 +557,11 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
 
                         pos++;
 
-                        this->ctx_.headers.reset();
-                        this->ctx_.hctx.reset();
+                        this->m_ctx.headers.reset();
+                        this->m_ctx.hctx.reset();
 
-                        this->ctx_.current = FORMDATA_MULTI_R;
-                        this->ctx_.next = FORMDATA_MULTI_ERR;
+                        this->m_ctx.current = FORMDATA_MULTI_R;
+                        this->m_ctx.next = FORMDATA_MULTI_ERR;
 
                         break;
                     }
@@ -575,7 +575,7 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
         }
 
         if (!slice_transfer.empty()) {
-            if (static_cast<ssize_t>(slice_transfer.size()) != co_await this->ondata_cb_ (slice_view(slice_transfer), false)) {
+            if (static_cast<ssize_t>(slice_transfer.size()) != co_await this->m_ondata_cb (slice_view(slice_transfer), false)) {
                 manapi_log_trace(debug::LOG_TRACE_HIGH, "formdata:user callback returned an invalid result (size=%zu)", slice_transfer.size());
                 co_return -1;
             }
@@ -601,28 +601,28 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_urlencoded_(slice_vie
             auto buffer = static_cast<const char *>(buff_it.buffer());
 
             while (pos != size) {
-                repeat: switch (this->ctx_.current) {
+                repeat: switch (this->m_ctx.current) {
                     case FORMDATA_URLEN_INIT: {
-                        this->ctx_.hctx = std::make_unique<decltype(this->ctx_.hctx)::element_type>(
-                            decltype(this->ctx_.hctx)::element_type{});
+                        this->m_ctx.hctx = std::make_unique<decltype(this->m_ctx.hctx)::element_type>(
+                            decltype(this->m_ctx.hctx)::element_type{});
 
-                        this->ctx_.n1 = 0;
-                        this->ctx_.n2 = 0;
+                        this->m_ctx.n1 = 0;
+                        this->m_ctx.n2 = 0;
 
-                        this->ctx_.current = FORMDATA_URLEN_KEY;
+                        this->m_ctx.current = FORMDATA_URLEN_KEY;
 
                         break;
                     }
                     case FORMDATA_URLEN_KEY: {
                         while (pos != size) {
                             if (buffer[pos] == '=') {
-                                encoding::decode_url(this->ctx_.hctx->s1,
-                                    std::string_view (buffer + this->ctx_.n1, pos - this->ctx_.n1));
+                                encoding::decode_url(this->m_ctx.hctx->s1,
+                                    std::string_view (buffer + this->m_ctx.n1, pos - this->m_ctx.n1));
 
                                 pos++;
 
-                                this->ctx_.n1 = static_cast<uint32_t>(pos);
-                                this->ctx_.current = FORMDATA_URLEN_VALUE;
+                                this->m_ctx.n1 = static_cast<uint32_t>(pos);
+                                this->m_ctx.current = FORMDATA_URLEN_VALUE;
 
                                 goto repeat;
                             }
@@ -631,11 +631,11 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_urlencoded_(slice_vie
                         }
 
                         if (pos == size) {
-                            if (pos != this->ctx_.n1)
-                                encoding::decode_url(this->ctx_.hctx->s1,
-                                    std::string_view (buffer + this->ctx_.n1, pos - this->ctx_.n1));
+                            if (pos != this->m_ctx.n1)
+                                encoding::decode_url(this->m_ctx.hctx->s1,
+                                    std::string_view (buffer + this->m_ctx.n1, pos - this->m_ctx.n1));
 
-                            this->ctx_.n1 = 0;
+                            this->m_ctx.n1 = 0;
                         }
 
                         break;
@@ -643,24 +643,24 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_urlencoded_(slice_vie
                     case FORMDATA_URLEN_VALUE: {
                         while (pos != size) {
                             if (buffer[pos] == '&') {
-                                encoding::decode_url(this->ctx_.hctx->s2,
-                                    std::string_view (buffer + this->ctx_.n1, pos - this->ctx_.n1));
+                                encoding::decode_url(this->m_ctx.hctx->s2,
+                                    std::string_view (buffer + this->m_ctx.n1, pos - this->m_ctx.n1));
 
                                 pos++;
 
-                                this->ctx_.n1 = static_cast<uint32_t>(pos);
-                                this->ctx_.current = FORMDATA_URLEN_KEY;
+                                this->m_ctx.n1 = static_cast<uint32_t>(pos);
+                                this->m_ctx.current = FORMDATA_URLEN_KEY;
 
-                                auto cb = this->onparam_cb_ (std::move(this->ctx_.hctx->s1));
+                                auto cb = this->m_onparam_cb (std::move(this->m_ctx.hctx->s1));
 
                                 if (cb) {
-                                    buffs_transfered.push_back(this->ctx_.hctx->s2.data(), this->ctx_.hctx->s2.size());
+                                    buffs_transfered.push_back(this->m_ctx.hctx->s2.data(), this->m_ctx.hctx->s2.size());
                                 }
 
-                                this->ctx_.hctx->s2.resize(0);
+                                this->m_ctx.hctx->s2.resize(0);
 
                                 if (!buffs_transfered.empty()) {
-                                    if (static_cast<ssize_t>(buffs_transfered.size()) != co_await this->ondata_cb_ (slice_view(buffs_transfered), false)) {
+                                    if (static_cast<ssize_t>(buffs_transfered.size()) != co_await this->m_ondata_cb (slice_view(buffs_transfered), false)) {
                                         manapi_log_trace(debug::LOG_TRACE_HIGH, "formdata:user callback returned an invalid result (size=%zu)", buffs_transfered.size());
                                         co_return -1;
                                     }
@@ -673,11 +673,11 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_urlencoded_(slice_vie
                         }
 
                         if (pos == size) {
-                            if (pos != this->ctx_.n1)
-                                encoding::decode_url(this->ctx_.hctx->s2,
-                                    std::string_view (buffer + this->ctx_.n1, pos - this->ctx_.n1));
+                            if (pos != this->m_ctx.n1)
+                                encoding::decode_url(this->m_ctx.hctx->s2,
+                                    std::string_view (buffer + this->m_ctx.n1, pos - this->m_ctx.n1));
 
-                            this->ctx_.n1 = 0;
+                            this->m_ctx.n1 = 0;
                         }
 
                         break;
@@ -931,7 +931,7 @@ manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::s
                 if (!status)
                     goto err;
 
-                auto res = manapi::async::current()->memory_fabric().slice(65536);
+                auto res = manapi::async::current()->memory_fabric()->slice(65536);
                 if (!res.ok())
                     co_return res.err();
 

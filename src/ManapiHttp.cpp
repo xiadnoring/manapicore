@@ -80,12 +80,12 @@ struct manapi__cache_pair_eq {
     }
 };
 
-static manapi::reference <manapi::net::http::http_handler_function> manapi__http_default_error_handler (new manapi::net::http::http_handler_function{
-    .handler = [](manapi::net::http::request &req, manapi::net::http::response &resp) -> manapi::future<> {
-        co_return resp.text(manapi::net::http::internal::generate_default_page(resp.status_code(),
-                                                                               resp.status_message())).unwrap();
-    },
-    .refcnt = 0
+thread_local manapi::reference <manapi::net::http::http_handler_function> manapi__http_default_error_handler (new manapi::net::http::http_handler_function{
+        .handler = [](manapi::net::http::request &req, manapi::net::http::response &resp) -> manapi::future<> {
+            co_return resp.text(manapi::net::http::internal::generate_default_page(resp.status_code(),
+                                                                                   resp.status_message())).unwrap();
+        },
+        .refcnt = 0
 });
 
 static std::string_view manapi__http_default_config_name = "config.json";
@@ -317,8 +317,8 @@ static manapi::future<> manapi__http_server_init_pool(std::shared_ptr<manapi::ne
 
         {
             std::lock_guard<std::mutex> lk(data.mx);
-            while (data.worker_data.pools.size() < pools.size()) {
-                data.worker_data.pools.push_back(std::make_shared<manapi::net::worker::pool_t>());
+            while (data.worker_data->pools.size() < pools.size()) {
+                data.worker_data->pools.push_back(std::make_shared<manapi::net::worker::pool_t>());
             }
         }
 
@@ -333,7 +333,7 @@ static manapi::future<> manapi__http_server_init_pool(std::shared_ptr<manapi::ne
 
                 try {
                     p = std::make_unique<http_pool> (*it, m_data->next_pool_id);
-                    manapi::unwrap(co_await p->run(srv, &data.worker_data));
+                    manapi::unwrap(co_await p->run(srv, data.worker_data));
 
                     m_data->pools.insert({m_data->next_pool_id, std::move(p)});
 

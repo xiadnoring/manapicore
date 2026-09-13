@@ -65,7 +65,7 @@ namespace manapi::net::http {
     /**
      * it helps to configure all http pools and endpoints
      */
-    class config : public manapi::internal::config_interface {
+    class config : public manapi::config_interface {
     public:
         config (const json &config);
 

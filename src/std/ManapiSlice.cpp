@@ -29,34 +29,34 @@ static std::size_t summary_size_buffs (manapi::slice_part_t *first, manapi::slic
 }
 
 static std::size_t slice_size (manapi::slice_data_t *data) {
-    return data->size_ - data->shift_ - data->rshift_;
+    return data->m_size - data->m_shift - data->m_rshift;
 }
 
 static manapi::status slice_shift_add (manapi::slice_data_t *data, std::size_t shift, int flags) {
     if (::slice_size(data) < shift)
         return manapi::status_out_of_range("slice: shift is too large");
 
-    if (data->last) {
-        data->shift_ += shift;
-        assert(data->first != data->last->next);
-        while (data->first && data->first != data->last->next
-                && data->first->buff.len <= data->shift_) {
-            data->shift_ -= data->first->buff.len;
-            data->size_ -= data->first->buff.len;
-            auto next = data->first->next;
+    if (data->m_last) {
+        data->m_shift += shift;
+        assert(data->m_first != data->m_last->next);
+        while (data->m_first && data->m_first != data->m_last->next
+                && data->m_first->buff.len <= data->m_shift) {
+            data->m_shift -= data->m_first->buff.len;
+            data->m_size -= data->m_first->buff.len;
+            auto next = data->m_first->next;
             if (flags & SLICE__FLAG_CAN_FREE) {
-                manapi::async::current()->memory_fabric().free(data->first->buff.base, data->first->buff.len);
-                delete data->first;
+                manapi::async::current()->memory_fabric()->free(data->m_first->buff.base, data->m_first->buff.len);
+                delete data->m_first;
             }
             else if (flags & SLICE__FLAG_CAN_FREE_ONLY_DIV) {
-                delete data->first;
+                delete data->m_first;
             }
-            data->first = next;
-            data->count -= 1;
+            data->m_first = next;
+            data->m_count -= 1;
 
-            if (!data->first || data->first == data->last->next) {
-                data->last = nullptr;
-                data->first = nullptr;
+            if (!data->m_first || data->m_first == data->m_last->next) {
+                data->m_last = nullptr;
+                data->m_first = nullptr;
                 break;
             }
         }
@@ -69,165 +69,165 @@ static manapi::status slice_rshift_add( manapi::slice_data_t *data, std::size_t 
     if (s > ::slice_size(data))
         return manapi::status_out_of_range("s is too large");
 
-    assert(!!data->last);
-    data->rshift_ += s;
+    assert(!!data->m_last);
+    data->m_rshift += s;
 
-    if (data->rshift_ < static_cast<std::size_t>(data->last->buff.len)) {
+    if (data->m_rshift < static_cast<std::size_t>(data->m_last->buff.len)) {
         return manapi::status_ok();
     }
 
     auto &mem = manapi::async::current()->memory_fabric();
 
-    if (data->rshift_ == static_cast<std::size_t>(data->last->buff.len)) {
+    if (data->m_rshift == static_cast<std::size_t>(data->m_last->buff.len)) {
         if (flags & SLICE__FLAG_CAN_FREE) {
-            mem.free(data->last->buff.base, data->last->buff.len);
-            data->last->buff.base = nullptr;
-            data->last->buff.len = 0;
-            data->size_ -= data->rshift_;
-            data->rshift_ = 0;
+            mem->free(data->m_last->buff.base, data->m_last->buff.len);
+            data->m_last->buff.base = nullptr;
+            data->m_last->buff.len = 0;
+            data->m_size -= data->m_rshift;
+            data->m_rshift = 0;
         }
         return manapi::status_ok();
     }
 
 #ifdef _MSC_VER
-    manapi::slice_part_t** parts = static_cast<manapi::slice_part_t**>(alloca(sizeof (manapi::slice_part_t*)*data->count));
+    manapi::slice_part_t** parts = static_cast<manapi::slice_part_t**>(alloca(sizeof (manapi::slice_part_t*)*data->m_count));
 #else
-    manapi::slice_part_t *parts[data->count];
+    manapi::slice_part_t *parts[data->m_count];
 #endif
 
-    auto current = data->first;
-    for (uint32_t i = 0; i < data->count; i++) {
+    auto current = data->m_first;
+    for (uint32_t i = 0; i < data->m_count; i++) {
         parts[i] = current;
         current = current->next;
     }
 
-    while (data->count && data->rshift_ >= data->last->buff.len) {
-        data->rshift_ -= data->last->buff.len;
-        data->size_ -= data->last->buff.len;
+    while (data->m_count && data->m_rshift >= data->m_last->buff.len) {
+        data->m_rshift -= data->m_last->buff.len;
+        data->m_size -= data->m_last->buff.len;
 
         if (flags & SLICE__FLAG_CAN_FREE) {
-            mem.free(data->last->buff.base, data->last->buff.len);
-            delete data->last;
+            mem->free(data->m_last->buff.base, data->m_last->buff.len);
+            delete data->m_last;
         }
         else if (flags & SLICE__FLAG_CAN_FREE_ONLY_DIV) {
-            delete data->last;
+            delete data->m_last;
         }
 
-        data->count --;
+        data->m_count --;
 
-        if (data->count) {
-            data->last = parts[data->count - 1];
-            data->last->next = nullptr;
+        if (data->m_count) {
+            data->m_last = parts[data->m_count - 1];
+            data->m_last->next = nullptr;
         }
         else {
-            assert(data->shift_ == 0);
+            assert(data->m_shift == 0);
 
-            data->last = nullptr;
-            data->first = nullptr;
+            data->m_last = nullptr;
+            data->m_first = nullptr;
 
-            assert(data->size_ == 0);
+            assert(data->m_size == 0);
         }
     }
 
-    if (data->count == 1 && data->shift_ + data->rshift_ == data->last->buff.len) {
+    if (data->m_count == 1 && data->m_shift + data->m_rshift == data->m_last->buff.len) {
         if (flags & SLICE__FLAG_CAN_FREE) {
-            mem.free(data->last->buff.base, data->last->buff.len);
-            delete data->last;
+            mem->free(data->m_last->buff.base, data->m_last->buff.len);
+            delete data->m_last;
         }
         else if (flags & SLICE__FLAG_CAN_FREE_ONLY_DIV) {
-            delete data->last;
+            delete data->m_last;
         }
 
-        data->first = nullptr;
-        data->last = nullptr;
-        data->size_ = 0;
-        data->rshift_ = 0;
-        data->shift_ = 0;
-        data->count--;
+        data->m_first = nullptr;
+        data->m_last = nullptr;
+        data->m_size = 0;
+        data->m_rshift = 0;
+        data->m_shift = 0;
+        data->m_count--;
     }
 
     return manapi::status_ok();
 }
 
 static void slice_remove_rshift (manapi::slice_data_t *data) {
-    if (!data->last) return;
+    if (!data->m_last) return;
     auto z = manapi::async::memory_fabric();
-    std::size_t new_size = static_cast<std::size_t>(data->last->buff.len) - data->rshift_;
-    if (z->mem_type(static_cast<std::size_t>(data->last->buff.len)) == z->mem_type(new_size)) {
-        data->size_ -= data->rshift_;
-        data->last->buff.len = static_cast<decltype(data->last->buff.len)> (new_size);
+    std::size_t new_size = static_cast<std::size_t>(data->m_last->buff.len) - data->m_rshift;
+    if (z->mem_type(static_cast<std::size_t>(data->m_last->buff.len)) == z->mem_type(new_size)) {
+        data->m_size -= data->m_rshift;
+        data->m_last->buff.len = static_cast<decltype(data->m_last->buff.len)> (new_size);
     }
     else {
         if (new_size) {
             auto bf = manapi::async::memory_fabric()->buffer(new_size).unwrap();
-            ::memcpy(bf.data(), data->last->buff.base, static_cast<std::size_t>(data->last->buff.len) - data->rshift_);
+            ::memcpy(bf.data(), data->m_last->buff.base, static_cast<std::size_t>(data->m_last->buff.len) - data->m_rshift);
 
-            data->size_ -= static_cast<std::size_t>(data->last->buff.len);
-            manapi::async::memory_fabric()->free(data->last->buff.base, data->last->buff.len);
+            data->m_size -= static_cast<std::size_t>(data->m_last->buff.len);
+            manapi::async::memory_fabric()->free(data->m_last->buff.base, data->m_last->buff.len);
 
-            data->size_ += new_size;
+            data->m_size += new_size;
 
-            data->last->buff.len = static_cast<decltype(data->last->buff.len)>(new_size);
-            data->last->buff.base = static_cast<char *>(bf.release());
+            data->m_last->buff.len = static_cast<decltype(data->m_last->buff.len)>(new_size);
+            data->m_last->buff.base = static_cast<char *>(bf.release());
         }
         else {
             //if (flags & SLICE__FLAG_CAN_FREE)
-            z->free(data->last->buff.base, static_cast<std::size_t>(data->last->buff.len));
+            z->free(data->m_last->buff.base, static_cast<std::size_t>(data->m_last->buff.len));
 
-            data->last->buff.base = nullptr;
-            data->last->buff.len = 0;
+            data->m_last->buff.base = nullptr;
+            data->m_last->buff.len = 0;
         }
     }
 
-    data->rshift_ = 0;
+    data->m_rshift = 0;
 }
 
 static void slice_remove_shift (manapi::slice_data_t *data) {
-    if (!data->first) return;
+    if (!data->m_first) return;
     auto z = manapi::async::memory_fabric();
-    std::size_t new_size = static_cast<std::size_t>(data->first->buff.len) - data->shift_;
-    if (z->mem_type(static_cast<std::size_t>(data->first->buff.len)) == z->mem_type(new_size)) {
-        ::memmove(data->first->buff.base, data->first->buff.base + data->shift_, static_cast<std::size_t>(data->first->buff.len) - data->shift_);
-        data->size_ -= data->shift_;
-        data->first->buff.len = static_cast<decltype(data->first->buff.len)> (new_size);
+    std::size_t new_size = static_cast<std::size_t>(data->m_first->buff.len) - data->m_shift;
+    if (z->mem_type(static_cast<std::size_t>(data->m_first->buff.len)) == z->mem_type(new_size)) {
+        ::memmove(data->m_first->buff.base, data->m_first->buff.base + data->m_shift, static_cast<std::size_t>(data->m_first->buff.len) - data->m_shift);
+        data->m_size -= data->m_shift;
+        data->m_first->buff.len = static_cast<decltype(data->m_first->buff.len)> (new_size);
     }
     else {
         if (new_size) {
             auto bf = manapi::async::memory_fabric()->buffer(new_size).unwrap();
-            ::memcpy(bf.data(), data->first->buff.base + data->shift_, static_cast<std::size_t>(data->first->buff.len) - data->shift_);
-            data->size_ -= static_cast<std::size_t>(data->first->buff.len);
-            manapi::async::memory_fabric()->free(data->first->buff.base, data->first->buff.len);
+            ::memcpy(bf.data(), data->m_first->buff.base + data->m_shift, static_cast<std::size_t>(data->m_first->buff.len) - data->m_shift);
+            data->m_size -= static_cast<std::size_t>(data->m_first->buff.len);
+            manapi::async::memory_fabric()->free(data->m_first->buff.base, data->m_first->buff.len);
 
-            data->size_ += new_size;
+            data->m_size += new_size;
 
-            data->first->buff.len = static_cast<decltype(data->first->buff.len)>(new_size);
-            data->first->buff.base = static_cast<char *>(bf.release());
+            data->m_first->buff.len = static_cast<decltype(data->m_first->buff.len)>(new_size);
+            data->m_first->buff.base = static_cast<char *>(bf.release());
         }
         else {
             //if (flags & SLICE__FLAG_CAN_FREE)
-            z->free(data->first->buff.base, static_cast<std::size_t>(data->first->buff.len));
+            z->free(data->m_first->buff.base, static_cast<std::size_t>(data->m_first->buff.len));
 
-            data->first->buff.base = nullptr;
-            data->first->buff.len = 0;
+            data->m_first->buff.base = nullptr;
+            data->m_first->buff.len = 0;
         }
     }
 
-    data->shift_ = 0;
+    data->m_shift = 0;
 }
 
 static manapi::status_or<manapi::slice_base> slice_subslice (const manapi::slice_data_t *data, std::size_t pos, std::size_t size, manapi::slice_part_t **lastfirst) {
-    pos += data->shift_;
-    auto const size_ = data->size_ - data->rshift_;
+    pos += data->m_shift;
+    auto const size_ = data->m_size - data->m_rshift;
     manapi::slice_part_t *lastfirst1;
 
     if (!size)
         return manapi::slice_base(nullptr, nullptr, 0, 0, 0, 0);
 
-    if (!data->last)
+    if (!data->m_last)
         return manapi::status_out_of_range("shift and size is too large");
 
-    if (pos == data->shift_ && size == size_) {
-        return manapi::slice_base (data->first, data->last, data->count, data->shift_, data->rshift_, data->size_ - data->shift_ - data->rshift_);
+    if (pos == data->m_shift && size == size_) {
+        return manapi::slice_base (data->m_first, data->m_last, data->m_count, data->m_shift, data->m_rshift, data->m_size - data->m_shift - data->m_rshift);
     }
 
     if (pos + size > size_) {
@@ -238,8 +238,8 @@ static manapi::status_or<manapi::slice_base> slice_subslice (const manapi::slice
     auto tmp_pos = pos;
     uint32_t cnt = 0;
     lastfirst1 = nullptr;
-    auto current = data->first;
-    while (data->last->next != current
+    auto current = data->m_first;
+    while (data->m_last->next != current
         && current->buff.len <= pos) {
         pos -= current->buff.len;
         lastfirst1 = current;
@@ -247,12 +247,12 @@ static manapi::status_or<manapi::slice_base> slice_subslice (const manapi::slice
         cnt++;
     }
 
-    if (current == data->last->next)
+    if (current == data->m_last->next)
         return manapi::slice_base{nullptr, nullptr, 0, 0, 0, 0};
 
-    if (tmp_pos + size >= data->size_ - static_cast<std::size_t>(data->last->buff.len)) {
-        auto const rshift = data->size_ - tmp_pos - size;
-        auto z = manapi::slice_base (current, data->last, data->count - cnt, pos, rshift, data->size_ - tmp_pos + pos - rshift - pos);
+    if (tmp_pos + size >= data->m_size - static_cast<std::size_t>(data->m_last->buff.len)) {
+        auto const rshift = data->m_size - tmp_pos - size;
+        auto z = manapi::slice_base (current, data->m_last, data->m_count - cnt, pos, rshift, data->m_size - tmp_pos + pos - rshift - pos);
         if (lastfirst) *lastfirst = lastfirst1;
         return std::move(z);
     }
@@ -261,14 +261,14 @@ static manapi::status_or<manapi::slice_base> slice_subslice (const manapi::slice
     size += pos;
     auto scurrent = current;
 
-    while (data->last->next != scurrent
+    while (data->m_last->next != scurrent
         && scurrent->buff.len < size) {
         cnt++;
         size -= scurrent->buff.len;
 
         scurrent=scurrent->next;
     }
-    if (data->last->next == scurrent)
+    if (data->m_last->next == scurrent)
         return manapi::status_out_of_range("pos and size too large");
 
     std::size_t rshift;
@@ -288,51 +288,51 @@ static manapi::status_or<manapi::slice_base> slice_subslice (const manapi::slice
 }
 
 manapi::slice_base::slice_base(std::unique_ptr<slice_part_t, slice_part_deleter> buffs, slice_part_t*last, uint32_t nbuff) {
-    this->last = last;
-    this->size_ = summary_size_buffs(buffs.get(), last);
-    this->first = buffs.release();
-    this->count = nbuff;
-    this->rshift_ = 0;
-    this->shift_ = 0;
+    this->m_last = last;
+    this->m_size = summary_size_buffs(buffs.get(), last);
+    this->m_first = buffs.release();
+    this->m_count = nbuff;
+    this->m_rshift = 0;
+    this->m_shift = 0;
 }
 
 manapi::slice_base::slice_base(std::unique_ptr<slice_part_t, slice_part_deleter> buffs, slice_part_t*last, uint32_t nbuff,
     std::size_t rshift) {
-    this->last = last;
-    this->rshift_ = rshift;
-    this->size_ = summary_size_buffs(buffs.get(), last);
-    this->first = buffs.release();
-    this->count = nbuff;
-    this->shift_ = 0;
+    this->m_last = last;
+    this->m_rshift = rshift;
+    this->m_size = summary_size_buffs(buffs.get(), last);
+    this->m_first = buffs.release();
+    this->m_count = nbuff;
+    this->m_shift = 0;
 }
 
 manapi::slice_base::slice_base(std::unique_ptr<slice_part_t, slice_part_deleter> buffs, slice_part_t*last, uint32_t nbuff, std::size_t shift, std::size_t rshift, std::size_t size) {
-    this->last = last;
-    this->rshift_ = rshift;
-    // this->size_ = summary_size_buffs(buffs, &this->last);
-    this->size_ = size + shift + rshift;
-    this->first = buffs.release();
-    this->count = nbuff;
-    this->shift_ = 0;
+    this->m_last = last;
+    this->m_rshift = rshift;
+    // this->m_size = summary_size_buffs(buffs, &this->m_last);
+    this->m_size = size + shift + rshift;
+    this->m_first = buffs.release();
+    this->m_count = nbuff;
+    this->m_shift = 0;
 
     assert(this->size() == size);
 }
 
 manapi::slice_base::slice_base(slice_part_t *first, slice_part_t *last, uint32_t count, std::size_t shift, std::size_t rshift, std::size_t size) {
-    this->last = last;
-    this->first = first;
-    this->count = count;
-    // this->size_ = summary_size_buffs (first, last);
-    this->size_ = size + shift + rshift;
-    this->shift_ = shift;
-    this->rshift_ = rshift;
+    this->m_last = last;
+    this->m_first = first;
+    this->m_count = count;
+    // this->m_size = summary_size_buffs (first, last);
+    this->m_size = size + shift + rshift;
+    this->m_shift = shift;
+    this->m_rshift = rshift;
 
     assert(this->size() == size);
 }
 
 manapi::slice_iterator::slice_iterator(slice_part_t *part, slice_base *base) {
-    this->part = part;
-    this->base_ = base;
+    this->m_part = part;
+    this->m_base = base;
 }
 
 manapi::slice_iterator::slice_iterator(const slice_iterator &n) = default;
@@ -342,12 +342,12 @@ manapi::slice_iterator & manapi::slice_iterator::operator=(const slice_iterator 
 manapi::slice_iterator::~slice_iterator() = default;
 
 manapi::slice_iterator & manapi::slice_iterator::operator++() {
-    this->part = this->part->next;
+    this->m_part = this->m_part->next;
     return *this;
 }
 
 manapi::slice_iterator & manapi::slice_iterator::operator++(int) {
-    this->part = this->part->next;
+    this->m_part = this->m_part->next;
     return *this;
 }
 
@@ -356,32 +356,32 @@ std::string_view manapi::slice_iterator::operator*() {
 }
 
 bool manapi::slice_iterator::operator==(const slice_iterator &n) const {
-    return this->part == n.part;
+    return this->m_part == n.m_part;
 }
 
 void * manapi::slice_iterator::buffer() {
-    if (this->base_->slices_begin() == this->part)
-        return this->part->buff.base + this->base_->shift();
+    if (this->m_base->slices_begin() == this->m_part)
+        return this->m_part->buff.base + this->m_base->shift();
 
-    return this->part->buff.base;
+    return this->m_part->buff.base;
 }
 
 std::size_t manapi::slice_iterator::size() const {
-    std::size_t s = this->part->buff.len;
-    if (this->base_->slices_begin() == this->part)
-        s -= this->base_->shift();
+    std::size_t s = this->m_part->buff.len;
+    if (this->m_base->slices_begin() == this->m_part)
+        s -= this->m_base->shift();
     if (this->is_last())
-        s -= this->base_->rshift();
+        s -= this->m_base->rshift();
     return s;
 }
 
 bool manapi::slice_iterator::is_last() const {
-    return this->base_->slices_end() == this->part->next;
+    return this->m_base->slices_end() == this->m_part->next;
 }
 
 manapi::slice_const_iterator::slice_const_iterator(slice_part_t *part, slice_base const *base) {
-    this->part = part;
-    this->base_ = base;
+    this->m_part = part;
+    this->m_base = base;
 }
 
 manapi::slice_const_iterator::slice_const_iterator(const slice_const_iterator &n) = default;
@@ -395,37 +395,37 @@ std::string_view manapi::slice_const_iterator::operator*() {
 }
 
 manapi::slice_const_iterator & manapi::slice_const_iterator::operator++() {
-    this->part = this->part->next;
+    this->m_part = this->m_part->next;
     return *this;
 }
 
 manapi::slice_const_iterator & manapi::slice_const_iterator::operator++(int) {
-    this->part = this->part->next;
+    this->m_part = this->m_part->next;
     return *this;
 }
 
 bool manapi::slice_const_iterator::operator==(const slice_const_iterator &n) const {
-    return this->part == n.part;
+    return this->m_part == n.m_part;
 }
 
 const void * manapi::slice_const_iterator::buffer() {
-    if (this->base_->slices_begin() == this->part)
-        return this->part->buff.base + this->base_->shift();
+    if (this->m_base->slices_begin() == this->m_part)
+        return this->m_part->buff.base + this->m_base->shift();
 
-    return this->part->buff.base;
+    return this->m_part->buff.base;
 }
 
 std::size_t manapi::slice_const_iterator::size() const {
-    std::size_t s = this->part->buff.len;
-    if (this->base_->slices_begin() == this->part)
-        s -= this->base_->shift();
+    std::size_t s = this->m_part->buff.len;
+    if (this->m_base->slices_begin() == this->m_part)
+        s -= this->m_base->shift();
     if (this->is_last())
-        s -= this->base_->rshift();
+        s -= this->m_base->rshift();
     return s;
 }
 
 bool manapi::slice_const_iterator::is_last() const {
-    return this->base_->slices_end() == this->part->next;
+    return this->m_base->slices_end() == this->m_part->next;
 }
 
 void manapi::slice_base::slice_part_deleter::operator()(slice_part_t *ptr) {
@@ -449,22 +449,22 @@ manapi::status manapi::slice_base::shift_add(std::size_t shift) MANAPIHTTP_NOEXC
     if (this->size() < shift)
         return status_out_of_range("slice: shift is too large");
 
-    if (this->last) {
-        this->shift_ += shift;
-        assert(this->first != this->last->next);
-        while (this->first && this->first != this->last->next
-                && this->first->buff.len <= this->shift_) {
-            this->shift_ -= this->first->buff.len;
-            this->size_ -= this->first->buff.len;
-            //manapi::async::current()->memory_fabric().free(this->first->buff.base, this->first->buff.len);
-            // auto const ptr = this->first;
-            this->first = this->first->next;
-            this->count -= 1;
+    if (this->m_last) {
+        this->m_shift += shift;
+        assert(this->m_first != this->m_last->next);
+        while (this->m_first && this->m_first != this->m_last->next
+                && this->m_first->buff.len <= this->m_shift) {
+            this->m_shift -= this->m_first->buff.len;
+            this->m_size -= this->m_first->buff.len;
+            //manapi::async::current()->memory_fabric()->free(this->m_first->buff.base, this->m_first->buff.len);
+            // auto const ptr = this->m_first;
+            this->m_first = this->m_first->next;
+            this->m_count -= 1;
             // delete ptr;
 
-            if (!this->first || this->first == this->last->next) {
-                this->last = nullptr;
-                this->first = nullptr;
+            if (!this->m_first || this->m_first == this->m_last->next) {
+                this->m_last = nullptr;
+                this->m_first = nullptr;
                 break;
             }
         }
@@ -480,12 +480,12 @@ manapi::status manapi::slice_base::copy_from(const void *buffer, std::size_t shi
     if (shift + size > this->size())
         return status_out_of_range("shift and size is too large");
 
-    assert(!!this->last);
+    assert(!!this->m_last);
 
-    auto current = this->first;
+    auto current = this->m_first;
 
-    shift += this->shift_;
-    while (current && current != this->last->next
+    shift += this->m_shift;
+    while (current && current != this->m_last->next
         && current->buff.len < shift) {
         shift -= current->buff.len;
         current = current->next;
@@ -501,12 +501,12 @@ manapi::status manapi::slice_base::copy_from(const void *buffer, const slice_par
     auto buffer_casted = static_cast<const char *>(buffer);
 
     while (size) {
-        if (current == this->last->next)
+        if (current == this->m_last->next)
             return manapi::status_out_of_range("shift and size is too large");
 
         std::size_t copy;
-        if (current == this->last)
-            copy = std::min(size, current->buff.len - shift - this->rshift_);
+        if (current == this->m_last)
+            copy = std::min(size, current->buff.len - shift - this->m_rshift);
         else
             copy = std::min(size, current->buff.len - shift);
 
@@ -525,23 +525,23 @@ manapi::status manapi::slice_base::copy_to(void *buffer, std::size_t shift, std:
     auto buffer_casted = static_cast<char *>(buffer);
 
     if (size) {
-        if (!this->last)
+        if (!this->m_last)
             return status_out_of_range("shift and size is too large");
 
-        auto current = this->first;
-        shift += this->shift_;
-        while (current != this->last
+        auto current = this->m_first;
+        shift += this->m_shift;
+        while (current != this->m_last
                 && current->buff.len <= shift) {
             shift -= current->buff.len;
             current=current->next;
         }
         while (size) {
-            if (current == this->last->next)
+            if (current == this->m_last->next)
                 return manapi::status_out_of_range("shift and size is too large");
 
             std::size_t copy;
-            if (current == this->last)
-                copy = std::min(size, current->buff.len - shift - this->rshift_);
+            if (current == this->m_last)
+                copy = std::min(size, current->buff.len - shift - this->m_rshift);
             else
                 copy = std::min(size, current->buff.len - shift);
 
@@ -560,14 +560,14 @@ manapi::status manapi::slice_base::copy_from(const slice_base &n, std::size_t sh
     if (!size)
         return status_ok();
 
-    if (!this->last)
+    if (!this->m_last)
         return status_out_of_range("shift and size is too large");
 
-    auto current = this->first,
-         current_n = n.first;
+    auto current = this->m_first,
+         current_n = n.m_first;
 
-    shift += this->shift_;
-    while (current != this->last
+    shift += this->m_shift;
+    while (current != this->m_last
         && current->buff.len <= shift) {
         shift -= current->buff.len;
         current=current->next;
@@ -575,26 +575,26 @@ manapi::status manapi::slice_base::copy_from(const slice_base &n, std::size_t sh
 
     shift_n += n.shift();
 
-    while (current_n != n.last
+    while (current_n != n.m_last
         && current_n->buff.len <= shift_n) {
         shift_n -= current_n->buff.len;
         current_n=current_n->next;
     }
 
     while (size) {
-        if (current == this->last->next
-            || current_n == n.last->next)
+        if (current == this->m_last->next
+            || current_n == n.m_last->next)
             return manapi::status_out_of_range("shift and size is too large");
 
         std::size_t fcopy;
-        if (current->next == this->last->next)
-            fcopy = current->buff.len - shift - this->rshift_;
+        if (current->next == this->m_last->next)
+            fcopy = current->buff.len - shift - this->m_rshift;
         else
             fcopy = current->buff.len - shift;
 
         std::size_t scopy;
-        if (current_n->next == n.last->next)
-            scopy = current_n->buff.len - shift_n - n.rshift_;
+        if (current_n->next == n.m_last->next)
+            scopy = current_n->buff.len - shift_n - n.m_rshift;
         else
             scopy = current_n->buff.len - shift_n;
 
@@ -636,11 +636,11 @@ manapi::status_or<manapi::slice_base> manapi::slice_base::subslice(std::size_t p
 }
 
 std::size_t manapi::slice_base::shift() const {
-    return this->shift_;
+    return this->m_shift;
 }
 
 std::size_t manapi::slice_base::rshift() const {
-    return this->rshift_;
+    return this->m_rshift;
 }
 
 bool manapi::slice_base::empty() const {
@@ -648,38 +648,38 @@ bool manapi::slice_base::empty() const {
 }
 
 const manapi::slice_part_t * manapi::slice_base::slices_begin() const {
-    return this->first;
+    return this->m_first;
 }
 
 const manapi::slice_part_t * manapi::slice_base::slices_end() const {
-    return (this->last) ? (this->last->next) : nullptr;
+    return (this->m_last) ? (this->m_last->next) : nullptr;
 }
 
 const manapi::slice_part_t * manapi::slice_base::slices_rbegin() const {
-    return this->last;
+    return this->m_last;
 }
 
 manapi::slice_iterator manapi::slice_base::begin() {
-    return slice_iterator{this->first, this};
+    return slice_iterator{this->m_first, this};
 }
 
 manapi::slice_iterator manapi::slice_base::end() {
-    return slice_iterator{(this->last) ? (this->last->next) : nullptr, this};
+    return slice_iterator{(this->m_last) ? (this->m_last->next) : nullptr, this};
 }
 
 manapi::slice_const_iterator manapi::slice_base::begin() const {
-    return slice_const_iterator{this->first, this};
+    return slice_const_iterator{this->m_first, this};
 }
 
 manapi::slice_const_iterator manapi::slice_base::end() const {
-    return slice_const_iterator{(this->last) ? (this->last->next) : nullptr, this};
+    return slice_const_iterator{(this->m_last) ? (this->m_last->next) : nullptr, this};
 }
 
 int manapi::slice_base::cmp(const manapi::slice_base &n) const MANAPIHTTP_NOEXCEPT {
     auto size = n.size();
 
-    auto buffptr1 = this->first;
-    auto buffptr2 = n.first;
+    auto buffptr1 = this->m_first;
+    auto buffptr2 = n.m_first;
 
     std::size_t cursor1 = this->shift();
     std::size_t cursor2 = n.shift();
@@ -689,10 +689,10 @@ int manapi::slice_base::cmp(const manapi::slice_base &n) const MANAPIHTTP_NOEXCE
         std::size_t size2 = buffptr2->buff.len;
 
         if (!buffptr1->next)
-            size1 -= this->rshift_;
+            size1 -= this->m_rshift;
 
         if (!buffptr2->next)
-            size2 -= n.rshift_;
+            size2 -= n.m_rshift;
 
         while (size && buffptr1 && buffptr2) {
             auto cmp_size = std::min<std::size_t>(size1 - cursor1,
@@ -714,7 +714,7 @@ int manapi::slice_base::cmp(const manapi::slice_base &n) const MANAPIHTTP_NOEXCE
                 if (buffptr1) {
                     size1 = buffptr1->buff.len;
                     if (!buffptr1->next)
-                        size1 -= this->rshift_;
+                        size1 -= this->m_rshift;
                 }
             }
 
@@ -725,7 +725,7 @@ int manapi::slice_base::cmp(const manapi::slice_base &n) const MANAPIHTTP_NOEXCE
                 if (buffptr2) {
                     size2 = buffptr2->buff.len;
                     if (!buffptr2->next)
-                        size2 -= n.rshift_;
+                        size2 -= n.m_rshift;
                 }
             }
 
@@ -764,11 +764,11 @@ int manapi::slice_base::cmp(const void *data, std::size_t size) const MANAPIHTTP
 
 void manapi::slice_base::slices_buffs(ev::buff_t *buffs, std::size_t cnt, std::size_t *sz) const {
     auto buffsptr = buffs;
-    auto cur = this->first;
+    auto cur = this->m_first;
 
     if (sz) *sz = 0;
 
-    while (this->last && cur && cur != this->last->next && cnt) {
+    while (this->m_last && cur && cur != this->m_last->next && cnt) {
         *buffsptr = cur->buff;
         if (sz) *sz += static_cast<std::size_t>(cur->buff.len);
         buffsptr++;
@@ -777,31 +777,31 @@ void manapi::slice_base::slices_buffs(ev::buff_t *buffs, std::size_t cnt, std::s
     }
 
     if (buffs != buffsptr) {
-        assert(!!this->last);
+        assert(!!this->m_last);
         buffsptr--;
 
-        buffs->base += this->shift_;
-        buffs->len -= static_cast<decltype(buffs->len)>(this->shift_);
-        if (sz) *sz -= this->shift_;
+        buffs->base += this->m_shift;
+        buffs->len -= static_cast<decltype(buffs->len)>(this->m_shift);
+        if (sz) *sz -= this->m_shift;
 
-        if (cur == this->last->next) {
-            if (sz) *sz -= this->rshift_;
-            buffsptr->len -= static_cast<decltype(buffsptr->len)>(this->rshift_);
+        if (cur == this->m_last->next) {
+            if (sz) *sz -= this->m_rshift;
+            buffsptr->len -= static_cast<decltype(buffsptr->len)>(this->m_rshift);
         }
     }
 }
 
 std::unique_ptr<manapi::ev::buff_t, manapi::ev::buffer_deleter> manapi::slice_base::slices_buffs(std::size_t max_cnt, std::size_t *cnt, std::size_t *sz) const {
     std::unique_ptr<manapi::ev::buff_t, manapi::ev::buffer_deleter> buffs;
-    auto buffs_cnt = std::min<std::size_t>(this->count, max_cnt);
+    auto buffs_cnt = std::min<std::size_t>(this->m_count, max_cnt);
     buffs.reset(new ev::buff_t[buffs_cnt]);
     if (cnt) *cnt = buffs_cnt;
     auto buffsptr = buffs.get();
-    auto cur = this->first;
+    auto cur = this->m_first;
 
     if (sz) *sz = 0;
 
-    while (this->last && cur && cur != this->last->next && max_cnt) {
+    while (this->m_last && cur && cur != this->m_last->next && max_cnt) {
         *buffsptr = cur->buff;
         if (sz) *sz += static_cast<std::size_t>(cur->buff.len);
         buffsptr++;
@@ -810,14 +810,14 @@ std::unique_ptr<manapi::ev::buff_t, manapi::ev::buffer_deleter> manapi::slice_ba
     }
 
     if (buffs.get() != buffsptr) {
-        assert(!!this->last);
+        assert(!!this->m_last);
         buffsptr--;
-        buffs->base += this->shift_;
-        if (sz) *sz -= this->shift_;
-        buffs->len -= static_cast<decltype(buffs->len)>(this->shift_);
-        if (cur == this->last->next) {
-            if (sz) *sz -= this->rshift_;
-            buffsptr->len -= static_cast<decltype(buffsptr->len)>(this->rshift_);
+        buffs->base += this->m_shift;
+        if (sz) *sz -= this->m_shift;
+        buffs->len -= static_cast<decltype(buffs->len)>(this->m_shift);
+        if (cur == this->m_last->next) {
+            if (sz) *sz -= this->m_rshift;
+            buffsptr->len -= static_cast<decltype(buffsptr->len)>(this->m_rshift);
         }
     }
 
@@ -825,11 +825,11 @@ std::unique_ptr<manapi::ev::buff_t, manapi::ev::buffer_deleter> manapi::slice_ba
 }
 
 uint32_t manapi::slice_base::slices_size() const {
-    return this->count;
+    return this->m_count;
 }
 
 std::size_t manapi::slice_base::size() const {
-    return this->size_ - this->shift_ - this->rshift_;
+    return this->m_size - this->m_shift - this->m_rshift;
 }
 
 std::string manapi::slice_base::to_string() const {
@@ -861,47 +861,47 @@ manapi::slice_ref::slice_ref() : slice_base(nullptr, nullptr, 0, 0, 0, 0) {
 }
 
 manapi::slice_ref::slice_ref(const slice_ref &n) : slice_ref() {
-    assert(!n.rshift_);
-    assert(!n.shift_);
+    assert(!n.m_rshift);
+    assert(!n.m_shift);
 
     for (auto it = n.slices_begin(); it != n.slices_end(); ++it) {
         auto t = std::make_unique<slice_part_t>();
         t->buff = it->buff;
-        if (this->last) {
-            this->last->next = t.release();
-            this->last = this->last->next;
+        if (this->m_last) {
+            this->m_last->next = t.release();
+            this->m_last = this->m_last->next;
         }
         else {
-            this->first = t.release();
-            this->last = this->first;
+            this->m_first = t.release();
+            this->m_last = this->m_first;
         }
     }
 
-    this->count = n.count;
-    this->size_ = n.size_;
+    this->m_count = n.m_count;
+    this->m_size = n.m_size;
 }
 
 manapi::slice_ref & manapi::slice_ref::operator=(const slice_ref &n) {
     this->clear();
 
-    assert(!n.rshift_);
-    assert(!n.shift_);
+    assert(!n.m_rshift);
+    assert(!n.m_shift);
 
     for (auto it = n.slices_begin(); it != n.slices_end(); ++it) {
         auto t = std::make_unique<slice_part_t>();
         t->buff = it->buff;
-        if (this->last) {
-            this->last->next = t.release();
-            this->last = this->last->next;
+        if (this->m_last) {
+            this->m_last->next = t.release();
+            this->m_last = this->m_last->next;
         }
         else {
-            this->first = t.release();
-            this->last = this->first;
+            this->m_first = t.release();
+            this->m_last = this->m_first;
         }
     }
 
-    this->count = n.count;
-    this->size_ = n.size_;
+    this->m_count = n.m_count;
+    this->m_size = n.m_size;
     return *this;
 }
 
@@ -914,21 +914,21 @@ manapi::slice_ref::~slice_ref() {
 }
 
 manapi::status manapi::slice_ref::push_back(const void *buffer, std::size_t size) {
-    assert(!this->rshift_);
+    assert(!this->m_rshift);
     auto t = std::make_unique<slice_part_t>();
     t->buff.base = (char*)(buffer);
     t->buff.len = static_cast<decltype(t->buff.len)>(size);
-    this->size_ += size;
-    if (this->last) {
-        this->last->next = t.release();
-        this->last = this->last->next;
+    this->m_size += size;
+    if (this->m_last) {
+        this->m_last->next = t.release();
+        this->m_last = this->m_last->next;
     }
     else {
-        assert(!this->first);
-        this->first = t.release();
-        this->last = this->first;
+        assert(!this->m_first);
+        this->m_first = t.release();
+        this->m_last = this->m_first;
     }
-    this->count++;
+    this->m_count++;
     return status_ok();
 }
 
@@ -937,18 +937,18 @@ manapi::status manapi::slice_ref::shift_add(std::size_t shift) MANAPIHTTP_NOEXCE
 }
 
 void manapi::slice_ref::clear() MANAPIHTTP_NOEXCEPT {
-    auto cur = this->first;
-    if (this->last) {
-        while (cur && cur != this->last->next) {
+    auto cur = this->m_first;
+    if (this->m_last) {
+        while (cur && cur != this->m_last->next) {
             delete std::exchange(cur, cur->next);
         }
     }
 
-    this->first = nullptr;
-    this->last = nullptr;
-    this->size_ = 0;
-    this->shift_ = 0;
-    this->count = 0;
+    this->m_first = nullptr;
+    this->m_last = nullptr;
+    this->m_size = 0;
+    this->m_shift = 0;
+    this->m_count = 0;
 }
 
 
@@ -956,7 +956,7 @@ manapi::slice::slice() : slice_base(nullptr, nullptr, 0, 0, 0, 0) {
 }
 
 manapi::status_or<manapi::slice> manapi::slice::create(std::size_t n) MANAPIHTTP_NOEXCEPT {
-    return manapi::async::current()->memory_fabric().slice(n);
+    return manapi::async::current()->memory_fabric()->slice(n);
 }
 
 manapi::slice::slice(std::unique_ptr<slice_part_t, slice_part_deleter> buffs, slice_part_t*last, uint32_t nbuff)
@@ -993,37 +993,37 @@ manapi::slice::slice(const char *buffer, std::size_t sz) : slice() {
 // }
 
 manapi::slice::slice(slice &&n) MANAPIHTTP_NOEXCEPT : slice() {
-    this->first = n.first;
-    this->last = n.last;
-    this->count = n.count;
-    this->rshift_ = n.rshift_;
-    this->size_ = n.size_;
-    this->shift_ = n.shift_;
+    this->m_first = n.m_first;
+    this->m_last = n.m_last;
+    this->m_count = n.m_count;
+    this->m_rshift = n.m_rshift;
+    this->m_size = n.m_size;
+    this->m_shift = n.m_shift;
 
-    n.size_ = 0;
-    n.shift_ = 0;
-    n.rshift_ = 0;
-    n.count = 0;
-    n.first = nullptr;
-    n.last = nullptr;
+    n.m_size = 0;
+    n.m_shift = 0;
+    n.m_rshift = 0;
+    n.m_count = 0;
+    n.m_first = nullptr;
+    n.m_last = nullptr;
 }
 
 manapi::slice & manapi::slice::operator=(slice &&n) MANAPIHTTP_NOEXCEPT {
     this->clear();
 
-    this->first = n.first;
-    this->last = n.last;
-    this->count = n.count;
-    this->rshift_ = n.rshift_;
-    this->shift_ = n.shift_;
-    this->size_ = n.size_;
+    this->m_first = n.m_first;
+    this->m_last = n.m_last;
+    this->m_count = n.m_count;
+    this->m_rshift = n.m_rshift;
+    this->m_shift = n.m_shift;
+    this->m_size = n.m_size;
 
-    n.size_ = 0;
-    n.shift_ = 0;
-    n.rshift_ = 0;
-    n.count = 0;
-    n.first = nullptr;
-    n.last = nullptr;
+    n.m_size = 0;
+    n.m_shift = 0;
+    n.m_rshift = 0;
+    n.m_count = 0;
+    n.m_first = nullptr;
+    n.m_last = nullptr;
     return *this;
 }
 
@@ -1044,33 +1044,33 @@ manapi::status manapi::slice::resize(std::size_t size) MANAPIHTTP_NOEXCEPT {
     else {
         size -= cur;
 
-        auto rhs = std::min<size_t>(this->rshift_, size);
-        const auto prev_rshift = this->rshift_;
-        this->rshift_ -= rhs;
+        auto rhs = std::min<size_t>(this->m_rshift, size);
+        const auto prev_rshift = this->m_rshift;
+        this->m_rshift -= rhs;
         size -= rhs;
 
         if (size) {
-            if (this->last && this->last->buff.len < manapi::object_pool::area_size()) {
-                auto sz = static_cast<std::size_t>(this->last->buff.len) + size;
+            if (this->m_last && this->m_last->buff.len < manapi::object_pool::area_size()) {
+                auto sz = static_cast<std::size_t>(this->m_last->buff.len) + size;
 
                 auto bf = manapi::async::memory_fabric()->buffer(std::max(sz, manapi::object_pool::area_size())).unwrap();
 
                 if (bf.size() >= sz) {
-                    this->rshift_ = bf.size() - sz;
+                    this->m_rshift = bf.size() - sz;
                     sz = 0;
                 }
                 else {
                     sz -= bf.size();
                 }
 
-                ::memcpy(bf.data(), this->last->buff.base, static_cast<std::size_t>(this->last->buff.len) - prev_rshift);
-                this->size_ -= static_cast<std::size_t>(this->last->buff.len);
-                manapi::async::memory_fabric()->free(this->last->buff.base, this->last->buff.len);
+                ::memcpy(bf.data(), this->m_last->buff.base, static_cast<std::size_t>(this->m_last->buff.len) - prev_rshift);
+                this->m_size -= static_cast<std::size_t>(this->m_last->buff.len);
+                manapi::async::memory_fabric()->free(this->m_last->buff.base, this->m_last->buff.len);
 
-                this->size_ += bf.size();
-                
-                this->last->buff.len = static_cast<decltype(this->last->buff.len)>(bf.size());
-                this->last->buff.base = static_cast<char *>(bf.release());
+                this->m_size += bf.size();
+
+                this->m_last->buff.len = static_cast<decltype(this->m_last->buff.len)>(bf.size());
+                this->m_last->buff.base = static_cast<char *>(bf.release());
 
                 if (sz) {
                     auto slice = manapi::async::memory_fabric()->slice(sz);
@@ -1096,41 +1096,37 @@ manapi::status manapi::slice::push_back(bytebuffer buffer) MANAPIHTTP_NOEXCEPT {
     if (buffer.empty())
         return status_ok();
 
-    if (buffer.flags() & bytebuffer::BYTEBUFFER_FLAG_OBJECT_POOL) {
-        std::unique_ptr<slice_part_t> t (new (std::nothrow) slice_part_t{});
-        if (!t)
-            return status_resource_exhausted();
+    std::unique_ptr<slice_part_t> t (new (std::nothrow) slice_part_t{});
+    if (!t)
+        return status_resource_exhausted();
 
-        ::slice_remove_rshift(this);
+    ::slice_remove_rshift(this);
 
-        auto const shift = buffer.shift();
+    auto const shift = buffer.shift();
 
-        t->buff.len = static_cast<decltype(t->buff.len)>(buffer.realsize());
-        this->size_ += buffer.realsize();
-        assert(!this->rshift_);
-        this->rshift_ = buffer.realsize() - buffer.size() - buffer.shift();
-        t->buff.base = static_cast<char*>(buffer.release());
+    t->buff.len = static_cast<decltype(t->buff.len)>(buffer.realsize());
+    this->m_size += buffer.realsize();
+    assert(!this->m_rshift);
+    this->m_rshift = buffer.realsize() - buffer.size() - buffer.shift();
+    t->buff.base = static_cast<char*>(buffer.release());
 
-        if (shift)
-            ::memmove(t->buff.base, t->buff.base + shift, t->buff.len - shift);
+    if (shift)
+        ::memmove(t->buff.base, t->buff.base + shift, t->buff.len - shift);
 
-        if (this->last) {
-            this->last->next = t.release();
-            this->last = this->last->next;
-        }
-        else {
-            assert(!this->first);
-            this->first = t.release();
-            this->last = this->first;
-        }
-
-        this->count++;
-
-
-        return status_ok();
+    if (this->m_last) {
+        this->m_last->next = t.release();
+        this->m_last = this->m_last->next;
+    }
+    else {
+        assert(!this->m_first);
+        this->m_first = t.release();
+        this->m_last = this->m_first;
     }
 
-    return this->push_back(buffer.data(), buffer.size());
+    this->m_count++;
+
+
+    return status_ok();
 }
 
 manapi::status manapi::slice::push_back(slice &&s) MANAPIHTTP_NOEXCEPT {
@@ -1139,29 +1135,29 @@ manapi::status manapi::slice::push_back(slice &&s) MANAPIHTTP_NOEXCEPT {
         ::slice_remove_shift(&s);
         ::slice_remove_rshift(this);
 
-        assert (!this->rshift_ && !s.shift_);
+        assert (!this->m_rshift && !s.m_shift);
 
-        this->rshift_ = s.rshift_;
-        if (this->last) {
-            this->last->next = s.first;
-            this->last = s.last;
+        this->m_rshift = s.m_rshift;
+        if (this->m_last) {
+            this->m_last->next = s.m_first;
+            this->m_last = s.m_last;
         }
         else {
-            this->last = s.last;
+            this->m_last = s.m_last;
         }
-        if (!this->first) {
-            this->first = s.first;
-            this->shift_ = 0;
+        if (!this->m_first) {
+            this->m_first = s.m_first;
+            this->m_shift = 0;
         }
-        this->count += s.count;
-        this->size_ += s.size_;
+        this->m_count += s.m_count;
+        this->m_size += s.m_size;
 
-        s.first = nullptr;
-        s.last = nullptr;
-        s.count = 0;
-        s.size_ = 0;
-        s.rshift_ = 0;
-        s.shift_ = 0;
+        s.m_first = nullptr;
+        s.m_last = nullptr;
+        s.m_count = 0;
+        s.m_size = 0;
+        s.m_rshift = 0;
+        s.m_shift = 0;
 
 //             else {
 //                 auto const datasize = s.size();
@@ -1175,22 +1171,22 @@ manapi::status manapi::slice::push_back(slice &&s) MANAPIHTTP_NOEXCEPT {
 //                 if (!res)
 //                     return std::move(res);
 //
-//                 if (i != datasize && this->rshift_) {
-//                     assert(this->last->buff.len >= this->rshift_);
-//                     auto rhs = std::min<std::size_t>(this->rshift_, datasize - i);
-//                     memcpy (this->last->buff.base + this->last->buff.len - this->rshift_,
+//                 if (i != datasize && this->m_rshift) {
+//                     assert(this->m_last->buff.len >= this->m_rshift);
+//                     auto rhs = std::min<std::size_t>(this->m_rshift, datasize - i);
+//                     memcpy (this->m_last->buff.base + this->m_last->buff.len - this->m_rshift,
 //                         data + i, rhs);
 //
-//                     this->rshift_ -= rhs;
+//                     this->m_rshift -= rhs;
 //                     i += rhs;
 //                 }
 //
 //                 std::size_t s_shift_used = 0;
 //
 //                 if (i != datasize) {
-//                     assert(s.first->buff.len >= s.shift_);
-//                     s_shift_used = std::min<std::size_t>(s.shift_, datasize - i);
-//                     memcpy (s.first->buff.base + s.first->buff.len - s_shift_used,
+//                     assert(s.m_first->buff.len >= s.m_shift);
+//                     s_shift_used = std::min<std::size_t>(s.m_shift, datasize - i);
+//                     memcpy (s.m_first->buff.base + s.m_first->buff.len - s_shift_used,
 //                         data + i, s_shift_used);
 //
 //                     auto err = ::slice_rshift_add(&s, s_shift_used, SLICE__FLAG_CAN_FREE);
@@ -1201,12 +1197,12 @@ manapi::status manapi::slice::push_back(slice &&s) MANAPIHTTP_NOEXCEPT {
 //                 }
 //
 //                 if (i != datasize) {
-//                     assert(!s.shift_ && !this->rshift_);
+//                     assert(!s.m_shift && !this->m_rshift);
 //                     auto rhs = s.copy_from(data + i, 0, datasize - i);
 //                     assert(rhs.ok());
 //                 }
 //
-//                 s.shift_ -= s_shift_used;
+//                 s.m_shift -= s_shift_used;
 //
 //                 return this->push_back(std::move(s));
 //             }
@@ -1220,21 +1216,21 @@ manapi::status manapi::slice::push_back(const void *buffer, std::size_t size) MA
         if (!size)
             return status_ok();
 
-        auto last = this->last;
+        auto last = this->m_last;
         std::size_t shift;
-        if (last) shift = static_cast<std::size_t>(last->buff.len) - this->rshift_;
+        if (last) shift = static_cast<std::size_t>(last->buff.len) - this->m_rshift;
         this->resize(size + this->size()).unwrap();
         if (!last) {
             shift = 0;
-            last = this->first;
+            last = this->m_first;
         }
         this->copy_from(buffer, last, shift, size).unwrap();
 
-        // if (this->rshift_) {
-        //     auto const copy = std::min<std::size_t>(size, this->rshift_);
-        //     memcpy (this->last->buff.base + this->last->buff.len - this->rshift_, buffer, copy);
+        // if (this->m_rshift) {
+        //     auto const copy = std::min<std::size_t>(size, this->m_rshift);
+        //     memcpy (this->m_last->buff.base + this->m_last->buff.len - this->m_rshift, buffer, copy);
         //
-        //     this->rshift_ -= copy;
+        //     this->m_rshift -= copy;
         //     size -= copy;
         //
         //     buffer = static_cast<const char *>(buffer) + copy;
@@ -1243,7 +1239,7 @@ manapi::status manapi::slice::push_back(const void *buffer, std::size_t size) MA
         //         return status_ok();
         // }
         //
-        // auto slice_res = manapi::async::current()->memory_fabric().slice(size);
+        // auto slice_res = manapi::async::current()->memory_fabric()->slice(size);
         // if (!slice_res.ok())
         //     return slice_res.err();
         //
@@ -1253,21 +1249,21 @@ manapi::status manapi::slice::push_back(const void *buffer, std::size_t size) MA
         // if (!res.ok())
         //     return res;
         //
-        // assert(!this->rshift_ && !slice.shift_);
+        // assert(!this->m_rshift && !slice.m_shift);
         //
-        // if (this->last) {
-        //     this->rshift_ = slice.rshift_;
-        //     this->last->next = slice.first;
-        //     this->last = slice.last;
-        //     this->count += slice.count;
-        //     this->size_ += slice.size_;
+        // if (this->m_last) {
+        //     this->m_rshift = slice.m_rshift;
+        //     this->m_last->next = slice.m_first;
+        //     this->m_last = slice.m_last;
+        //     this->m_count += slice.m_count;
+        //     this->m_size += slice.m_size;
         //
-        //     slice.first = nullptr;
-        //     slice.last = nullptr;
-        //     slice.count = 0;
-        //     slice.size_ = 0;
-        //     slice.rshift_ = 0;
-        //     slice.shift_ = 0;
+        //     slice.m_first = nullptr;
+        //     slice.m_last = nullptr;
+        //     slice.m_count = 0;
+        //     slice.m_size = 0;
+        //     slice.m_rshift = 0;
+        //     slice.m_shift = 0;
         // }
         // else {
         //     *this = std::move(slice);
@@ -1300,93 +1296,93 @@ manapi::status_or<manapi::slice> manapi::slice::split(std::size_t start, std::si
         manapi::slice_base sv = z.unwrap();
 
         manapi::slice res;
-        res.first = sv.first;
-        res.last = sv.last;
-        res.count = sv.count;
-        res.shift_ = sv.shift_;
-        res.rshift_ = sv.rshift_;
-        res.size_ = sv.size_;
+        res.m_first = sv.m_first;
+        res.m_last = sv.m_last;
+        res.m_count = sv.m_count;
+        res.m_shift = sv.m_shift;
+        res.m_rshift = sv.m_rshift;
+        res.m_size = sv.m_size;
 
-        if (res.first) {
+        if (res.m_first) {
 
-            if (res.shift_ || res.rshift_) {
+            if (res.m_shift || res.m_rshift) {
                 std::size_t cc_shift_sub = 0, cc_rshift_sub = 0;
-                if (res.first == this->first) cc_shift_sub = this->shift_;
-                if (res.last == this->last) cc_rshift_sub = this->rshift_;
-                auto cc = manapi::async::memory_fabric()->slice(res.shift_ + res.rshift_ - cc_shift_sub - cc_rshift_sub).unwrap();
+                if (res.m_first == this->m_first) cc_shift_sub = this->m_shift;
+                if (res.m_last == this->m_last) cc_rshift_sub = this->m_rshift;
+                auto cc = manapi::async::memory_fabric()->slice(res.m_shift + res.m_rshift - cc_shift_sub - cc_rshift_sub).unwrap();
 
                 assert(!cc.shift());
 
-                cc.copy_from(res.first->buff.base + cc_shift_sub, 0, res.shift_ - cc_shift_sub).unwrap();
-                cc.copy_from(res.last->buff.base + static_cast<std::size_t> (res.last->buff.len) - res.rshift_,
-                             res.shift_, res.rshift_ - cc_rshift_sub).unwrap();
+                cc.copy_from(res.m_first->buff.base + cc_shift_sub, 0, res.m_shift - cc_shift_sub).unwrap();
+                cc.copy_from(res.m_last->buff.base + static_cast<std::size_t> (res.m_last->buff.len) - res.m_rshift,
+                             res.m_shift, res.m_rshift - cc_rshift_sub).unwrap();
 
-                this->count -= res.count;
-                this->size_ -= res.size_;
+                this->m_count -= res.m_count;
+                this->m_size -= res.m_size;
 
-                auto last = this->last;
-                auto next = res.last->next;
-                res.last->next = nullptr;
+                auto last = this->m_last;
+                auto next = res.m_last->next;
+                res.m_last->next = nullptr;
 
-                if (last != res.last) {
+                if (last != res.m_last) {
                     ::slice_remove_rshift(&cc);
                 }
 
-                if (this->first == res.first) {
-                    this->first = nullptr;
-                    this->shift_ = 0;
+                if (this->m_first == res.m_first) {
+                    this->m_first = nullptr;
+                    this->m_shift = 0;
                 }
                 else {
                     lastfirst->next = nullptr;
                 }
 
-                auto rshift = this->rshift_;
-                this->rshift_ = 0;
+                auto rshift = this->m_rshift;
+                this->m_rshift = 0;
 
-                if (this->first) {
+                if (this->m_first) {
                     assert(!!lastfirst);
-                    this->last = lastfirst;
+                    this->m_last = lastfirst;
                     this->push_back(std::move(cc)).unwrap();
                 }
                 else {
-                    this->last = nullptr;
+                    this->m_last = nullptr;
                     this->push_back(std::move(cc)).unwrap();
                 }
 
 
 
-                if (last != res.last) {
+                if (last != res.m_last) {
                     assert(next);
-                    this->last->next = next;
-                    this->last = last;
+                    this->m_last->next = next;
+                    this->m_last = last;
 
-                    assert(!this->rshift_);
-                    this->rshift_ = rshift;
+                    assert(!this->m_rshift);
+                    this->m_rshift = rshift;
                 }
                 else {
                     assert(!next);
                 }
 
-                assert(!this->last || static_cast<std::size_t>(this->last->buff.len) >= this->rshift_);
+                assert(!this->m_last || static_cast<std::size_t>(this->m_last->buff.len) >= this->m_rshift);
             }
             else {
 
-                this->count -= res.count;
-                this->size_ -= res.size_;
+                this->m_count -= res.m_count;
+                this->m_size -= res.m_size;
 
-                if (this->first == res.first) {
-                    this->first = res.last->next;
-                    this->shift_ = 0;
+                if (this->m_first == res.m_first) {
+                    this->m_first = res.m_last->next;
+                    this->m_shift = 0;
                 }
                 else {
-                    lastfirst->next = res.last->next;
+                    lastfirst->next = res.m_last->next;
                 }
 
-                res.last->next = nullptr;
+                res.m_last->next = nullptr;
 
-                if (this->last == res.last) {
-                    this->rshift_ = 0;
-                    this->last = lastfirst;
+                if (this->m_last == res.m_last) {
+                    this->m_rshift = 0;
+                    this->m_last = lastfirst;
                 }
             }
         }
@@ -1403,17 +1399,17 @@ manapi::status_or<manapi::slice> manapi::slice::split(std::size_t start, std::si
 }
 
 void manapi::slice::clear() MANAPIHTTP_NOEXCEPT {
-    auto cur = this->first;
+    auto cur = this->m_first;
 
-    while (cur&&cur != this->last->next) {
-        manapi::async::current()->memory_fabric().free(cur->buff.base, cur->buff.len);
+    while (cur&&cur != this->m_last->next) {
+        manapi::async::current()->memory_fabric()->free(cur->buff.base, cur->buff.len);
         delete std::exchange(cur, cur->next);
     }
 
-    this->first = nullptr;
-    this->last = nullptr;
-    this->size_ = 0;
-    this->shift_ = 0;
+    this->m_first = nullptr;
+    this->m_last = nullptr;
+    this->m_size = 0;
+    this->m_shift = 0;
 }
 
 manapi::slice manapi::slice::copy() const {

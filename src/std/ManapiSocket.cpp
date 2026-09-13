@@ -19,21 +19,20 @@
 #endif
 
 
-static manapi::ev::io_cb manapi__pio_ready_mk_(int flags, manapi::socket_t fd,manapi::async::promise_sync<manapi::ev::status_or<int>>::resolve_t resolve, manapi::ctoken cancellation) {
+static manapi::ev::io_cb manapi__pio_ready_mk(int flags, manapi::socket_t fd,manapi::async::promise_sync<manapi::ev::status_or<int>>::resolve_t resolve, manapi::ctoken cancellation) {
     try {
         return [flags, resolve = std::move(resolve), cancellation = std::move(cancellation)]
             (const std::shared_ptr<manapi::ev::io> &w, int status, int revents) mutable
                 -> void {
-            auto resolve_ = std::move(resolve);
             cancellation.disable();
 
             manapi::async::current()->eventloop()->stop_watcher(w);
 
             if (!status && (revents & flags)) {
-                resolve_(revents);
+                resolve(revents);
+            } else {
+                resolve(manapi::ev::status_internal("io ready failed", status));
             }
-
-            resolve_(manapi::ev::status_internal("io ready failed", status));
         };
     }
     catch (std::exception const &) {
@@ -131,7 +130,7 @@ void manapi::async::close_descriptor(socket_t fd) MANAPIHTTP_NOEXCEPT {
 manapi::future<manapi::ev::status_or<int>> manapi::async::custom_ready(int flags, socket_t fd) {
     typedef manapi::async::promise_sync<manapi::ev::status_or<int>> promise;
     co_return co_await promise ([flags, fd] (promise::resolve_t resolve, promise::reject_t reject) -> void {
-        auto cb = manapi__pio_ready_mk_(flags, fd, resolve, nullptr);
+        auto cb = manapi__pio_ready_mk(flags, fd, resolve, nullptr);
         auto wres = async::current()->eventloop()->create_watcher_socket(fd, std::move(cb));
         if (!wres) {
             resolve(wres.err());
@@ -154,7 +153,7 @@ manapi::future<manapi::ev::status_or<int>> manapi::async::custom_ready(int flags
     using promise = promise_sync<manapi::ev::status_or<int>>;
 
     auto res = co_await  promise([flags, fd, cancellation] (promise::resolve_t resolve, promise::reject_t reject) mutable -> void {
-        auto cb = manapi__pio_ready_mk_(flags, fd, resolve, cancellation);
+        auto cb = manapi__pio_ready_mk(flags, fd, resolve, cancellation);
         manapi__pio_ready(fd, flags, std::move(cb), resolve, std::move(cancellation));
     });
 

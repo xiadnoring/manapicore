@@ -18,15 +18,15 @@ namespace manapi {
         TASK_TYPE_HANDLE
     };
 
-    class mthreadpool {
+    class mthread_pool {
     public:
         struct data_t;
 
         typedef std::vector<chain<std::move_only_function<void()>>> tasks_by_thread_t;
 
-        mthreadpool(std::size_t thread_num);
+        mthread_pool(std::size_t thread_num);
 
-        ~mthreadpool();
+        ~mthread_pool();
 
         void resize (std::size_t thread_num);
 
@@ -57,13 +57,13 @@ namespace manapi {
         std::unique_ptr<data_t> m_data;
     };
 
-    class ethreadpool {
+    class ethread_pool {
     public:
         struct data_t;
 
-        ethreadpool ();
+        ethread_pool ();
 
-        ~ethreadpool ();
+        ~ethread_pool ();
 
         MANAPIHTTP_NODISCARD std::size_t tasks_size() const MANAPIHTTP_NOEXCEPT;
 

@@ -9,11 +9,19 @@ namespace manapi {
         template <typename T, typename = void> struct HasRefCnt : std::false_type {};
 
         template <typename T> struct HasRefCnt<T, decltype(void(std::declval<T>().refcnt))> : std::true_type {};
+
+        template <typename T>
+        struct is_atomic : std::false_type {};
+
+        template <typename U>
+        struct is_atomic<std::atomic<U>> : std::true_type {};
     }
 
     template<typename T, std::enable_if_t<reference_impl::HasRefCnt<T>::value, std::nullptr_t> = nullptr>
     class reference {
     public:
+        using is_atomic = reference_impl::is_atomic<decltype(std::declval<T>().refcnt)>;
+
         reference () {
             this->src = nullptr;
         }
@@ -21,7 +29,11 @@ namespace manapi {
         reference (T *n) {
             this->src = n;
             if (n) {
-                ++n->refcnt;
+                if constexpr (is_atomic::value) {
+                    n->refcnt.fetch_add(1);
+                } else {
+                    n->refcnt++;
+                }
             }
         }
 
@@ -37,7 +49,11 @@ namespace manapi {
         reference& operator= (reference &&n) MANAPIHTTP_NOEXCEPT {
             if (this != &n) {
                 if (n.src) {
-                    n.src->refcnt++;
+                    if constexpr (is_atomic::value) {
+                        n.src->refcnt.fetch_add(1);
+                    } else {
+                        n.src->refcnt++;
+                    }
                     this->reset();
                     this->src = n.src;
                     n.reset();
@@ -62,8 +78,14 @@ namespace manapi {
 
         void reset () MANAPIHTTP_NOEXCEPT {
             if (this->src) {
-                if (!--this->src->refcnt) {
-                    delete this->src;
+                if constexpr (is_atomic::value) {
+                    if (this->src->refcnt.fetch_sub(1) == 1) {
+                        delete this->src;
+                    }
+                } else {
+                    if (!--this->src->refcnt) {
+                        delete this->src;
+                    }
                 }
                 this->src = nullptr;
             }
@@ -71,7 +93,11 @@ namespace manapi {
 
         void reset (T *n) MANAPIHTTP_NOEXCEPT {
             if (n) {
-                n->refcnt++;
+                if constexpr (is_atomic::value) {
+                    n->refcnt.fetch_add(1);
+                } else {
+                    n->refcnt++;
+                }
                 this->reset();
                 this->src = n;
             }
@@ -110,7 +136,11 @@ namespace manapi {
 
         manapi::status ref () const MANAPIHTTP_NOEXCEPT {
             if (this->src) {
-                ++this->src->refcnt;
+                if constexpr (is_atomic::value) {
+                    this->src->refcnt.fetch_add(1);
+                } else {
+                    this->src->refcnt++;
+                }
                 return manapi::status_ok();
             }
             return manapi::status_internal("ref:Object doesn't exist");
@@ -118,9 +148,16 @@ namespace manapi {
 
         void unref () const MANAPIHTTP_NOEXCEPT {
             if (this->src) {
-                if (!--this->src->refcnt) {
-                    delete this->src;
-                    this->src = nullptr;
+                if constexpr (is_atomic::value) {
+                    if (this->src->refcnt.fetch_sub(1) == 1) {
+                        delete this->src;
+                        this->src = nullptr;
+                    }
+                } else {
+                    if (!--this->src->refcnt) {
+                        delete this->src;
+                        this->src = nullptr;
+                    }
                 }
             }
         }

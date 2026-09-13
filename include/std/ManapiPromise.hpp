@@ -46,7 +46,7 @@ namespace manapi::async::internal {
             manapi::async::etaskpool()->release_tasks(manapi::TASK_TYPE_HANDLE, 1);
         }
 
-        manapi::async::append_task(handle);
+        manapi::async::etaskpool()->append_task( handle );
     }
 
     template<typename T>
@@ -186,44 +186,44 @@ namespace manapi::async::internal {
         template<typename Async1 = Async>
         requires(std::is_same_v<Async1, std::true_type>)
         promise_base(async_cb cb) {
-            this->data = std::make_shared<data_t>(nullptr, 0, std::optional <T>{}, nullptr);
-            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->data->flags |= PROMISE_FLAG_ASYNC; this->data->cb = obj.release(); }
+            this->m_data = std::make_shared<data_t>(nullptr, 0, std::optional <T>{}, nullptr);
+            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->m_data->flags |= PROMISE_FLAG_ASYNC; this->m_data->cb = obj.release(); }
         }
 
         template<typename Async1 = Async>
         requires(std::is_same_v<Async1, std::false_type>)
         promise_base(sync_cb cb) {
-            this->data = std::make_shared<data_t>(nullptr, 0, std::optional <T>{}, nullptr);
-            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->data->cb = obj.release(); }
+            this->m_data = std::make_shared<data_t>(nullptr, 0, std::optional <T>{}, nullptr);
+            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->m_data->cb = obj.release(); }
         }
 
         template<typename Async1 = Async>
         requires(std::is_same_v<Async1, std::true_type>)
         promise_base(async_resolve_cb cb) {
-            this->data = std::make_shared<data_t>(nullptr, 0, std::optional <T>{}, nullptr);
-            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->data->flags |= PROMISE_FLAG_ASYNC|PROMISE_FLAG_RESOLVE_ONLY; this->data->cb = obj.release(); }
+            this->m_data = std::make_shared<data_t>(nullptr, 0, std::optional <T>{}, nullptr);
+            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->m_data->flags |= PROMISE_FLAG_ASYNC|PROMISE_FLAG_RESOLVE_ONLY; this->m_data->cb = obj.release(); }
         }
 
         template<typename Async1 = Async>
         requires(std::is_same_v<Async1, std::false_type>)
         promise_base(sync_resolve_cb cb) {
-            this->data = std::make_shared<data_t>(nullptr, 0, std::optional <T>{}, nullptr);
-            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->data->flags |= PROMISE_FLAG_RESOLVE_ONLY; this->data->cb = obj.release(); }
+            this->m_data = std::make_shared<data_t>(nullptr, 0, std::optional <T>{}, nullptr);
+            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->m_data->flags |= PROMISE_FLAG_RESOLVE_ONLY; this->m_data->cb = obj.release(); }
         }
 
         ~promise_base() {
-            if (this->data && this->data->flags & PROMISE_FLAG_PREALLOCATED_TASK) {
-                this->data->flags ^= PROMISE_FLAG_PREALLOCATED_TASK;
+            if (this->m_data && this->m_data->flags & PROMISE_FLAG_PREALLOCATED_TASK) {
+                this->m_data->flags ^= PROMISE_FLAG_PREALLOCATED_TASK;
                 manapi::async::etaskpool()->release_tasks(manapi::TASK_TYPE_HANDLE, 1);
             }
         }
 
         T await_resume () {
-            if (this->data->exception) {
-                std::rethrow_exception(std::move(this->data->exception));
+            if (this->m_data->exception) {
+                std::rethrow_exception(std::move(this->m_data->exception));
             }
 
-            return std::move(this->data->value.value());
+            return std::move(this->m_data->value.value());
         }
 
         bool await_ready () {
@@ -234,25 +234,25 @@ namespace manapi::async::internal {
         requires(std::is_base_of_v<promise_base_future, T1>)
         void await_suspend (std::coroutine_handle<T1> handle) {
             try {
-                this->data->handle = handle;
-                this->data->flags |= PROMISE_FLAG_PREALLOCATED_TASK;
+                this->m_data->handle = handle;
+                this->m_data->flags |= PROMISE_FLAG_PREALLOCATED_TASK;
 
                 manapi::async::etaskpool()->reserve_tasks(manapi::TASK_TYPE_HANDLE, 1);
 
-                if (this->data->flags & PROMISE_FLAG_ASYNC /* async */) {
-                    if (this->data->flags & PROMISE_FLAG_RESOLVE_ONLY) {
-                        async::run<void>(static_cast<async_resolve_cb *>(this->data->cb)->operator()(promise_resolve<T>(this->data)),
-                            [data = this->data] (std::exception_ptr e) -> void {
+                if (this->m_data->flags & PROMISE_FLAG_ASYNC /* async */) {
+                    if (this->m_data->flags & PROMISE_FLAG_RESOLVE_ONLY) {
+                        async::run<void>(static_cast<async_resolve_cb *>(this->m_data->cb)->operator()(promise_resolve<T>(this->m_data)),
+                            [data = this->m_data] (std::exception_ptr e) -> void {
                                 if (e) {
                                     call_promise_reject(data, std::move(e));
                                 }
                             });
                     }
                     else {
-                        async::run<void>(static_cast<async_cb *>(this->data->cb)->operator()(
-                            promise_resolve<T>(this->data),
-                            promise_reject<T>(this->data)),
-                            [data = this->data] (std::exception_ptr e) -> void {
+                        async::run<void>(static_cast<async_cb *>(this->m_data->cb)->operator()(
+                            promise_resolve<T>(this->m_data),
+                            promise_reject<T>(this->m_data)),
+                            [data = this->m_data] (std::exception_ptr e) -> void {
                                 if (e) {
                                     call_promise_reject(data, std::move(e));
                                 }
@@ -260,23 +260,23 @@ namespace manapi::async::internal {
                     }
                 }
                 else {
-                    if (this->data->flags & PROMISE_FLAG_RESOLVE_ONLY) {
-                        static_cast<sync_resolve_cb *>(this->data->cb)->operator() (promise_resolve<T>(this->data));
+                    if (this->m_data->flags & PROMISE_FLAG_RESOLVE_ONLY) {
+                        static_cast<sync_resolve_cb *>(this->m_data->cb)->operator() (promise_resolve<T>(this->m_data));
                     }
                     else {
-                        static_cast<sync_cb *>(this->data->cb)->operator() (
-                            promise_resolve<T>(this->data),
-                            promise_reject<T>(this->data));
+                        static_cast<sync_cb *>(this->m_data->cb)->operator() (
+                            promise_resolve<T>(this->m_data),
+                            promise_reject<T>(this->m_data));
                     }
                 }
             }
             catch (std::exception const &e) {
                 manapi_log_error(e.what());
-                call_promise_reject(this->data, std::current_exception());
+                call_promise_reject(this->m_data, std::current_exception());
             }
         }
     private:
-        std::shared_ptr<data_t> data;
+        std::shared_ptr<data_t> m_data;
     };
 
     template<typename Async>
@@ -299,42 +299,42 @@ namespace manapi::async::internal {
         template<typename Async1 = Async>
         requires(std::is_same_v<Async1, std::true_type>)
         promise_base(async_cb cb) {
-            this->data = std::make_shared<data_t>(nullptr, 0, nullptr);
-            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->data->flags |= PROMISE_FLAG_ASYNC; this->data->cb = obj.release(); }
+            this->m_data = std::make_shared<data_t>(nullptr, 0, nullptr);
+            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->m_data->flags |= PROMISE_FLAG_ASYNC; this->m_data->cb = obj.release(); }
         }
 
         template<typename Async1 = Async>
         requires(std::is_same_v<Async1, std::false_type>)
         promise_base(sync_cb cb) {
-            this->data = std::make_shared<data_t>(nullptr, 0, nullptr);
-            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->data->cb = obj.release(); }
+            this->m_data = std::make_shared<data_t>(nullptr, 0, nullptr);
+            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->m_data->cb = obj.release(); }
         }
 
 
         template<typename Async1 = Async>
         requires(std::is_same_v<Async1, std::true_type>)
         promise_base(async_resolve_cb cb) {
-            this->data = std::make_shared<data_t>(nullptr, 0, nullptr);
-            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->data->flags |= PROMISE_FLAG_ASYNC|PROMISE_FLAG_RESOLVE_ONLY; this->data->cb = obj.release(); }
+            this->m_data = std::make_shared<data_t>(nullptr, 0, nullptr);
+            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->m_data->flags |= PROMISE_FLAG_ASYNC|PROMISE_FLAG_RESOLVE_ONLY; this->m_data->cb = obj.release(); }
         }
 
         template<typename Async1 = Async>
         requires(std::is_same_v<Async1, std::false_type>)
         promise_base(sync_resolve_cb cb) {
-            this->data = std::make_shared<data_t>(nullptr, 0, nullptr);
-            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->data->flags |= PROMISE_FLAG_RESOLVE_ONLY; this->data->cb = obj.release(); }
+            this->m_data = std::make_shared<data_t>(nullptr, 0, nullptr);
+            if (cb) { auto obj = std::make_unique<decltype(cb)>(std::move(cb)); this->m_data->flags |= PROMISE_FLAG_RESOLVE_ONLY; this->m_data->cb = obj.release(); }
         }
 
         ~promise_base() {
-            if (this->data && this->data->flags & PROMISE_FLAG_PREALLOCATED_TASK) {
-                this->data->flags ^= PROMISE_FLAG_PREALLOCATED_TASK;
+            if (this->m_data && this->m_data->flags & PROMISE_FLAG_PREALLOCATED_TASK) {
+                this->m_data->flags ^= PROMISE_FLAG_PREALLOCATED_TASK;
                 manapi::async::etaskpool()->release_tasks(manapi::TASK_TYPE_HANDLE, 1);
             }
         }
 
         void await_resume () {
-            if (this->data->exception) {
-                std::rethrow_exception(std::move(this->data->exception));
+            if (this->m_data->exception) {
+                std::rethrow_exception(std::move(this->m_data->exception));
             }
         }
 
@@ -346,26 +346,26 @@ namespace manapi::async::internal {
         requires(std::is_base_of_v<promise_base_future, T1>)
         void await_suspend (std::coroutine_handle<T1> handle) {
             try {
-                this->data->handle = handle;
-                this->data->flags |= PROMISE_FLAG_PREALLOCATED_TASK;
+                this->m_data->handle = handle;
+                this->m_data->flags |= PROMISE_FLAG_PREALLOCATED_TASK;
 
                 manapi::async::etaskpool()->reserve_tasks(manapi::TASK_TYPE_HANDLE, 1);
 
-                if (this->data->flags & PROMISE_FLAG_ASYNC /* async */) {
-                    if (this->data->flags & PROMISE_FLAG_RESOLVE_ONLY) {
-                        async::run<void>(static_cast<async_resolve_cb *>(this->data->cb)->operator()(
-                            promise_resolve<void>(this->data)),
-                        [data = this->data] (std::exception_ptr e) -> void {
+                if (this->m_data->flags & PROMISE_FLAG_ASYNC /* async */) {
+                    if (this->m_data->flags & PROMISE_FLAG_RESOLVE_ONLY) {
+                        async::run<void>(static_cast<async_resolve_cb *>(this->m_data->cb)->operator()(
+                            promise_resolve<void>(this->m_data)),
+                        [data = this->m_data] (std::exception_ptr e) -> void {
                             if (e) {
                                 call_promise_reject(data, std::move(e));
                             }
                         });
                     }
                     else {
-                        async::run<void>(static_cast<async_cb *>(this->data->cb)->operator()(
-                            promise_resolve<void>(this->data),
-                            promise_reject<void>(this->data)),
-                            [data = this->data] (std::exception_ptr e) -> void {
+                        async::run<void>(static_cast<async_cb *>(this->m_data->cb)->operator()(
+                            promise_resolve<void>(this->m_data),
+                            promise_reject<void>(this->m_data)),
+                            [data = this->m_data] (std::exception_ptr e) -> void {
                                 if (e) {
                                     call_promise_reject(data, std::move(e));
                                 }
@@ -373,23 +373,23 @@ namespace manapi::async::internal {
                     }
                 }
                 else {
-                    if (this->data->flags & PROMISE_FLAG_RESOLVE_ONLY) {
-                        static_cast<sync_resolve_cb *>(this->data->cb)->operator() (promise_resolve<>(this->data));
+                    if (this->m_data->flags & PROMISE_FLAG_RESOLVE_ONLY) {
+                        static_cast<sync_resolve_cb *>(this->m_data->cb)->operator() (promise_resolve<>(this->m_data));
                     }
                     else {
-                        static_cast<sync_cb *>(this->data->cb)->operator() (
-                            promise_resolve<>(this->data),
-                            promise_reject<>(this->data));
+                        static_cast<sync_cb *>(this->m_data->cb)->operator() (
+                            promise_resolve<>(this->m_data),
+                            promise_reject<>(this->m_data));
                     }
                 }
             }
             catch (std::exception const &e) {
                 manapi_log_error(e.what());
-                call_promise_reject(this->data, std::current_exception());
+                call_promise_reject(this->m_data, std::current_exception());
             }
         }
     private:
-        std::shared_ptr<data_t> data{nullptr};
+        std::shared_ptr<data_t> m_data;
     };
 
 

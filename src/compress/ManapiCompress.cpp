@@ -89,7 +89,7 @@ skip:
 
         for (;;) {
             if (this->m_data->buffer.empty()) {
-                this->m_data->buffer = manapi::async::current()->memory_fabric().buffer(
+                this->m_data->buffer = manapi::async::current()->memory_fabric()->buffer(
                         manapi::object_pool::area_size()).unwrap();
                 this->m_data->cursor = 0;
             }
@@ -174,7 +174,7 @@ skip:
 
         for (;;) {
             if (this->m_data->buffer.empty()) {
-                this->m_data->buffer = manapi::async::current()->memory_fabric().buffer(
+                this->m_data->buffer = manapi::async::current()->memory_fabric()->buffer(
                         manapi::object_pool::area_size()).unwrap();
                 this->m_data->cursor = 0;
             }
@@ -290,7 +290,7 @@ skip:
 
         for (;;) {
             if (this->m_data->buffer.empty()) {
-                this->m_data->buffer = manapi::async::current()->memory_fabric().buffer(
+                this->m_data->buffer = manapi::async::current()->memory_fabric()->buffer(
                         manapi::object_pool::area_size()).unwrap();
                 this->m_data->cursor = 0;
             }
@@ -372,7 +372,7 @@ skip:
 
         for (;;) {
             if (this->m_data->buffer.empty()) {
-                this->m_data->buffer = manapi::async::current()->memory_fabric().buffer(
+                this->m_data->buffer = manapi::async::current()->memory_fabric()->buffer(
                         manapi::object_pool::area_size()).unwrap();
                 this->m_data->cursor = 0;
             }
@@ -483,7 +483,7 @@ skip:
 
         do {
             if (this->m_data->buffer.empty()) {
-                this->m_data->buffer = manapi::async::current()->memory_fabric().buffer(
+                this->m_data->buffer = manapi::async::current()->memory_fabric()->buffer(
                         manapi::object_pool::area_size()).unwrap();
                 this->m_data->cursor = 0;
             }
@@ -575,7 +575,7 @@ skip:
 
         do {
             if (this->m_data->buffer.empty()) {
-                this->m_data->buffer = manapi::async::current()->memory_fabric().buffer(
+                this->m_data->buffer = manapi::async::current()->memory_fabric()->buffer(
                         manapi::object_pool::area_size()).unwrap();
                 this->m_data->cursor = 0;
             }

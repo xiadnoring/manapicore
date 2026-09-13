@@ -158,106 +158,106 @@ static void json_set_slice_(int &m_type, manapi::json::data_t &m_data) {
 
 static void json_set_object_(int &m_type, manapi::json::data_t &m_data, manapi::json::OBJECT val) {
     ::json_set_object_(m_type, m_data);
-    *m_data.object_src_ = std::move(val);
+    *m_data.m_object_src = std::move(val);
 }
 
 static void json_set_bool_(int &m_type, manapi::json::data_t &m_data, manapi::json::BOOLEAN val) {
     ::json_set_bool_(m_type, m_data);
-    *m_data.bool_src_ = val;
+    *m_data.m_bool_src = val;
 }
 
 static void json_set_array_(int &m_type, manapi::json::data_t &m_data, manapi::json::ARRAY val) {
     ::json_set_array_(m_type, m_data);
-    *m_data.array_src_ = std::move(val);
+    *m_data.m_array_src = std::move(val);
 }
 
 static void json_set_string_(int &m_type, manapi::json::data_t &m_data, manapi::json::STRING val) {
     ::json_set_string_(m_type, m_data);
-    *m_data.string_src_ = std::move(val);
+    *m_data.m_string_src = std::move(val);
 }
 
 static void json_set_string_(int &m_type, manapi::json::data_t &m_data, manapi::json::STRING_VIEW val) {
     ::json_set_string_(m_type, m_data);
-    *m_data.string_src_ = val;
+    *m_data.m_string_src = val;
 }
 
 static void json_set_integer_(int &m_type, manapi::json::data_t &m_data, manapi::json::INTEGER val) {
     ::json_set_integer_(m_type, m_data);
-    *m_data.integer_src_ = val;
+    *m_data.m_integer_src = val;
 }
 
 static void json_set_decimal_(int &m_type, manapi::json::data_t &m_data, manapi::json::DECIMAL val) {
     ::json_set_decimal_(m_type, m_data);
-    *m_data.decimal_src_ = val;
+    *m_data.m_decimal_src = val;
 }
 
 #ifdef MANAPIHTTP_BIGINT_SUPPORT
 static void json_set_bigint_(int &m_type, manapi::json::data_t &m_data, manapi::json::BIGINT val) {
     ::json_set_bigint_(m_type, m_data);
-    *m_data.bigint_src_ = std::move(val);
+    *m_data.m_bigint_src = std::move(val);
 }
 #endif
 
 static void json_set_pair_(int &m_type, manapi::json::data_t &m_data, manapi::json &&first, manapi::json &&second) {
     ::json_set_pair_(m_type, m_data);
 
-    m_data.pair_src_->first = std::forward<decltype(first)>(first);
-    m_data.pair_src_->second = std::forward<decltype(second)>(second);
+    m_data.m_pair_src->first = std::forward<decltype(first)>(first);
+    m_data.m_pair_src->second = std::forward<decltype(second)>(second);
 }
 
 static void json_set_pair_(int &m_type, manapi::json::data_t &m_data, const manapi::json &first, const manapi::json &second) {
     ::json_set_pair_(m_type, m_data);
 
-    m_data.pair_src_->first = (first);
-    m_data.pair_src_->second = (second);
+    m_data.m_pair_src->first = (first);
+    m_data.m_pair_src->second = (second);
 }
 
 static void json_set_slice_(int &m_type, manapi::json::data_t &m_data, manapi::slice &&n) {
     ::json_set_slice_(m_type, m_data);
 
-    *m_data.slice_src_ = std::forward<decltype(n)>(n);
+    *m_data.m_slice_src = std::forward<decltype(n)>(n);
 }
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data,manapi::json::INTEGER num) {
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,manapi::json::INTEGER num) {
     ::json_set_integer_(m_type, m_data, num);
 }
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data,int num) {
-    ::json_parse_(m_type, m_data, static_cast<manapi::json::INTEGER> (num));
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,int num) {
+    ::manapi__json_parse(m_type, m_data, static_cast<manapi::json::INTEGER> (num));
 }
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data,manapi::json::DECIMAL num) {
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,manapi::json::DECIMAL num) {
     ::json_set_decimal_(m_type, m_data, num);
 }
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data,double num) {
-    ::json_parse_(m_type, m_data, static_cast<manapi::json::DECIMAL> (num));
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,double num) {
+    ::manapi__json_parse(m_type, m_data, static_cast<manapi::json::DECIMAL> (num));
 }
 
 #ifdef MANAPIHTTP_BIGINT_SUPPORT
-static void json_parse_(int &m_type, manapi::json::data_t &m_data,manapi::json::BIGINT num) {
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,manapi::json::BIGINT num) {
     ::json_set_bigint_(m_type, m_data, std::move(num));
 }
 #endif
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data,manapi::json::OBJECT obj) {
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,manapi::json::OBJECT obj) {
     ::json_set_object_(m_type, m_data, std::move(obj));
 }
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data,manapi::json::ARRAY arr) {
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,manapi::json::ARRAY arr) {
     ::json_set_array_(m_type, m_data, std::move(arr));
 }
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data,manapi::json::BOOLEAN val) {
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,manapi::json::BOOLEAN val) {
     ::json_set_bool_(m_type, m_data, val);
 }
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data, const manapi::json::NULLPTR &) {
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data, const manapi::json::NULLPTR &) {
     ::json_set_nullptr_(m_type, m_data);
 }
 
-static void json_parse_(int &m_type, manapi::json::data_t &m_data, std::size_t num) {
-    ::json_parse_ (m_type, m_data, static_cast<manapi::json::INTEGER> (num));
+static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data, std::size_t num) {
+    ::manapi__json_parse (m_type, m_data, static_cast<manapi::json::INTEGER> (num));
 }
 
 static manapi::json::OBJECT & json_as_object_(const int &m_type, const manapi::json::data_t &m_data) {
@@ -333,42 +333,42 @@ static manapi::json::DECIMAL & json_as_decimal_(const int &m_type, const manapi:
 static void json_copy_value(int &m_type, manapi::json::data_t &m_data, int o_type, const manapi::json::data_t &o_data) {
     switch (o_type) {
         case manapi::json::type_string:
-            ::json_set_string_(m_type, m_data,*o_data.string_src_);
+            ::json_set_string_(m_type, m_data,*o_data.m_string_src);
         break;
         case manapi::json::type_integer:
-            ::json_set_integer_(m_type, m_data,*o_data.integer_src_);
+            ::json_set_integer_(m_type, m_data,*o_data.m_integer_src);
         break;
         case manapi::json::type_decimal:
-            ::json_set_decimal_(m_type, m_data,*o_data.decimal_src_);
+            ::json_set_decimal_(m_type, m_data,*o_data.m_decimal_src);
         break;
 #ifdef MANAPIHTTP_BIGINT_SUPPORT
         case manapi::json::type_bigint:
-            ::json_set_bigint_(m_type, m_data,*o_data.bigint_src_);
+            ::json_set_bigint_(m_type, m_data,*o_data.m_bigint_src);
         break;
 #endif
         case manapi::json::type_array: {
-            ::json_set_array_(m_type, m_data,*o_data.array_src_);
+            ::json_set_array_(m_type, m_data,*o_data.m_array_src);
             break;
         }
         case manapi::json::type_object: {
-            ::json_set_object_(m_type, m_data,*o_data.object_src_);
+            ::json_set_object_(m_type, m_data,*o_data.m_object_src);
             break;
         }
         case manapi::json::type_boolean:
-            ::json_set_bool_(m_type, m_data, *o_data.bool_src_);
+            ::json_set_bool_(m_type, m_data, *o_data.m_bool_src);
         break;
         case manapi::json::type_null:
             ::json_set_nullptr_(m_type, m_data);
         break;
         case manapi::json::type_pair:
-            ::json_set_pair_(m_type, m_data, o_data.pair_src_->first, o_data.pair_src_->second);
+            ::json_set_pair_(m_type, m_data, o_data.m_pair_src->first, o_data.m_pair_src->second);
         break;
         case manapi::json::type_slice: {
-            ::json_set_slice_(m_type, m_data, o_data.slice_src_->copy());
+            ::json_set_slice_(m_type, m_data, o_data.m_slice_src->copy());
             break;
         }
         case manapi::json::type_source:
-            ::json_set_source_(o_data.source_src_->copy(), m_type, m_data);
+            ::json_set_source_(o_data.m_source_src->copy(), m_type, m_data);
         break;
         default:
             break;
@@ -569,7 +569,7 @@ manapi::json::json(const manapi::slice_base &sv) : json() {
 }
 
 manapi::json::json(INTEGER num) : json() {
-    ::json_parse_(this->m_type, this->m_data, num);
+    ::manapi__json_parse(this->m_type, this->m_data, num);
 }
 
 manapi::json::json(const manapi::json &other) : json() {
@@ -590,29 +590,29 @@ manapi::json::json(const char *plain_text) : json() {
 }
 
 manapi::json::json(DECIMAL num) : json() {
-    ::json_parse_(this->m_type, this->m_data, num);
+    ::manapi__json_parse(this->m_type, this->m_data, num);
 }
 
 #ifdef MANAPIHTTP_BIGINT_SUPPORT
 manapi::json::json(BIGINT num) : json() {
-    ::json_parse_(this->m_type, this->m_data, std::move(num));
+    ::manapi__json_parse(this->m_type, this->m_data, std::move(num));
 }
 #endif
 
 manapi::json::json(BOOLEAN value) : json() {
-    ::json_parse_(this->m_type, this->m_data, value);
+    ::manapi__json_parse(this->m_type, this->m_data, value);
 }
 
 manapi::json::json(OBJECT obj) : json() {
-    ::json_parse_(this->m_type, this->m_data, std::move(obj));
+    ::manapi__json_parse(this->m_type, this->m_data, std::move(obj));
 }
 
 manapi::json::json(ARRAY arr) : json() {
-    ::json_parse_(this->m_type, this->m_data, std::move(arr));
+    ::manapi__json_parse(this->m_type, this->m_data, std::move(arr));
 }
 
 manapi::json::json(const nullptr_t &n) : json() {
-    ::json_parse_(this->m_type, this->m_data, n);
+    ::manapi__json_parse(this->m_type, this->m_data, n);
 }
 
 manapi::json::json (const std::initializer_list<json> &data) : json() {
@@ -1597,7 +1597,7 @@ bool manapi::json::is_source() const MANAPIHTTP_NOEXCEPT {
 }
 
 manapi::json_source * manapi::json::release_source() {
-    auto const z = this->m_data.source_src_;
+    auto const z = this->m_data.m_source_src;
     this->m_type = type_null;
     this->m_data.src = nullptr;
     return z;

@@ -9,21 +9,19 @@
 
 namespace manapi {
     class logger;
-}
 
-namespace manapi::async {
     class context;
 
     class cthread;
+}
 
-    class mutex;
-
+namespace manapi::async {
     /* provides an async context */
     typedef std::shared_ptr<context> shared_ctx;
     /* provides a task pool */
-    typedef std::shared_ptr<ethreadpool> shared_etaskpool;
+    typedef std::shared_ptr<ethread_pool> shared_etaskpool;
     /* provides a task pool */
-    typedef std::shared_ptr<mthreadpool> shared_mtaskpool;
+    typedef std::shared_ptr<mthread_pool> shared_mtaskpool;
     /* provides a logger */
     typedef std::shared_ptr<logger> shared_logger;
     /* provides a context by thread */
@@ -94,7 +92,6 @@ namespace manapi::async {
 }
 
 namespace manapi {
-    class object_pool;
 #if defined (__unix__) || defined(__APPLE__)
     struct sigset_t : public ::sigset_t {};
 #else
@@ -104,30 +101,33 @@ namespace manapi {
     };
 #   undef MANAPIHTTP_SIGSET_NWORDS
 #endif
+    class object_pool;
 
     class event_loop;
 
-    class timerpool;
+    class timer_pool;
 
-    class mthreadpool;
+    class mthread_pool;
 
-    class ethreadpool;
+    class ethread_pool;
 }
 
 namespace manapi::async {
     /* provides a timer pool */
-    typedef std::shared_ptr<timerpool> shared_timerpool;
+    typedef std::shared_ptr<timer_pool> shared_timerpool;
     /* provides a timer pool */
-    typedef std::shared_ptr<mthreadpool> shared_mthreadpool;
+    typedef std::shared_ptr<mthread_pool> shared_mthreadpool;
     /* provides an event loop */
     typedef std::shared_ptr<event_loop> shared_eventloop;
+    /* provides an event loop */
+    typedef std::shared_ptr<object_pool> shared_memory_fabric;
 }
 
 #if defined (__unix__) || defined(__APPLE__)
 #   include <pthread.h>
 #endif
 
-namespace manapi::async {
+namespace manapi {
     /**
      * provides a context
      */
@@ -140,7 +140,7 @@ namespace manapi::async {
          * @param timerpool the timer pool
          * @param logger the logger
          */
-        cthread (shared_eventloop eventloop, shared_mthreadpool taskpool, shared_timerpool timerpool, shared_logger logger);
+        cthread (async::shared_eventloop eventloop, async::shared_mthreadpool taskpool, async::shared_timerpool timerpool, async::shared_logger logger);
 
         /**
          * set as the default context in the thread
@@ -157,45 +157,38 @@ namespace manapi::async {
          * get the event loop
          * @return the event loop
          */
-        MANAPIHTTP_NODISCARD const shared_eventloop& eventloop() MANAPIHTTP_NOEXCEPT;
+        MANAPIHTTP_NODISCARD const async::shared_eventloop& eventloop() MANAPIHTTP_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const shared_mthreadpool &threadpool();
+        MANAPIHTTP_NODISCARD const async::shared_mthreadpool &threadpool();
 
         /**
          * get the timer pool
          * @return the timer pool
          */
-        MANAPIHTTP_NODISCARD const shared_timerpool &timerpool() MANAPIHTTP_NOEXCEPT;
+        MANAPIHTTP_NODISCARD const async::shared_timerpool &timerpool() MANAPIHTTP_NOEXCEPT;
 
         /**
          * get the event task pool
          * @return the event task pool
          */
-        MANAPIHTTP_NODISCARD const shared_etaskpool &etaskpool () MANAPIHTTP_NOEXCEPT;
+        MANAPIHTTP_NODISCARD const async::shared_etaskpool &etaskpool () MANAPIHTTP_NOEXCEPT;
 
         /**
          * get the logger
          * @return the logger
          */
-        MANAPIHTTP_NODISCARD const shared_logger &logger() MANAPIHTTP_NOEXCEPT;
+        MANAPIHTTP_NODISCARD const async::shared_logger &logger() MANAPIHTTP_NOEXCEPT;
 
         /**
          * get the memory fabric
          * @return the memory fabric
          */
-        MANAPIHTTP_NODISCARD object_pool &memory_fabric () MANAPIHTTP_NOEXCEPT;
-
-        //manapi::future<void> start ();
+        MANAPIHTTP_NODISCARD const async::shared_memory_fabric &memory_fabric () MANAPIHTTP_NOEXCEPT;
 
         /**
          * start working synchronously
          */
         virtual manapi::ev::status start ();
-
-        /**
-         * join all threads
-         */
-        void join () MANAPIHTTP_NOEXCEPT;
 
         /**
          * stop working
@@ -205,17 +198,17 @@ namespace manapi::async {
 
         manapi::future<> stop ();
     protected:
-        int flags;
+        int m_flags;
 
-        shared_eventloop eventloop_;
+        async::shared_eventloop m_eventloop;
 
-        shared_timerpool timerpool_;
+        async::shared_timerpool m_timerpool;
 
-        shared_mthreadpool taskpool_;
+        async::shared_mthreadpool m_taskpool;
 
-        shared_logger logger_;
+        async::shared_logger m_logger;
 
-        object_pool memory_fabric_;
+        async::shared_memory_fabric m_memory_fabric;
     };
 
     typedef std::shared_ptr<cthread> shared_async_thread;
@@ -228,15 +221,13 @@ namespace manapi::async {
          * @param timerpool the timer pool
          * @param logger the logger
          */
-        context (shared_eventloop eventloop, std::shared_ptr<mthreadpool> taskpool, shared_timerpool timerpool, shared_logger logger);
+        context (async::shared_eventloop eventloop, async::shared_mthreadpool taskpool, async::shared_timerpool timerpool, async::shared_logger logger);
     public:
 
         /**
          * deconstructor
          */
         ~context() override;
-
-        // static void inloops (shared_ctx thr, std::function<void()> callback);
 
         /**
          * create a context and return it
@@ -276,32 +267,17 @@ namespace manapi::async {
          */
         static std::unique_ptr<manapi::sigset_t> blockedsignals () MANAPIHTTP_NOEXCEPT;
 
-        /**
-         * get all copies of the context
-         * @return the copies
-         */
-        const std::vector<shared_cthread> &loops () MANAPIHTTP_NOEXCEPT;
-
         static manapi::sigset_t *gbs () MANAPIHTTP_NOEXCEPT;
 
         static void gbs (std::unique_ptr<manapi::sigset_t> n) MANAPIHTTP_NOEXCEPT;
-
-        static std::shared_ptr<context> gctx () MANAPIHTTP_NOEXCEPT;
-
-        static void gctx (std::shared_ptr<context> n) MANAPIHTTP_NOEXCEPT;
     private:
-        /**
-         * global context storage
-         */
-        static std::shared_ptr<context> gctx_;
         /**
          * global blocked signals storage
          */
-        static std::unique_ptr<manapi::sigset_t> gbs_;
+        static std::unique_ptr<manapi::sigset_t> m_gbs;
         /* copies */
-        std::vector<shared_cthread> loops_;
+        std::vector<async::shared_cthread> m_loops;
     };
-
 
     template<typename T = void>
     struct async_task_t {
@@ -311,21 +287,15 @@ namespace manapi::async {
 
     template<typename T>
     requires(!std::is_same_v<T, void>)
-    manapi::future<T> blank_future(T &&n) {
-        co_return std::forward<decltype(n)>(n);
-    }
+    manapi::future<T> blank_future(T &&n) { co_return std::forward<decltype(n)>(n); }
 
     template<typename T>
     requires(!std::is_same_v<T, void>)
-    manapi::future<T> blank_future(const T &n) {
-        co_return std::forward<decltype(n)>(n);
-    }
+    manapi::future<T> blank_future(const T &n) { co_return std::forward<decltype(n)>(n); }
 
     template<typename T>
     requires(std::is_same_v<T, void>)
-    manapi::future<T> blank_future () {
-        co_return;
-    }
+    manapi::future<T> blank_future () { co_return; }
 }
 
 
@@ -333,6 +303,7 @@ namespace manapi::async::internal {
     enum async_task_flags {
         ASYNC_TASK_FLAG_EXECUTED = 1
     };
+
     void run_prepare_error_ (std::exception_ptr err) MANAPIHTTP_NOEXCEPT;
 
     void run_prepare_std_exception_ (std::exception const &e) MANAPIHTTP_NOEXCEPT;
@@ -344,7 +315,7 @@ namespace manapi::async::internal {
      * @param task_data the task data
      * @param onfinish the callback
      */
-    inline void run_prepare_(std::unique_ptr<manapi::async::async_task_t<void>> &&task_data, run_cb &&onfinish) {
+    inline void run_prepare_(std::unique_ptr<manapi::async_task_t<void>> &&task_data, run_cb &&onfinish) {
 
         task_data->task.onfinish([task = task_data.get(), onfinish = std::forward<decltype(onfinish)>(onfinish)] (std::exception_ptr err) mutable -> void {
             try { onfinish(std::move(err)); }
@@ -368,7 +339,7 @@ namespace manapi::async::internal {
      * @param onfinish the callback
      */
     template<typename T>
-    void run_prepare_(std::unique_ptr<manapi::async::async_task_t<T>> &&task_data, run_cb_with_value<T> &&onfinish) {
+    void run_prepare_(std::unique_ptr<manapi::async_task_t<T>> &&task_data, run_cb_with_value<T> &&onfinish) {
 
         task_data->task.onfinish([task = task_data.get(), onfinish = std::forward<decltype(onfinish)>(onfinish)] (std::exception_ptr err, T *value) mutable -> void {
             try { onfinish(std::move(err), value); }
@@ -389,7 +360,7 @@ namespace manapi::async::internal {
      * FOR INTERNAL USE ONLY
      * @param task_data the task data
      */
-    inline void run_prepare_(std::unique_ptr<manapi::async::async_task_t<void>> &&task_data) {
+    inline void run_prepare_(std::unique_ptr<manapi::async_task_t<void>> &&task_data) {
 
         task_data->task.onfinish([task = task_data.get()] (std::exception_ptr err) mutable -> void {
             if (err)
@@ -411,7 +382,7 @@ namespace manapi::async::internal {
      * @param task_data the task data
      */
     template<typename T>
-    void run_prepare_(std::unique_ptr<manapi::async::async_task_t<T>> &&task_data) {
+    void run_prepare_(std::unique_ptr<manapi::async_task_t<T>> &&task_data) {
 
         task_data->task.onfinish([task = task_data.get()] (std::exception_ptr err, T *) mutable -> void {
             if (err) internal::run_prepare_error_(std::move(err));

@@ -13,46 +13,43 @@
 #include "./ManapiUtils.hpp"
 
 namespace manapi {
-    class ethreadpool;
+    class ethread_pool;
 
-    class mthreadpool;
+    class mthread_pool;
 
     class event_loop;
 
-    class timerpool;
+    class timer_pool;
 
     class logger;
 
     class object_pool;
+
+    class cthread;
 
     template<typename T>
     class future;
 }
 
 namespace manapi::async {
-    class mutex_locker;
-
-    class cthread;
 
     const std::shared_ptr<cthread> &current () MANAPIHTTP_NOEXCEPT;
 
+    const std::shared_ptr<cthread> &try_current () MANAPIHTTP_NOEXCEPT;
+
     const std::shared_ptr<event_loop> &eventloop () MANAPIHTTP_NOEXCEPT;
 
-    const std::shared_ptr<timerpool> &etimerpool () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<timer_pool> &timerpool () MANAPIHTTP_NOEXCEPT;
 
-    const std::shared_ptr<ethreadpool> &etaskpool () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<ethread_pool> &etaskpool () MANAPIHTTP_NOEXCEPT;
 
-    const std::shared_ptr<mthreadpool> &mtaskpool () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<mthread_pool> &mtaskpool () MANAPIHTTP_NOEXCEPT;
 
-    object_pool* memory_fabric () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<object_pool> &memory_fabric () MANAPIHTTP_NOEXCEPT;
 
     const std::shared_ptr<logger> &log () MANAPIHTTP_NOEXCEPT;
 
     bool context_exists () MANAPIHTTP_NOEXCEPT;
-
-    void append_task (const std::coroutine_handle<> &handle);
-
-    void append_task (std::move_only_function<void()>&& callback);
 }
 
 namespace manapi::async::internal {
@@ -60,10 +57,6 @@ namespace manapi::async::internal {
 
     template<typename T>
     class promise;
-
-    const std::shared_ptr<cthread> &current_ () MANAPIHTTP_NOEXCEPT;
-
-    void current_ (std::shared_ptr<cthread> ctx) MANAPIHTTP_NOEXCEPT;
 
     std::size_t current_stack_cnt_crt () MANAPIHTTP_NOEXCEPT;
 
@@ -89,7 +82,7 @@ namespace manapi::async::internal {
 
         virtual void run_finish_cb () MANAPIHTTP_NOEXCEPT = 0;
 
-        std::coroutine_handle<> waiting;
+        std::coroutine_handle<> m_waiting;
 
         std::exception_ptr m_exception;
     };
