@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iomanip>
+#include <array>
 
 #include "encoding/ManapiURL.hpp"
 #include "encoding/ManapiUnicode.hpp"
@@ -7,10 +8,10 @@
 
 static constexpr auto manapi__url_allowed_symbols = [] {
     std::array<bool, 256> tbl{};
-    tbl['-'] = tbl['_'] = tbl['.'] = tbl['~'] = tbl['!'] = tbl['*']
-        = tbl['\''] = tbl['*'] = tbl['('] = tbl[')'] = tbl[';'] = tbl['/'] = tbl['?']
-        = tbl[':'] = tbl['@'] = tbl['&'] = tbl['='] = tbl['+'] = tbl['$'] = tbl[',']
-        = tbl['.'] =tbl['#'] = tbl['['] = tbl[']'] = tbl['%'] = true;
+    tbl['-'] = tbl['_'] = tbl['.'] = tbl['~'] = tbl['!'] = tbl['*'] = true;
+    tbl['\''] = tbl['*'] = tbl['('] = tbl[')'] = tbl[';'] = tbl['/'] = tbl['?'] = true;
+    tbl[':'] = tbl['@'] = tbl['&'] = tbl['='] = tbl['+'] = tbl['$'] = tbl[','] = true;
+    tbl['.'] = tbl['#'] = tbl['['] = tbl[']'] = tbl['%'] = true;
 
     for (uint8_t c = '0'; c <= '9'; c++) tbl[c] = true;
     for (uint8_t c = 'a'; c <= 'z'; c++) tbl[c] = true;

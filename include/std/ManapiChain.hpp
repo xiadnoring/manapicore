@@ -25,37 +25,37 @@ namespace manapi {
         public:
 
             chain_iterator (chain_item_ptr n) {
-                this->src_ = n;
+                this->m_src = n;
             }
 
             chain_iterator &operator++(int) {
-                this->src_ = this->src_ ? this->src_->next.get() : nullptr;
+                this->m_src = this->m_src ? this->m_src->next.get() : nullptr;
                 return *this;
             }
 
             chain_iterator &operator--(int) {
-                this->src_ = this->src_ ? this->src_->prev : nullptr;
+                this->m_src = this->m_src ? this->m_src->prev : nullptr;
                 return *this;
             }
 
             value_type &operator*() {
-                return this->src_->src;
+                return this->m_src->src;
             }
 
             pointer operator->() {
-                return &this->src_->src;
+                return &this->m_src->src;
             }
 
             const value_type &operator*() const {
-                return this->src_->src;
+                return this->m_src->src;
             }
 
             const pointer operator->() const {
-                return &this->src_->src;
+                return &this->m_src->src;
             }
 
             bool operator==(const chain_iterator &_n) const {
-                return this->src_ == _n.src_;
+                return this->m_src == _n.m_src;
             }
 
             bool operator!=(const chain_iterator &_n) const {
@@ -63,43 +63,43 @@ namespace manapi {
             }
 
             friend void swap (chain_iterator &lhs, chain_iterator &rhs) MANAPIHTTP_NOEXCEPT {
-                std::swap(lhs.src_, rhs.src_);
+                std::swap(lhs.m_src, rhs.m_src);
             }
 
             operator bool () MANAPIHTTP_NOEXCEPT {
-                return this->src_ != nullptr;
+                return this->m_src != nullptr;
             }
 
-            chain_item_ptr src_;
+            chain_item_ptr m_src;
         };
 
         class chain_const_iterator {
         public:
 
             chain_const_iterator (chain_item_ptr n) {
-                this->src_ = n;
+                this->m_src = n;
             }
 
             chain_const_iterator &operator++(int) {
-                this->src_ = this->src_ ? this->src_->next.get() : nullptr;
+                this->m_src = this->m_src ? this->m_src->next.get() : nullptr;
                 return *this;
             }
 
             chain_const_iterator &operator--(int) {
-                this->src_ = this->src_ ? this->src_->prev : nullptr;
+                this->m_src = this->m_src ? this->m_src->prev : nullptr;
                 return *this;
             }
 
             value_type const &operator*() {
-                return this->src_->src;
+                return this->m_src->src;
             }
 
             pointer const operator->() {
-                return &this->src_->src;
+                return &this->m_src->src;
             }
 
             bool operator==(const chain_const_iterator &_n) const {
-                return this->src_ == _n.src_;
+                return this->m_src == _n.m_src;
             }
 
             bool operator!=(const chain_const_iterator &_n) const {
@@ -107,23 +107,23 @@ namespace manapi {
             }
 
             friend void swap (chain_const_iterator &lhs, chain_const_iterator &rhs) MANAPIHTTP_NOEXCEPT {
-                std::swap(lhs.src_, rhs.src_);
+                std::swap(lhs.m_src, rhs.m_src);
             }
 
             operator bool () MANAPIHTTP_NOEXCEPT {
-                return this->src_ != nullptr;
+                return this->m_src != nullptr;
             }
 
-            chain_item_ptr src_;
+            chain_item_ptr m_src;
         };
 
         using iterator = chain_iterator;
         using const_iterator = chain_const_iterator;
 
         chain () {
-            this->src_ = nullptr;
-            this->last_ = nullptr;
-            this->s_ = 0;
+            this->m_src = nullptr;
+            this->m_last = nullptr;
+            this->m_s = 0;
         }
 
         ~chain () {
@@ -131,16 +131,16 @@ namespace manapi {
         }
 
         chain (chain &&n) MANAPIHTTP_NOEXCEPT {
-            this->src_ = std::move(n.src_);
-            this->last_ = std::exchange(n.last_, nullptr);
-            this->s_ = std::exchange(n.s_, 0);
+            this->m_src = std::move(n.m_src);
+            this->m_last = std::exchange(n.m_last, nullptr);
+            this->m_s = std::exchange(n.m_s, 0);
         }
 
         chain &operator=(chain &&n) MANAPIHTTP_NOEXCEPT {
             if (this != &n) {
-                this->src_ = std::move(n.src_);
-                this->last_ = std::exchange(n.last_, nullptr);
-                this->s_ = std::exchange(n.s_, 0);
+                this->m_src = std::move(n.m_src);
+                this->m_last = std::exchange(n.m_last, nullptr);
+                this->m_s = std::exchange(n.m_s, 0);
             }
             return *this;
         }
@@ -166,31 +166,31 @@ namespace manapi {
         }
 
         void push_back_chain (chain_item_un n) {
-            if (this->last_ == nullptr) {
-                this->src_ = std::move(n);
-                this->last_ = this->src_.get();
-                ++this->s_;
+            if (this->m_last == nullptr) {
+                this->m_src = std::move(n);
+                this->m_last = this->m_src.get();
+                ++this->m_s;
                 return;
             }
 
-            this->last_->next = std::move(n);
-            this->last_->next->prev = this->last_;
-            this->last_ = this->last_->next.get();
-            ++this->s_;
+            this->m_last->next = std::move(n);
+            this->m_last->next->prev = this->m_last;
+            this->m_last = this->m_last->next.get();
+            ++this->m_s;
         }
 
         void push_front_chain (chain_item_un n) {
-            if (this->src_ == nullptr) {
-                this->last_ = n.get();
-                this->src_ = std::move(n);
-                ++this->s_;
+            if (this->m_src == nullptr) {
+                this->m_last = n.get();
+                this->m_src = std::move(n);
+                ++this->m_s;
                 return;
             }
 
-            this->src_->prev = n.get();
-            n->next = std::move(this->src_);
-            this->src_ = std::move(n);
-            ++this->s_;
+            this->m_src->prev = n.get();
+            n->next = std::move(this->m_src);
+            this->m_src = std::move(n);
+            ++this->m_s;
         }
 
         chain_item_un erase (chain_item<value_type> *n) {
@@ -203,13 +203,13 @@ namespace manapi {
             chain_item_un m;
 
             if (ss == 1) {
-                if (this->src_.get() == n) {
-                    m = std::move(this->src_);
+                if (this->m_src.get() == n) {
+                    m = std::move(this->m_src);
 
-                    this->src_ = nullptr;
-                    this->last_ = nullptr;
+                    this->m_src = nullptr;
+                    this->m_last = nullptr;
 
-                    --this->s_;
+                    --this->m_s;
                 }
                 return std::move(m);
             }
@@ -223,9 +223,9 @@ namespace manapi {
             }
 
             if (!prev) {
-                m = std::move(this->src_);
-                this->src_ = std::move(next);
-                this->src_->prev = nullptr;
+                m = std::move(this->m_src);
+                this->m_src = std::move(next);
+                this->m_src->prev = nullptr;
             }
             else {
                 m = std::move(prev->next);
@@ -233,61 +233,61 @@ namespace manapi {
                 if (prev->next)
                     prev->next->prev = prev;
                 else
-                    this->last_ = prev;
+                    this->m_last = prev;
             }
 
-            --this->s_;
+            --this->m_s;
             m->prev = nullptr;
             m->next = nullptr;
             return std::move(m);
         }
 
         iterator erase (iterator n, chain_item_un &u) {
-            if (!n.src_) { return n; }
-            auto next = n.src_->next.get();
-            u = this->erase(n.src_);
+            if (!n.m_src) { return n; }
+            auto next = n.m_src->next.get();
+            u = this->erase(n.m_src);
             return iterator{next};
         }
 
         iterator erase (iterator n) {
-            if (!n.src_) { return n; }
-            auto next = n.src_->next.get();
-            this->erase(n.src_);
+            if (!n.m_src) { return n; }
+            auto next = n.m_src->next.get();
+            this->erase(n.m_src);
             return iterator{next};
         }
 
         void pop_back () {
-            if (!this->last_) {
+            if (!this->m_last) {
                 return;
             }
 
-            this->last_ = this->last_->prev;
+            this->m_last = this->m_last->prev;
 
-            if (this->last_) {
-                this->last_->next = nullptr;
+            if (this->m_last) {
+                this->m_last->next = nullptr;
             }
             else {
-                this->src_ = nullptr;
+                this->m_src = nullptr;
             }
 
-            --this->s_;
+            --this->m_s;
         }
 
         void pop_front () {
-            if (!this->src_) {
+            if (!this->m_src) {
                 return;
             }
 
-            this->src_ = std::move(this->src_->next);
+            this->m_src = std::move(this->m_src->next);
 
-            if (this->src_) {
-                this->src_->prev = nullptr;
+            if (this->m_src) {
+                this->m_src->prev = nullptr;
             }
             else {
-                this->last_ = nullptr;
+                this->m_last = nullptr;
             }
 
-            --this->s_;
+            --this->m_s;
         }
 
         MANAPIHTTP_NODISCARD bool empty () const {
@@ -295,19 +295,19 @@ namespace manapi {
         }
 
         void clear () {
-            chain_item_un c = std::move(this->src_);
+            chain_item_un c = std::move(this->m_src);
             while (c) {
                 chain_item_un next = std::move(c->next);
                 c->prev = nullptr;
                 c = std::move(next);
             }
-            this->src_ = nullptr;
-            this->last_ = nullptr;
-            this->s_ = 0;
+            this->m_src = nullptr;
+            this->m_last = nullptr;
+            this->m_s = 0;
         }
 
         iterator begin () {
-            return iterator{this->src_.get()};
+            return iterator{this->m_src.get()};
         }
 
         iterator end () {
@@ -315,7 +315,7 @@ namespace manapi {
         }
 
         const_iterator begin () const {
-            return const_iterator{this->src_.get()};
+            return const_iterator{this->m_src.get()};
         }
 
         const_iterator end () const {
@@ -323,7 +323,7 @@ namespace manapi {
         }
 
         const_iterator rbegin () const {
-            return const_iterator{this->last_};
+            return const_iterator{this->m_last};
         }
 
         const_iterator rend () const {
@@ -331,7 +331,7 @@ namespace manapi {
         }
 
         iterator rbegin () {
-            return iterator{this->last_};
+            return iterator{this->m_last};
         }
 
         iterator rend () {
@@ -339,7 +339,7 @@ namespace manapi {
         }
 
         MANAPIHTTP_NODISCARD size_t size () const {
-            return s_;
+            return this->m_s;
         }
 
         value_type &back () {
@@ -350,8 +350,8 @@ namespace manapi {
             return *this->begin();
         }
     private:
-        size_t s_;
-        chain_item_un src_;
-        chain_item<value_type> *last_;
+        size_t m_s;
+        chain_item_un m_src;
+        chain_item<value_type> *m_last;
     };
 }

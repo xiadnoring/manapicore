@@ -115,9 +115,7 @@ namespace manapi {
     class slice_base : protected slice_data_t {
         friend class slice;
     public:
-        struct slice_part_deleter {
-            void operator () (slice_part_t *ptr);
-        };
+        struct slice_part_deleter { void operator () (slice_part_t *ptr); };
 
         slice_base (std::unique_ptr<slice_part_t, slice_part_deleter> buffs, slice_part_t*last, uint32_t nbuff);
 
@@ -159,11 +157,11 @@ namespace manapi {
 
         MANAPIHTTP_NODISCARD manapi::status_or<manapi::slice_base> subslice (std::size_t pos) const MANAPIHTTP_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD std::size_t shift () const;
+        MANAPIHTTP_NODISCARD std::size_t shift () const { return this->m_shift; }
 
-        MANAPIHTTP_NODISCARD std::size_t rshift () const;
+        MANAPIHTTP_NODISCARD std::size_t rshift () const { return this->m_rshift; }
 
-        MANAPIHTTP_NODISCARD bool empty () const;
+        MANAPIHTTP_NODISCARD bool empty () const { return this->size() == 0; }
 
         MANAPIHTTP_NODISCARD const slice_part_t *slices_begin () const;
 
@@ -187,7 +185,7 @@ namespace manapi {
 
         MANAPIHTTP_NODISCARD std::unique_ptr<ev::buff_t, ev::buffer_deleter> slices_buffs (std::size_t max_cnt, std::size_t *cnt = nullptr, std::size_t *sz = nullptr) const;
 
-        MANAPIHTTP_NODISCARD uint32_t slices_size () const;
+        MANAPIHTTP_NODISCARD uint32_t slices_size () const { return this->m_count; }
 
         MANAPIHTTP_NODISCARD std::size_t size () const;
 
@@ -213,6 +211,8 @@ namespace manapi {
         slice (const char* n);
 
         slice (const char *buffer, std::size_t sz);
+
+        slice (const ev::buff_t *buff);
 
         slice (slice &&n) MANAPIHTTP_NOEXCEPT;
 
@@ -241,9 +241,15 @@ namespace manapi {
          */
         manapi::status push_back (slice &&s) MANAPIHTTP_NOEXCEPT;
 
+        /**
+         * Moves |buff| to the slices chain
+         * @param buff buffer
+         * @return Ok if success, otherwise, ResourceExhausted
+         */
+        manapi::status push_back (const ev::buff_t *buff) MANAPIHTTP_NOEXCEPT;
 
         /**
-         * Adds |buffer| to the slices chain
+         * Copy |buffer| to the back of the slices chain
          * @param buffer buffer pointer
          * @param size buffer size
          * @return Ok if success, otherwise, ResourceExhausted
@@ -291,7 +297,6 @@ namespace manapi {
         slice_view &operator=(const slice_view &n);
 
         ~slice_view() override;
-    private:
     };
 
     class slice_ref final : public slice_base {
@@ -313,6 +318,54 @@ namespace manapi {
         manapi::status shift_add(std::size_t shift) MANAPIHTTP_NOEXCEPT override;
 
         void clear () MANAPIHTTP_NOEXCEPT;
+    };
+
+    class slice_complex {
+    public:
+        union st_t {
+            manapi::slice s;
+            manapi::slice_view sv;
+
+            st_t();
+
+            ~st_t();
+        };
+
+        slice_complex ();
+
+        ~slice_complex ();
+
+        slice_complex ( manapi::slice &&n );
+
+        slice_complex ( manapi::slice_view &&n );
+
+        slice_complex (manapi::slice_complex &&n) MANAPIHTTP_NOEXCEPT;
+
+        slice_complex &operator= ( manapi::slice &&n ) MANAPIHTTP_NOEXCEPT;
+
+        slice_complex &operator= ( manapi::slice_view &&n ) MANAPIHTTP_NOEXCEPT;
+
+        slice_complex &operator= (manapi::slice_complex &&n ) MANAPIHTTP_NOEXCEPT;
+
+        slice_base *base ( ) MANAPIHTTP_NOEXCEPT;
+
+        MANAPIHTTP_NODISCARD const slice_base *base ( ) const MANAPIHTTP_NOEXCEPT;
+
+        MANAPIHTTP_NODISCARD bool is_slice () const MANAPIHTTP_NOEXCEPT;
+
+        MANAPIHTTP_NODISCARD bool is_slice_view () const MANAPIHTTP_NOEXCEPT;
+
+        slice *get_slice () MANAPIHTTP_NOEXCEPT;
+
+        MANAPIHTTP_NODISCARD const slice *get_slice () const MANAPIHTTP_NOEXCEPT;
+
+        slice_view *get_slice_view () MANAPIHTTP_NOEXCEPT;
+
+        MANAPIHTTP_NODISCARD const slice_view *get_slice_view () const MANAPIHTTP_NOEXCEPT;
+
+        slice_complex &to_slice ();
     private:
+        uint8_t m_flags;
+        st_t m_st;
     };
 }

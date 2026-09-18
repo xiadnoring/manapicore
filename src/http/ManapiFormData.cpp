@@ -1,4 +1,5 @@
 #include <memory.h>
+#include <array>
 
 #include "ManapiString.hpp"
 #include "encoding/ManapiUnicode.hpp"
@@ -9,14 +10,27 @@
 #include "http/ManapiHttpTypes.hpp"
 #include "http/ManapiBaseHttp.hpp"
 #include "fs/ManapiFilesystem.hpp"
+#include "fs/ManapiFileStream.hpp"
 #include "../include/ManapiUtils.hpp"
 #include "../include/http/ManapiHttp1.hpp"
 
-const std::string SPECIAL_SYMBOLS_BOUNDARY = "\r\n--";
+constexpr int manapi__boundary_payload_size = 32;
+constexpr char manapi__boundary_end_symbols[] = "--";
+constexpr char manapi__nline[] = "\r\n";
 
-constexpr int boundary_payload_size = 32;
-constexpr char boundary_end_symbols[] = "--";
-constexpr char nline[] = "\r\n";
+constexpr auto manapi__token_chars = [] () {
+    std::array<bool, 256> t{};
+
+    for (auto c : {'!', '#', '$', '%', '&', '\'', '*', '+', '-', '.', '^', '_', '`', '|', '~'}) {
+        t[static_cast<uint8_t>(c)] = true;
+    }
+
+    for (uint8_t c = '0'; c <= '9'; c++) t[c] = true;
+    for (uint8_t c = 'a'; c <= 'z'; c++) t[c] = true;
+    for (uint8_t c = 'A'; c <= 'Z'; c++) t[c] = true;
+
+    return t;
+}();
 
 enum data_type {
     DATA_NONE = 0,
@@ -327,7 +341,7 @@ manapi::future<ssize_t> manapi::net::formdata_recv::onrecv_multipart_(slice_view
                                 break;
                             }
 
-                            if (!http::http_v1_1_is_token_char(buffer[pos])) {
+                            if (!manapi__token_chars[static_cast<uint8_t>(buffer[pos])]) {
                                 /**
                                  * RFC7230 (3.2.4) Field Parsing
                                  * No whitespace is allowed between the header field-name and colon.
@@ -823,14 +837,14 @@ static constexpr char boundary_label[] = "--boundary";
 std::string manapi::net::formdata_send::generate_boundary() const {
     std::string boundary;
     size_t constexpr boundary_label_size = sizeof (boundary_label) - 1;
-    boundary.resize(boundary_label_size + boundary_payload_size);
+    boundary.resize(boundary_label_size + manapi__boundary_payload_size);
     memcpy (boundary.data(), boundary_label, boundary_label_size);
-    manapi::string::random(boundary.data() + boundary_label_size, boundary_payload_size,
+    manapi::string::random(boundary.data() + boundary_label_size, manapi__boundary_payload_size,
         "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM0123456789");
     return std::move(boundary);
 }
 
-manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::string boundary, ssize_t buffer_size,  std::move_only_function<manapi::future<manapi::status>(manapi::slice_view slice, bool fin)> write) {
+manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::string boundary, std::move_only_function<manapi::future<manapi::status>(manapi::slice_view slice, bool fin)> write) {
     manapi::status status;
 
     slice_part_t part{};
@@ -844,8 +858,8 @@ manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::s
             if (!status)
                 goto err;
 
-            part.buff.base = (char*)nline;
-            part.buff.len = sizeof (nline) - 1;
+            part.buff.base = (char*)manapi__nline;
+            part.buff.len = sizeof (manapi__nline) - 1;
             status = co_await write (slice_view(&part), false);
             if (!status)
                 goto err;
@@ -860,14 +874,14 @@ manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::s
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
-                part.buff.base = (char*)nline;
-                part.buff.len = sizeof (nline) - 1;
+                part.buff.base = (char*)manapi__nline;
+                part.buff.len = sizeof (manapi__nline) - 1;
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
 
-                part.buff.base = (char*)nline;
-                part.buff.len = sizeof (nline) - 1;
+                part.buff.base = (char*)manapi__nline;
+                part.buff.len = sizeof (manapi__nline) - 1;
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
@@ -880,8 +894,8 @@ manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::s
                     goto err;
                 param.data = {};
 
-                part.buff.base = (char*)nline;
-                part.buff.len = sizeof (nline) - 1;
+                part.buff.base = (char*)manapi__nline;
+                part.buff.len = sizeof (manapi__nline) - 1;
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
@@ -897,8 +911,8 @@ manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::s
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
-                part.buff.base = (char*)nline;
-                part.buff.len = sizeof (nline) - 1;
+                part.buff.base = (char*)manapi__nline;
+                part.buff.len = sizeof (manapi__nline) - 1;
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
@@ -910,14 +924,14 @@ manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::s
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
-                part.buff.base = (char*)nline;
-                part.buff.len = sizeof (nline) - 1;
+                part.buff.base = (char*)manapi__nline;
+                part.buff.len = sizeof (manapi__nline) - 1;
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
 
-                part.buff.base = (char*)nline;
-                part.buff.len = sizeof (nline) - 1;
+                part.buff.base = (char*)manapi__nline;
+                part.buff.len = sizeof (manapi__nline) - 1;
                 status = co_await write (slice_view(&part), false);
                 if (!status)
                     goto err;
@@ -970,8 +984,8 @@ manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::s
 
                 param.data = {};
 
-                part.buff.base = (char*)nline;
-                part.buff.len = sizeof (nline) - 1;
+                part.buff.base = (char*)manapi__nline;
+                part.buff.len = sizeof (manapi__nline) - 1;
                 status = co_await write (slice_view(&part), true);
                 if (!status)
                     goto err;
@@ -984,13 +998,13 @@ manapi::future<manapi::status> manapi::net::formdata_send::data2multipart(std::s
     status = co_await write (slice_view(&part), false);
     if (!status)
         goto err;
-    part.buff.base = (char*)boundary_end_symbols;
-    part.buff.len = sizeof (boundary_end_symbols) - 1;
+    part.buff.base = (char*)manapi__boundary_end_symbols;
+    part.buff.len = sizeof (manapi__boundary_end_symbols) - 1;
     status = co_await write (slice_view(&part), false);
     if (!status)
         goto err;
-    part.buff.base = (char*)nline;
-    part.buff.len = sizeof (nline) - 1;
+    part.buff.base = (char*)manapi__nline;
+    part.buff.len = sizeof (manapi__nline) - 1;
     status = co_await write (slice_view(&part), true);
     if (!status)
         goto err;

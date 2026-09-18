@@ -68,10 +68,8 @@ namespace manapi {
         MANAPIHTTP_NODISCARD bool empty () const;
     private:
         uint32_t m_shift;
-
         uint32_t m_s;
         uint32_t m_reserved;
-
         uint8_t *m_src;
     };
 }

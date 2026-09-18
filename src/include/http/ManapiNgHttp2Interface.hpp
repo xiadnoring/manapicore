@@ -6,7 +6,7 @@
 #include "worker/ManapiHttp2Worker.hpp"
 #include "../ManapiUtils.hpp"
 
-#if MANAPIHTTP_NGHTTP2_DEPENDENCY
+#if MANAPIHTTP_NGHTTP2_DEPENDENCY && false
 
 namespace manapi::net::worker {
     struct ng_wrk_http2_ctx_global_t;

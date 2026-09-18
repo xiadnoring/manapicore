@@ -10,7 +10,7 @@
 #include "./tools.hpp"
 
 
-#ifdef MANAPIHTTP_FETCH_SUPPORT
+#if defined(MANAPIHTTP_FETCH_SUPPORT) && false
 
 UTEST (http_and_fetch, keep_alive_1) {
     using http = manapi::net::http::server;

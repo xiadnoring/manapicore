@@ -27,8 +27,6 @@
 #   define MANAPIHTTP_NONUNIX false
 #endif
 
-#define WORKER_MAX_CNT INT_MAX
-
 namespace manapi {
     void print_stacktrace () MANAPIHTTP_NOEXCEPT;
 }

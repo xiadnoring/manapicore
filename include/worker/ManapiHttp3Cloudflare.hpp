@@ -6,7 +6,7 @@
 #include "../worker/ManapiBaseWorker.hpp"
 #include "../ManapiTimerObject.hpp"
 
-#if MANAPIHTTP_QUICHE_DEPENDENCY
+#if MANAPIHTTP_QUICHE_DEPENDENCY && false
 
 struct quiche_conn;
 struct quiche_h3_conn;

@@ -7,6 +7,7 @@
 #include "./std/ManapiTimer.hpp"
 #include "./std/ManapiCancelToken.hpp"
 #include "./http/ManapiFileTransferInfo.hpp"
+#include "./http/ManapiFormData.hpp"
 
 #ifdef MANAPIHTTP_FETCH_SUPPORT
 

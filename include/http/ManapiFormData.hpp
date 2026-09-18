@@ -91,7 +91,7 @@ namespace manapi::net {
 
         MANAPIHTTP_NODISCARD std::string generate_boundary () const;
 
-        manapi::future<manapi::status> data2multipart (std::string boundary, ssize_t buffer_size, std::move_only_function<manapi::future<manapi::status>(manapi::slice_view, bool fin)> write);
+        manapi::future<manapi::status> data2multipart (std::string boundary, std::move_only_function<manapi::future<manapi::status>(manapi::slice_view, bool fin)> write);
     private:
         struct data_file_storage {
             std::string filename;

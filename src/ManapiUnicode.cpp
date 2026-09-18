@@ -216,11 +216,6 @@ std::size_t manapi::unicode::escape_string_size(const manapi::slice_base *sv) {
     return size;
 }
 
-// char manapi::unicode::hex2dec(char a) {
-//     a = static_cast<char> (std::toupper(a));
-//     return static_cast <char>(a >= 'A' ? a - 'A' + 10 : a - '0');
-// }
-
 std::string manapi::unicode::escape_string (std::string_view str) {
     std::string s;
     s.resize(unicode::escape_string_size(str));

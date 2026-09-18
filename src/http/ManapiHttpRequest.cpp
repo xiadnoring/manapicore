@@ -1,768 +1,768 @@
-#include <format>
-#include <fstream>
-#include <memory.h>
-
-#include "http/ManapiHttpMime.hpp"
-#include "http/ManapiHttpRequest.hpp"
-#include "http/ManapiBaseHttp.hpp"
-#include "http/ManapiURLParams.hpp"
-#include "json/ManapiJsonBuilder.hpp"
-#include "std/ManapiParallelRun.hpp"
-#include "../include/ManapiUtils.hpp"
-#include "../include/ManapiDefaultErrors.hpp"
-#include "../include/ManapiHttpStructs.hpp"
-#include "../include/ManapiHttpInternal.hpp"
-
-static manapi::future<manapi::status> manapi__http_req_read_async_body(manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_async_cb handler);
-
-static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_sync_cb handler);
-
-static manapi::json_error::status http_req_prepare_get_params (std::unique_ptr<std::map<std::string, std::string, std::less<>>> &params, manapi::net::http::request_data_t *req_data, const manapi::json_mask *mask) MANAPIHTTP_NOEXCEPT {
-    using namespace manapi;
-
-    try {
-        if (!params) {
-            params = std::make_unique<std::map<std::string, std::string, std::less<>>>();
-
-            if (req_data->divided >= 0) {
-                *params = manapi::net::http::parse_get_params (req_data->path[static_cast<std::size_t>(req_data->divided)]);
-            }
-
-            // verify params
-            if (mask) {
-                auto res = mask->valid(*params);
-                if (!res.ok())
-                    return std::move(res);
-            }
-        }
-        return json_error::status_ok();
-    }
-    catch (std::bad_alloc const &) {
-        return status_resource_exhausted();
-    }
-    catch (std::exception const &e) {
-        manapi_log_error("%s due to %s", "get params:Failed" ,e.what());
-        return status_internal("get params:Failed");
-    }
-}
-
-manapi::net::http::request::request(std::unique_ptr<manapi::net::http::manapi_socket_information> ip_data, manapi::net::http::request_data_t *m_request_data, manapi::net::worker::shared_conn *conn, worker::shared_worker worker)  {
-    this->m_conn = (conn);
-    this->m_ip_data = std::move(ip_data);
-    this->m_request_data = m_request_data;
-    this->m_worker = std::move(worker);
-    this->m_flags = 0;
-}
-
-manapi::net::http::request::~request () = default;
-
-manapi::ctoken manapi::net::http::request::cancellation() {
-    return this->m_conn->get()->cancellation;
-}
-
-const manapi::net::http::manapi_socket_information &manapi::net::http::request::ip_data() const {
-    return *this->m_ip_data;
-}
-
-const std::string &manapi::net::http::request::method() const {
-    return this->m_request_data->method;
-}
-
-int manapi::net::http::request::http() const {
-    return this->m_request_data->http;
-}
-
-MANAPIHTTP_NODISCARD const std::map<std::string, std::string, std::less<>> &manapi::net::http::request::ref_headers () const {
-    return this->m_request_data->headers;
-}
-
-std::map<std::string, std::string, std::less<>> manapi::net::http::request::headers() const {
-    return std::move(this->m_request_data->headers);
-}
-
-manapi::status_or<std::string_view> manapi::net::http::request::param(std::string_view param) const MANAPIHTTP_NOEXCEPT {
-    auto it = this->m_request_data->params.find(param);
-    if (it == this->m_request_data->params.end())
-        return manapi::status_not_found("params:Not found");
-
-    return std::string_view{it->second};
-}
-
-manapi::status_or<std::pair<std::string, std::string>> manapi::net::http::request::param_extract( std::string_view param) MANAPIHTTP_NOEXCEPT {
-    auto it = this->m_request_data->params.find(param);
-    if (it == this->m_request_data->params.end())
-        return manapi::status_not_found("params:Not found");
-
-    auto data = this->m_request_data->params.extract(it);
-    return std::make_pair(std::move(data.key()), std::move(data.mapped()));
-}
-
-manapi::future<manapi::status_or<std::string>> manapi::net::http::request::text() {
-    try {
-        std::string body;
-
-
-        if (this->m_request_data->body_size >= 0) {
-            body.resize(static_cast<std::size_t>(this->m_request_data->body_size));
-
-            size_t j = 0;
-
-            auto rhs = co_await http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
-                [&body, &j] (const char *data, std::size_t size, bool fin) -> ssize_t {
-                memcpy (body.data() + j, data, size);
-                j += size;
-                return static_cast<ssize_t>(size);
-            });
-
-            if (!rhs.ok())
-                co_return std::move(rhs);
-        }
-        else {
-            auto rhs = co_await http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
-                [&body] (const char *data, std::size_t size, bool fin)
-                -> ssize_t { body.append(data, size); return static_cast<ssize_t>(size); });
-
-            if (!rhs.ok())
-                co_return std::move(rhs);
-        }
-
-        co_return std::move(body);
-    }
-    catch (std::bad_alloc const &) {
-        co_return status_resource_exhausted();
-    }
-    catch (std::exception const &e) {
-        manapi_log_error("%s due to %s", "req:Failed", e.what());
-        co_return status_internal("req:Failed");
-    }
-}
-
-manapi::future<manapi::status_or<manapi::slice>> manapi::net::http::request::slice() {
-    try {
-        manapi::slice body;
-
-        auto rhs = co_await ::http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
-            [&body] (const char *data, std::size_t size, bool fin) mutable
-            -> ssize_t {
-                // auto last = body.slices_rbegin();
-                // std::size_t shift;
-                // if (last) {
-                //     shift = last->buff.len - body.rshift();
-                // }
-                // body.resize(body.size() + size);
-                // if (!last) {
-                //     last = body.slices_begin();
-                //     shift = 0;
-                // }
-                // body.copy_from(data, last, shift, size);
-                body.push_back(data, size).unwrap();
-                return static_cast<ssize_t>(size);
-            });
-
-        if (!rhs.ok())
-            co_return std::move(rhs);
-
-        co_return std::move(body);
-    }
-    catch (std::bad_alloc const &) {
-        co_return status_resource_exhausted();
-    }
-    catch (std::exception const &e) {
-        manapi_log_error("%s due to %s", "req:Failed", e.what());
-        co_return status_internal("req:Failed");
-    }
-}
-
-manapi::future<manapi::json_error::status_or<manapi::json>> manapi::net::http::request::json(manapi::json_mask *mask) {
-    return this->json(0, mask);
-}
-
-manapi::future<manapi::json_error::status_or<manapi::json>> manapi::net::http::request::json(uint32_t flags,manapi::json_mask *mask) {
-    try {
-        struct builder_callback_data_t {
-            manapi::json_builder *builder;
-            json_error::status *status;
-        }
-        data_callback{};
-
-        if (mask) {
-            json_builder builder = json_builder (*mask);
-            builder.flags(flags);
-
-            auto status = json_error::status_ok();
-
-            data_callback.builder = &builder;
-            data_callback.status = &status;
-
-            auto res = co_await http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
-                [&data_callback] (const char *data, std::size_t size, bool fin)
-                -> ssize_t {
-                *data_callback.status = data_callback.builder->parse(std::string_view (data, size));
-                if (!*data_callback.status)
-                    return -1;
-
-                return static_cast<ssize_t>(size);
-            });
-
-            if (!status)
-                co_return std::move(status);
-
-            if (!res.ok())
-                co_return json_error::status(std::move(res));
-            auto json_res = builder.get();
-            if (!json_res)
-                co_return std::move(json_res);
-            co_return json_res.unwrap();
-        }
-        else {
-            auto status = json_error::status_ok();
-            json_builder builder = json_builder ();
-
-            data_callback.builder = &builder;
-            data_callback.status = &status;
-
-            auto res = co_await http_req_read_body_( this->m_worker.get(), this->m_conn, this->m_request_data,
-                [&data_callback] (const char *data, std::size_t size, bool fin)
-            -> ssize_t {
-                *data_callback.status = data_callback.builder->parse(std::string_view (data, size));
-                if (!*data_callback.status)
-                    return -1;
-
-                return static_cast<ssize_t>(size);
-            });
-            if (!status)
-                co_return std::move(status);
-
-            if (!res.ok())
-                co_return json_error::status(std::move(res));
-
-            auto json_res = builder.get();
-            if (!json_res)
-                co_return std::move(json_res);
-
-            co_return json_res.unwrap();
-        }
-    }
-    catch (std::bad_alloc const &) {
-        co_return json_error::status(status_resource_exhausted());
-    }
-    catch (std::exception const &e) {
-        manapi_log_error("%s failed due to %s", "req:Json failed", e.what());
-    }
-    co_return json_error::status(status_internal("req:Json failed"));
-}
-
-manapi::future<manapi::status> manapi::net::http::request::form (formdata_recv::onparam_cb_t cb) {
-    try {
-        formdata_recv fdata ([wrk = this->m_worker.get(), conn = this->m_conn, req_data = this->m_request_data]
-                (formdata_recv::req_data_cb_t cb) -> manapi::future<manapi::status> {
-            return ::manapi__http_req_read_async_body (wrk, conn, req_data, std::move(cb));
-        });
-        auto hit = this->m_request_data->headers.find(H_CONTENT_TYPE);
-        co_return co_await fdata.get((hit == this->m_request_data->headers.end() ? std::string_view{} : hit->second),
-            std::move(cb));
-    }
-    catch (std::exception const &e) {
-        manapi_log_error("%s failed due to %s", "req:Form failed", e.what());
-        co_return status_internal("req:Form failed");
-    }
-}
-
-manapi::future<manapi::status> manapi::net::http::request::callback_sync(onrecv_sync_cb callback) {
-    co_return co_await http_req_read_body_( this->m_worker.get(), this->m_conn, this->m_request_data,std::move(callback));
-}
-
-manapi::future<manapi::status> manapi::net::http::request::callback_async(onrecv_async_cb callback) {
-    co_return co_await manapi__http_req_read_async_body( this->m_worker.get(), this->m_conn, this->m_request_data,std::move(callback));
-}
-
-manapi::future<manapi::status> manapi::net::http::request::file(std::string filepath, int flags) {
-    auto status = manapi::fs::fstream::create (std::move(filepath), this->cancellation().sub());
-    if (!status)
-        co_return status.err();
-
-    auto f = status.unwrap();
-
-    auto res = co_await f->open(ev::FS_O_WRONLY|ev::FS_O_CREAT|ev::FS_O_TRUNC, flags);
-
-    if (!res.ok())
-        co_return status_unknown("formdata:Failed to open file");
-
-    res = co_await ::manapi__http_req_read_async_body(this->m_worker.get(), this->m_conn, this->m_request_data,
-        [f] (slice_view buffs, bool fin) mutable
-            -> manapi::future<ssize_t> { return f->write(buffs); });
-
-    co_return std::move(res);
-}
-
-int64_t manapi::net::http::request::left() {
-    return this->m_request_data->body_size;
-}
-
-manapi::json_error::status manapi::net::http::request::verify_get(const manapi::json_mask *mask) MANAPIHTTP_NOEXCEPT {
-    return ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, mask);
-}
-
-manapi::json_error::status_or<std::string_view> manapi::net::http::request::get(std::string_view key) {
-    auto err = ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, nullptr);
-    if (!err)
-        return std::move(err);
-
-    auto it = this->m_get_params->find(key);
-    if (it == this->m_get_params->end())
-        return json_error::status{status_not_found("get params:Not found")};
-
-    return std::string_view{it->second};
-}
-
-manapi::json_error::status_or<std::pair<std::string, std::string>> manapi::net::http::request::get_extract(std::string_view key) {
-    auto err = ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, nullptr);
-    if (!err)
-        return std::move(err);
-
-    auto it = this->m_get_params->find(key);
-    if (it == this->m_get_params->end())
-        return json_error::status{status_not_found("get params:Not found")};
-
-    auto data = this->m_get_params->extract(it);
-    return std::make_pair(std::move(data.key()), std::move(data.mapped()));
-}
-
-manapi::json_error::status manapi::net::http::request::contains_get_param(std::string_view key) {
-    auto err = ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, nullptr);
-    if (!err)
-        return std::move(err);
-
-    if (this->m_get_params->find(key) == this->m_get_params->end())
-        return status_not_found("get params:Not found");
-
-    return status_ok();
-}
-
-manapi::status manapi::net::http::request::available_body_size(int64_t size) {
-    if (this->m_request_data->body_size < 0) {
-        this->m_request_data->body_size = size;
-        this->m_request_data->flags |= internal::REQ_DATA_FLAG_BODY_LIMITED;
-    }
-    else if (this->m_request_data->body_size > size)
-        return manapi::status_failed_precondition("body_size is large");
-    return manapi::status_ok();
-}
-
-bool manapi::net::http::request::contains_header(std::string_view name) {
-    return this->m_request_data->headers.find(name) != this->m_request_data->headers.end();
-}
-
-manapi::status_or<std::string_view> manapi::net::http::request::header(std::string_view name) {
-    auto it = this->m_request_data->headers.find(name);
-    if (it==this->m_request_data->headers.end())
-        return status_not_found("headers:Not found");
-    return std::string_view{it->second};
-}
-
-manapi::status_or<std::pair<std::string, std::string>> manapi::net::http::request::header_extract( std::string_view name) {
-    auto it = this->m_request_data->headers.find(name);
-    if (it==this->m_request_data->headers.end())
-        return status_not_found("headers:Not found");
-    auto data = this->m_request_data->headers.extract(it);
-    return std::make_pair(std::move(data.key()), std::move(data.mapped()));
-}
-
-void manapi::net::http::request::stop_propagation() {
-    this->propagation(false);
-}
-
-void manapi::net::http::request::propagation(bool state) {
-    if (!state) {
-        this->m_flags |= internal::REQUEST_FLAG_IS_NO_PROPAGATION;
-    }
-    else if (this->m_flags & internal::REQUEST_FLAG_IS_NO_PROPAGATION) {
-        this->m_flags ^= internal::REQUEST_FLAG_IS_NO_PROPAGATION;
-    }
-}
-
-manapi::future<manapi::status_or<std::map<std::string, std::string, std::less<>>>> manapi::net::http::request::trailers () {
-    auto &conn = *this->m_conn;
-    auto flags = this->m_worker->event_flags(conn);
-
-    if (!(flags & worker::base::CONN_RECV_END)) {
-        using promise = async::promise_sync<manapi::status>;
-
-        auto status = co_await promise ([this] (promise::resolve_t resolve, promise::reject_t reject) -> void {
-            auto &conn = *this->m_conn;
-            this->m_worker->event_on(conn,
-                [resolve = std::move(resolve)] (const worker::shared_conn & conn, int flags, const char *buffer, ssize_t nsize, worker::ibuffpool_t *p) -> void {
-
-                if (flags & ev::DISCONNECT) {
-                    resolve(manapi::status_aborted("connection closed"));
-                    return;
-                }
-
-                if (buffer && nsize) {
-                    resolve(manapi::status_data_loss("data was received"));
-                }
-
-                if (flags & worker::base::CONN_RECV_END) {
-                    resolve(manapi::status_ok());
-                }
-            });
-
-            this->m_worker->event_flags(conn, ev::READ);
-        });
-
-        if (!status)
-            co_return std::move(status);
-    }
-
-
-    co_return std::move(this->m_request_data->trailers);
-}
-
-bool manapi::net::http::request::propagation() const {
-    return !(this->m_flags & internal::REQUEST_FLAG_IS_NO_PROPAGATION);
-}
-
-std::string_view manapi::net::http::request::url() const {
-    return this->m_request_data->uri;
-}
-
-const std::vector<std::string> &manapi::net::http::request::path() const {
-    return this->m_request_data->path;
-}
-
-bool manapi::net::http::request::has_body() const {
-    if (this->m_request_data->body_size == 0)
-        return false;
-
-    if (!(this->m_flags & worker::base::CONN_RECV_END))
-        return true;
-
-    return !!this->m_worker->wrk_recv_count(*this->m_conn);
-}
-
-static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_sync_cb handler) {
-    using namespace manapi;
-    using namespace manapi::net;
-    using namespace manapi::net::http;
-    using promise = manapi::async::promise_sync<manapi::status>;
-
-    manapi::status status;
-    worker->waiting(*conn, true);
-
-    struct manapi__ctx_cb_t {
-        net::worker::base *worker;
-        request_data_t *req;
-        promise::resolve_t resolve;
-        request::onrecv_sync_cb handler;
-        worker::shared_conn conn;
-        int pflags;
-        worker::worker_watcher_cb prev;
-    } ctx_cb {};
-
-    ctx_cb.worker = worker;
-    ctx_cb.req = req;
-    ctx_cb.handler = std::move(handler);
-    ctx_cb.conn = *conn;
-
-
-    try {
-        status = co_await promise ([&ctx_cb] (promise::resolve_t resolve, promise::reject_t reject)
-            -> void {
-            ctx_cb.resolve = std::move(resolve);
-
-            worker::worker_watcher_cb cb =
-                [&ctx_cb] (
-                const worker::shared_conn & conn, int m_flags, const char *buffer, std::size_t nsize, worker::ibuffpool_t *p) mutable -> void {
-                    if (m_flags & ev::DISCONNECT) {
-                        ctx_cb.resolve (manapi::status_aborted("read_body:Connection was closed"));
-                        goto finish;
-                    }
-                    if (m_flags & ev::READ) {
-                        try {
-                            std::size_t size;
-                            bool flg = false;
-
-                            if (ctx_cb.req->body_size >= 0) {
-                                size = std::min(static_cast<std::size_t>(ctx_cb.req->body_size), (nsize));
-                                if (static_cast<std::size_t>(ctx_cb.req->body_size) == size) {
-                                    flg = true;
-                                    ctx_cb.worker->event_toggle(conn, true, worker::base::CONN_RECV_END);
-                                }
-                            }
-                            else
-                                size = (nsize);
-
-                            std::size_t rhs = 0;
-                            while (rhs < size) {
-                                auto const copy = size - rhs;
-
-                                auto const res = ctx_cb.handler (buffer + rhs, copy, flg);
-                                if (res >= 0) {
-                                    if (copy != static_cast<std::size_t>(res)) {
-                                        ctx_cb.resolve(manapi::status_internal("read_body:Something gets wrong"));
-                                        goto finish;
-                                    }
-
-                                    rhs += static_cast<std::size_t>(res);
-                                    ctx_cb.req->body_size -= res;
-
-                                    continue;
-                                }
-                                ctx_cb.resolve (manapi::status_internal("read_body:Something gets wrong"));
-                                goto finish;
-                            }
-
-                            if (!ctx_cb.req->body_size) {
-                                auto const copy = (nsize - rhs);
-                                if (ctx_cb.req->flags & http::internal::REQ_DATA_FLAG_BODY_LIMITED) {
-                                    if (copy) {
-                                        ctx_cb.resolve(manapi::status_out_of_range("read_body:Too much data"));
-                                    }
-                                    else {
-                                        ctx_cb.resolve(manapi::status_ok());
-                                    }
-                                    goto finish;
-                                }
-                                else {
-                                    if (copy) {
-                                        ctx_cb.worker->feed_event(conn, worker::base::CONN_TOP_READ,
-                                               static_cast<const char *>(buffer + rhs), copy, nullptr);
-                                    }
-
-                                    ctx_cb.resolve(manapi::status_ok());
-                                    goto finish;
-                                }
-                            }
-                        }
-                        catch (std::exception const &e) {
-                            manapi_log_error("%s failed due to %s", "read_body:Failed", e.what());
-                            ctx_cb.resolve (manapi::status_internal("read_body:Something gets wrong"));
-                            goto finish;
-                        }
-                    }
-                    if (m_flags & worker::base::CONN_RECV_END) {
-                        ctx_cb.resolve(manapi::status_ok());
-                        goto finish;
-                    }
-
-                    return;
-
-                    finish: {
-                        auto const wrk = ctx_cb.worker;
-                        wrk->event_on(conn, nullptr);
-                        wrk->event_flags(conn, 0);
-                    }
-            };
-
-            ctx_cb.prev = ctx_cb.worker->event_on(ctx_cb.conn, std::move(cb));
-            ctx_cb.pflags = ctx_cb.worker->event_flags(ctx_cb.conn, ev::READ);
-        });
-    }
-    catch (std::bad_alloc const &) {
-        status = status_resource_exhausted();
-    }
-    catch (std::exception const &e) {
-        manapi_log_error("%s due to %s", "read_body:Failed", e.what());
-        status = status_internal("read_body:Failed");
-    }
-
-    worker->waiting(*conn, false);
-
-    if (ctx_cb.prev) {
-        worker->event_on(*conn, std::move(ctx_cb.prev));
-        worker->event_flags(*conn, ctx_cb.pflags);
-    }
-
-    co_return std::move(status);
-}
-
-static manapi::future<manapi::status> manapi__http_req_read_async_body(manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_async_cb handler) {
-    using namespace manapi;
-    using namespace manapi::net;
-    using namespace manapi::net::http;
-    using promise = manapi::async::promise_sync<manapi::status>;
-    using handler_t = decltype(handler);
-
-    struct manapi__ctx_cb_t {
-        net::worker::base *worker;
-        request_data_t *req;
-        promise::resolve_t resolve;
-        worker::shared_conn conn;
-        handler_t handler;
-        worker::worker_watcher_cb prev{nullptr};
-        int pflags;
-        int cnt;
-        async::mutex mx;
-    } ctx_cb {};
-
-    ctx_cb.handler = std::move(handler);
-    ctx_cb.worker = worker;
-    ctx_cb.req = req;
-    ctx_cb.conn = *conn;
-
-    manapi::status status;
-
-
-    worker->waiting(*conn, true);
-
-
-    try {
-        status = co_await promise ([&ctx_cb] (promise::resolve_t resolve, promise::reject_t reject)
-            -> void {
-            ctx_cb.resolve = std::move(resolve);
-
-            worker::worker_watcher_cb cb =
-                [&ctx_cb] (
-                const worker::shared_conn & conn, int m_flags, const char * buffer, std::size_t nsize, worker::ibuffpool_t *p) mutable -> void {
-                    if (m_flags & ev::DISCONNECT) {
-                        ctx_cb.resolve(manapi::status_aborted("read_async_body:Connection was closed"));
-                        goto finish;
-                    }
-
-                    if (m_flags & ev::READ) {
-                        slice buffs = manapi::async::memory_fabric()->slice(nsize).unwrap();
-                        buffs.copy_from(buffer, 0, nsize).unwrap();
-
-                        while (ctx_cb.worker->wrk_recv_count(ctx_cb.conn))
-                            buffs.push_back(ctx_cb.worker->wrk_recv_first_buffer(ctx_cb.conn)).unwrap();
-
-                        if (ctx_cb.worker->event_flags(conn) & worker::base::CONN_RECV_END)
-                            m_flags |= worker::base::CONN_RECV_END;
-
-                        ctx_cb.worker->waiting(conn, false);
-                        ctx_cb.worker->event_toggle(conn, false, ev::READ);
-                        ctx_cb.cnt++;
-                        manapi::async::run (manapi::async::invoke(
-                            [] (const worker::shared_conn & conn, manapi::slice buffs, manapi__ctx_cb_t *ctx_cb, int m_flags) -> manapi::future<> {
-                                try {
-
-                                    std::size_t size;
-                                    bool flg = false;
-                                    if (ctx_cb->req->body_size >= 0) {
-                                        size = std::min(static_cast<std::size_t>(ctx_cb->req->body_size),  (buffs.size()));
-
-                                        if (static_cast<std::size_t>(ctx_cb->req->body_size) == size) {
-                                            flg = true;
-                                            ctx_cb->worker->event_toggle(conn, true, worker::base::CONN_RECV_END);
-                                        }
-                                    }
-                                    else {
-                                        size = (buffs.size());
-                                    }
-
-                                    auto buffsview = buffs.subslice(0, size).unwrap();
-
-                                    std::size_t rhs = 0;
-                                    while (rhs < size) {
-                                        auto const copy = size - rhs;
-
-                                        auto const res = co_await ctx_cb->handler (buffsview, flg);
-                                        if (res >= 0) {
-                                            if (copy != static_cast<std::size_t>(res)) {
-                                                ctx_cb->resolve(manapi::status_internal("read_async_body:Something gets wrong"));
-                                                goto finish;
-                                            }
-
-                                            rhs += static_cast<std::size_t>(res);
-                                            ctx_cb->req->body_size -= res;
-
-                                            buffsview = buffs.subslice(static_cast<std::size_t>(res)).unwrap();
-
-                                            continue;
-                                        }
-
-                                        ctx_cb->resolve (manapi::status_internal("read_async_body:Something gets wrong"));
-                                        goto finish;
-                                    }
-
-                                    if (!ctx_cb->req->body_size) {
-                                        auto const copy = (buffs.size() - rhs);
-
-                                        if (ctx_cb->req->flags & http::internal::REQ_DATA_FLAG_BODY_LIMITED) {
-                                            if (copy) {
-                                                ctx_cb->resolve(manapi::status_out_of_range("read_async_body:Too much data"));
-                                            } else {
-                                                ctx_cb->resolve(manapi::status_ok());
-                                            }
-                                            goto finish;
-                                        }
-                                        else {
-                                            if (copy) {
-                                                for (auto it = buffsview.begin(); it != buffsview.end(); ++it) {
-                                                    ctx_cb->worker->feed_event(ctx_cb->conn, worker::base::CONN_TOP_READ,
-                                                        static_cast<const char *>(it.buffer()), it.size(), nullptr);
-                                                }
-                                            }
-                                            ctx_cb->resolve(manapi::status_ok());
-                                            goto finish;
-                                        }
-                                    }
-
-                                }
-                                catch (std::exception const &e) {
-                                    manapi_log_error("%s due to %s", "read_async_body:Failed", e.what());
-                                    goto finish;
-                                }
-
-                                ctx_cb->worker->waiting(conn, true);
-                                ctx_cb->worker->event_toggle(conn, true, ev::READ);
-                                ctx_cb->cnt--;
-                                ctx_cb->mx.unlock();
-
-                                co_return;
-
-                                finish: {
-                                    auto const zctx_cb = ctx_cb;
-                                    zctx_cb->worker->event_on(conn, nullptr);
-                                    zctx_cb->worker->event_flags(conn, 0);
-                                    zctx_cb->cnt--;
-                                    zctx_cb->mx.unlock();
-                                }
-                        }, ctx_cb.conn, std::move(buffs), &ctx_cb, m_flags));
-                    }
-                    else if (m_flags & worker::base::CONN_RECV_END) {
-                        ctx_cb.resolve(manapi::status_ok());
-                        goto finish;
-                    }
-
-                    return;
-                    finish: {
-                        auto const wrk = ctx_cb.worker;
-
-                        wrk->event_on(conn, nullptr);
-                        wrk->event_flags(conn, 0);
-                    }
-            };
-
-            ctx_cb.prev = ctx_cb.worker->event_on(ctx_cb.conn, std::move(cb));
-            ctx_cb.pflags = ctx_cb.worker->event_flags(ctx_cb.conn, ev::READ);
-
-
-        });
-    }
-    catch (std::bad_alloc const &) {
-        status = status_resource_exhausted();
-    }
-    catch (std::exception const &e) {
-        manapi_log_error("%s due to %s", "read_async_body:Failed", e.what());
-        status = manapi::status_internal("read_async_body:Failed");
-    }
-
-    while (true) {
-        if (ctx_cb.cnt) {
-            co_await ctx_cb.mx.lock();
-            continue;
-        }
-
-        break;
-    }
-
-    worker->waiting(*conn, false);
-
-    if (ctx_cb.prev) {
-        worker->event_on(ctx_cb.conn, std::move(ctx_cb.prev));
-        worker->event_flags(ctx_cb.conn, ctx_cb.pflags);
-    }
-
-    co_return std::move(status);
-}
+//#include <format>
+//#include <fstream>
+//#include <memory.h>
+//
+//#include "http/ManapiHttpMime.hpp"
+//#include "http/ManapiHttpRequest.hpp"
+//#include "http/ManapiBaseHttp.hpp"
+//#include "http/ManapiURLParams.hpp"
+//#include "json/ManapiJsonBuilder.hpp"
+//#include "std/ManapiParallelRun.hpp"
+//#include "../include/ManapiUtils.hpp"
+//#include "../include/ManapiDefaultErrors.hpp"
+//#include "../include/ManapiHttpStructs.hpp"
+//#include "../include/ManapiHttpInternal.hpp"
+//
+//static manapi::future<manapi::status> manapi__http_req_read_async_body(manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_async_cb handler);
+//
+//static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_sync_cb handler);
+//
+//static manapi::json_error::status http_req_prepare_get_params (std::unique_ptr<std::map<std::string, std::string, std::less<>>> &params, manapi::net::http::request_data_t *req_data, const manapi::json_mask *mask) MANAPIHTTP_NOEXCEPT {
+//    using namespace manapi;
+//
+//    try {
+//        if (!params) {
+//            params = std::make_unique<std::map<std::string, std::string, std::less<>>>();
+//
+//            if (req_data->divided >= 0) {
+//                *params = manapi::net::http::parse_get_params (req_data->path[static_cast<std::size_t>(req_data->divided)]);
+//            }
+//
+//            // verify params
+//            if (mask) {
+//                auto res = mask->valid(*params);
+//                if (!res.ok())
+//                    return std::move(res);
+//            }
+//        }
+//        return json_error::status_ok();
+//    }
+//    catch (std::bad_alloc const &) {
+//        return status_resource_exhausted();
+//    }
+//    catch (std::exception const &e) {
+//        manapi_log_error("%s due to %s", "get params:Failed" ,e.what());
+//        return status_internal("get params:Failed");
+//    }
+//}
+//
+//manapi::net::http::request::request(std::unique_ptr<manapi::net::http::manapi_socket_information> ip_data, manapi::net::http::request_data_t *m_request_data, manapi::net::worker::shared_conn *conn, worker::shared_worker worker)  {
+//    this->m_conn = (conn);
+//    this->m_ip_data = std::move(ip_data);
+//    this->m_request_data = m_request_data;
+//    this->m_worker = std::move(worker);
+//    this->m_flags = 0;
+//}
+//
+//manapi::net::http::request::~request () = default;
+//
+//manapi::ctoken manapi::net::http::request::cancellation() {
+//    return this->m_conn->get()->cancellation;
+//}
+//
+//const manapi::net::http::manapi_socket_information &manapi::net::http::request::ip_data() const {
+//    return *this->m_ip_data;
+//}
+//
+//const std::string &manapi::net::http::request::method() const {
+//    return this->m_request_data->method;
+//}
+//
+//int manapi::net::http::request::http() const {
+//    return this->m_request_data->http;
+//}
+//
+//MANAPIHTTP_NODISCARD const std::map<std::string, std::string, std::less<>> &manapi::net::http::request::ref_headers () const {
+//    return this->m_request_data->headers;
+//}
+//
+//std::map<std::string, std::string, std::less<>> manapi::net::http::request::headers() const {
+//    return std::move(this->m_request_data->headers);
+//}
+//
+//manapi::status_or<std::string_view> manapi::net::http::request::param(std::string_view param) const MANAPIHTTP_NOEXCEPT {
+//    auto it = this->m_request_data->params.find(param);
+//    if (it == this->m_request_data->params.end())
+//        return manapi::status_not_found("params:Not found");
+//
+//    return std::string_view{it->second};
+//}
+//
+//manapi::status_or<std::pair<std::string, std::string>> manapi::net::http::request::param_extract( std::string_view param) MANAPIHTTP_NOEXCEPT {
+//    auto it = this->m_request_data->params.find(param);
+//    if (it == this->m_request_data->params.end())
+//        return manapi::status_not_found("params:Not found");
+//
+//    auto data = this->m_request_data->params.extract(it);
+//    return std::make_pair(std::move(data.key()), std::move(data.mapped()));
+//}
+//
+//manapi::future<manapi::status_or<std::string>> manapi::net::http::request::text() {
+//    try {
+//        std::string body;
+//
+//
+//        if (this->m_request_data->body_size >= 0) {
+//            body.resize(static_cast<std::size_t>(this->m_request_data->body_size));
+//
+//            size_t j = 0;
+//
+//            auto rhs = co_await http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
+//                [&body, &j] (const char *data, std::size_t size, bool fin) -> ssize_t {
+//                memcpy (body.data() + j, data, size);
+//                j += size;
+//                return static_cast<ssize_t>(size);
+//            });
+//
+//            if (!rhs.ok())
+//                co_return std::move(rhs);
+//        }
+//        else {
+//            auto rhs = co_await http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
+//                [&body] (const char *data, std::size_t size, bool fin)
+//                -> ssize_t { body.append(data, size); return static_cast<ssize_t>(size); });
+//
+//            if (!rhs.ok())
+//                co_return std::move(rhs);
+//        }
+//
+//        co_return std::move(body);
+//    }
+//    catch (std::bad_alloc const &) {
+//        co_return status_resource_exhausted();
+//    }
+//    catch (std::exception const &e) {
+//        manapi_log_error("%s due to %s", "req:Failed", e.what());
+//        co_return status_internal("req:Failed");
+//    }
+//}
+//
+//manapi::future<manapi::status_or<manapi::slice>> manapi::net::http::request::slice() {
+//    try {
+//        manapi::slice body;
+//
+//        auto rhs = co_await ::http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
+//            [&body] (const char *data, std::size_t size, bool fin) mutable
+//            -> ssize_t {
+//                // auto last = body.slices_rbegin();
+//                // std::size_t shift;
+//                // if (last) {
+//                //     shift = last->buff.len - body.rshift();
+//                // }
+//                // body.resize(body.size() + size);
+//                // if (!last) {
+//                //     last = body.slices_begin();
+//                //     shift = 0;
+//                // }
+//                // body.copy_from(data, last, shift, size);
+//                body.push_back(data, size).unwrap();
+//                return static_cast<ssize_t>(size);
+//            });
+//
+//        if (!rhs.ok())
+//            co_return std::move(rhs);
+//
+//        co_return std::move(body);
+//    }
+//    catch (std::bad_alloc const &) {
+//        co_return status_resource_exhausted();
+//    }
+//    catch (std::exception const &e) {
+//        manapi_log_error("%s due to %s", "req:Failed", e.what());
+//        co_return status_internal("req:Failed");
+//    }
+//}
+//
+//manapi::future<manapi::json_error::status_or<manapi::json>> manapi::net::http::request::json(manapi::json_mask *mask) {
+//    return this->json(0, mask);
+//}
+//
+//manapi::future<manapi::json_error::status_or<manapi::json>> manapi::net::http::request::json(uint32_t flags,manapi::json_mask *mask) {
+//    try {
+//        struct builder_callback_data_t {
+//            manapi::json_builder *builder;
+//            json_error::status *status;
+//        }
+//        data_callback{};
+//
+//        if (mask) {
+//            json_builder builder = json_builder (*mask);
+//            builder.flags(flags);
+//
+//            auto status = json_error::status_ok();
+//
+//            data_callback.builder = &builder;
+//            data_callback.status = &status;
+//
+//            auto res = co_await http_req_read_body_(this->m_worker.get(), this->m_conn, this->m_request_data,
+//                [&data_callback] (const char *data, std::size_t size, bool fin)
+//                -> ssize_t {
+//                *data_callback.status = data_callback.builder->parse(std::string_view (data, size));
+//                if (!*data_callback.status)
+//                    return -1;
+//
+//                return static_cast<ssize_t>(size);
+//            });
+//
+//            if (!status)
+//                co_return std::move(status);
+//
+//            if (!res.ok())
+//                co_return json_error::status(std::move(res));
+//            auto json_res = builder.get();
+//            if (!json_res)
+//                co_return std::move(json_res);
+//            co_return json_res.unwrap();
+//        }
+//        else {
+//            auto status = json_error::status_ok();
+//            json_builder builder = json_builder ();
+//
+//            data_callback.builder = &builder;
+//            data_callback.status = &status;
+//
+//            auto res = co_await http_req_read_body_( this->m_worker.get(), this->m_conn, this->m_request_data,
+//                [&data_callback] (const char *data, std::size_t size, bool fin)
+//            -> ssize_t {
+//                *data_callback.status = data_callback.builder->parse(std::string_view (data, size));
+//                if (!*data_callback.status)
+//                    return -1;
+//
+//                return static_cast<ssize_t>(size);
+//            });
+//            if (!status)
+//                co_return std::move(status);
+//
+//            if (!res.ok())
+//                co_return json_error::status(std::move(res));
+//
+//            auto json_res = builder.get();
+//            if (!json_res)
+//                co_return std::move(json_res);
+//
+//            co_return json_res.unwrap();
+//        }
+//    }
+//    catch (std::bad_alloc const &) {
+//        co_return json_error::status(status_resource_exhausted());
+//    }
+//    catch (std::exception const &e) {
+//        manapi_log_error("%s failed due to %s", "req:Json failed", e.what());
+//    }
+//    co_return json_error::status(status_internal("req:Json failed"));
+//}
+//
+//manapi::future<manapi::status> manapi::net::http::request::form (formdata_recv::onparam_cb_t cb) {
+//    try {
+//        formdata_recv fdata ([wrk = this->m_worker.get(), conn = this->m_conn, req_data = this->m_request_data]
+//                (formdata_recv::req_data_cb_t cb) -> manapi::future<manapi::status> {
+//            return ::manapi__http_req_read_async_body (wrk, conn, req_data, std::move(cb));
+//        });
+//        auto hit = this->m_request_data->headers.find(H_CONTENT_TYPE);
+//        co_return co_await fdata.get((hit == this->m_request_data->headers.end() ? std::string_view{} : hit->second),
+//            std::move(cb));
+//    }
+//    catch (std::exception const &e) {
+//        manapi_log_error("%s failed due to %s", "req:Form failed", e.what());
+//        co_return status_internal("req:Form failed");
+//    }
+//}
+//
+//manapi::future<manapi::status> manapi::net::http::request::callback_sync(onrecv_sync_cb callback) {
+//    co_return co_await http_req_read_body_( this->m_worker.get(), this->m_conn, this->m_request_data,std::move(callback));
+//}
+//
+//manapi::future<manapi::status> manapi::net::http::request::callback_async(onrecv_async_cb callback) {
+//    co_return co_await manapi__http_req_read_async_body( this->m_worker.get(), this->m_conn, this->m_request_data,std::move(callback));
+//}
+//
+//manapi::future<manapi::status> manapi::net::http::request::file(std::string filepath, int flags) {
+//    auto status = manapi::fs::fstream::create (std::move(filepath), this->cancellation().sub());
+//    if (!status)
+//        co_return status.err();
+//
+//    auto f = status.unwrap();
+//
+//    auto res = co_await f->open(ev::FS_O_WRONLY|ev::FS_O_CREAT|ev::FS_O_TRUNC, flags);
+//
+//    if (!res.ok())
+//        co_return status_unknown("formdata:Failed to open file");
+//
+//    res = co_await ::manapi__http_req_read_async_body(this->m_worker.get(), this->m_conn, this->m_request_data,
+//        [f] (slice_view buffs, bool fin) mutable
+//            -> manapi::future<ssize_t> { return f->write(buffs); });
+//
+//    co_return std::move(res);
+//}
+//
+//int64_t manapi::net::http::request::left() {
+//    return this->m_request_data->body_size;
+//}
+//
+//manapi::json_error::status manapi::net::http::request::verify_get(const manapi::json_mask *mask) MANAPIHTTP_NOEXCEPT {
+//    return ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, mask);
+//}
+//
+//manapi::json_error::status_or<std::string_view> manapi::net::http::request::get(std::string_view key) {
+//    auto err = ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, nullptr);
+//    if (!err)
+//        return std::move(err);
+//
+//    auto it = this->m_get_params->find(key);
+//    if (it == this->m_get_params->end())
+//        return json_error::status{status_not_found("get params:Not found")};
+//
+//    return std::string_view{it->second};
+//}
+//
+//manapi::json_error::status_or<std::pair<std::string, std::string>> manapi::net::http::request::get_extract(std::string_view key) {
+//    auto err = ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, nullptr);
+//    if (!err)
+//        return std::move(err);
+//
+//    auto it = this->m_get_params->find(key);
+//    if (it == this->m_get_params->end())
+//        return json_error::status{status_not_found("get params:Not found")};
+//
+//    auto data = this->m_get_params->extract(it);
+//    return std::make_pair(std::move(data.key()), std::move(data.mapped()));
+//}
+//
+//manapi::json_error::status manapi::net::http::request::contains_get_param(std::string_view key) {
+//    auto err = ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, nullptr);
+//    if (!err)
+//        return std::move(err);
+//
+//    if (this->m_get_params->find(key) == this->m_get_params->end())
+//        return status_not_found("get params:Not found");
+//
+//    return status_ok();
+//}
+//
+//manapi::status manapi::net::http::request::available_body_size(int64_t size) {
+//    if (this->m_request_data->body_size < 0) {
+//        this->m_request_data->body_size = size;
+//        this->m_request_data->flags |= internal::REQ_DATA_FLAG_BODY_LIMITED;
+//    }
+//    else if (this->m_request_data->body_size > size)
+//        return manapi::status_failed_precondition("body_size is large");
+//    return manapi::status_ok();
+//}
+//
+//bool manapi::net::http::request::contains_header(std::string_view name) {
+//    return this->m_request_data->headers.find(name) != this->m_request_data->headers.end();
+//}
+//
+//manapi::status_or<std::string_view> manapi::net::http::request::header(std::string_view name) {
+//    auto it = this->m_request_data->headers.find(name);
+//    if (it==this->m_request_data->headers.end())
+//        return status_not_found("headers:Not found");
+//    return std::string_view{it->second};
+//}
+//
+//manapi::status_or<std::pair<std::string, std::string>> manapi::net::http::request::header_extract( std::string_view name) {
+//    auto it = this->m_request_data->headers.find(name);
+//    if (it==this->m_request_data->headers.end())
+//        return status_not_found("headers:Not found");
+//    auto data = this->m_request_data->headers.extract(it);
+//    return std::make_pair(std::move(data.key()), std::move(data.mapped()));
+//}
+//
+//void manapi::net::http::request::stop_propagation() {
+//    this->propagation(false);
+//}
+//
+//void manapi::net::http::request::propagation(bool state) {
+//    if (!state) {
+//        this->m_flags |= internal::REQUEST_FLAG_IS_NO_PROPAGATION;
+//    }
+//    else if (this->m_flags & internal::REQUEST_FLAG_IS_NO_PROPAGATION) {
+//        this->m_flags ^= internal::REQUEST_FLAG_IS_NO_PROPAGATION;
+//    }
+//}
+//
+//manapi::future<manapi::status_or<std::map<std::string, std::string, std::less<>>>> manapi::net::http::request::trailers () {
+//    auto &conn = *this->m_conn;
+//    auto flags = this->m_worker->event_flags(conn);
+//
+//    if (!(flags & worker::base::CONN_RECV_END)) {
+//        using promise = async::promise_sync<manapi::status>;
+//
+//        auto status = co_await promise ([this] (promise::resolve_t resolve, promise::reject_t reject) -> void {
+//            auto &conn = *this->m_conn;
+//            this->m_worker->event_on(conn,
+//                [resolve = std::move(resolve)] (const worker::shared_conn & conn, int flags, const char *buffer, ssize_t nsize, worker::ibuffpool_t *p) -> void {
+//
+//                if (flags & ev::DISCONNECT) {
+//                    resolve(manapi::status_aborted("connection closed"));
+//                    return;
+//                }
+//
+//                if (buffer && nsize) {
+//                    resolve(manapi::status_data_loss("data was received"));
+//                }
+//
+//                if (flags & worker::base::CONN_RECV_END) {
+//                    resolve(manapi::status_ok());
+//                }
+//            });
+//
+//            this->m_worker->event_flags(conn, ev::READ);
+//        });
+//
+//        if (!status)
+//            co_return std::move(status);
+//    }
+//
+//
+//    co_return std::move(this->m_request_data->trailers);
+//}
+//
+//bool manapi::net::http::request::propagation() const {
+//    return !(this->m_flags & internal::REQUEST_FLAG_IS_NO_PROPAGATION);
+//}
+//
+//std::string_view manapi::net::http::request::url() const {
+//    return this->m_request_data->uri;
+//}
+//
+//const std::vector<std::string> &manapi::net::http::request::path() const {
+//    return this->m_request_data->path;
+//}
+//
+//bool manapi::net::http::request::has_body() const {
+//    if (this->m_request_data->body_size == 0)
+//        return false;
+//
+//    if (!(this->m_flags & worker::base::CONN_RECV_END))
+//        return true;
+//
+//    return !!this->m_worker->wrk_recv_count(*this->m_conn);
+//}
+//
+//static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_sync_cb handler) {
+//    using namespace manapi;
+//    using namespace manapi::net;
+//    using namespace manapi::net::http;
+//    using promise = manapi::async::promise_sync<manapi::status>;
+//
+//    manapi::status status;
+//    worker->waiting(*conn, true);
+//
+//    struct manapi__ctx_cb_t {
+//        net::worker::base *worker;
+//        request_data_t *req;
+//        promise::resolve_t resolve;
+//        request::onrecv_sync_cb handler;
+//        worker::shared_conn conn;
+//        int pflags;
+//        worker::worker_watcher_cb prev;
+//    } ctx_cb {};
+//
+//    ctx_cb.worker = worker;
+//    ctx_cb.req = req;
+//    ctx_cb.handler = std::move(handler);
+//    ctx_cb.conn = *conn;
+//
+//
+//    try {
+//        status = co_await promise ([&ctx_cb] (promise::resolve_t resolve, promise::reject_t reject)
+//            -> void {
+//            ctx_cb.resolve = std::move(resolve);
+//
+//            worker::worker_watcher_cb cb =
+//                [&ctx_cb] (
+//                const worker::shared_conn & conn, int m_flags, const char *buffer, std::size_t nsize, worker::ibuffpool_t *p) mutable -> void {
+//                    if (m_flags & ev::DISCONNECT) {
+//                        ctx_cb.resolve (manapi::status_aborted("read_body:Connection was closed"));
+//                        goto finish;
+//                    }
+//                    if (m_flags & ev::READ) {
+//                        try {
+//                            std::size_t size;
+//                            bool flg = false;
+//
+//                            if (ctx_cb.req->body_size >= 0) {
+//                                size = std::min(static_cast<std::size_t>(ctx_cb.req->body_size), (nsize));
+//                                if (static_cast<std::size_t>(ctx_cb.req->body_size) == size) {
+//                                    flg = true;
+//                                    ctx_cb.worker->event_toggle(conn, true, worker::base::CONN_RECV_END);
+//                                }
+//                            }
+//                            else
+//                                size = (nsize);
+//
+//                            std::size_t rhs = 0;
+//                            while (rhs < size) {
+//                                auto const copy = size - rhs;
+//
+//                                auto const res = ctx_cb.handler (buffer + rhs, copy, flg);
+//                                if (res >= 0) {
+//                                    if (copy != static_cast<std::size_t>(res)) {
+//                                        ctx_cb.resolve(manapi::status_internal("read_body:Something gets wrong"));
+//                                        goto finish;
+//                                    }
+//
+//                                    rhs += static_cast<std::size_t>(res);
+//                                    ctx_cb.req->body_size -= res;
+//
+//                                    continue;
+//                                }
+//                                ctx_cb.resolve (manapi::status_internal("read_body:Something gets wrong"));
+//                                goto finish;
+//                            }
+//
+//                            if (!ctx_cb.req->body_size) {
+//                                auto const copy = (nsize - rhs);
+//                                if (ctx_cb.req->flags & http::internal::REQ_DATA_FLAG_BODY_LIMITED) {
+//                                    if (copy) {
+//                                        ctx_cb.resolve(manapi::status_out_of_range("read_body:Too much data"));
+//                                    }
+//                                    else {
+//                                        ctx_cb.resolve(manapi::status_ok());
+//                                    }
+//                                    goto finish;
+//                                }
+//                                else {
+//                                    if (copy) {
+//                                        ctx_cb.worker->feed_event(conn, worker::base::CONN_TOP_READ,
+//                                               static_cast<const char *>(buffer + rhs), copy, nullptr);
+//                                    }
+//
+//                                    ctx_cb.resolve(manapi::status_ok());
+//                                    goto finish;
+//                                }
+//                            }
+//                        }
+//                        catch (std::exception const &e) {
+//                            manapi_log_error("%s failed due to %s", "read_body:Failed", e.what());
+//                            ctx_cb.resolve (manapi::status_internal("read_body:Something gets wrong"));
+//                            goto finish;
+//                        }
+//                    }
+//                    if (m_flags & worker::base::CONN_RECV_END) {
+//                        ctx_cb.resolve(manapi::status_ok());
+//                        goto finish;
+//                    }
+//
+//                    return;
+//
+//                    finish: {
+//                        auto const wrk = ctx_cb.worker;
+//                        wrk->event_on(conn, nullptr);
+//                        wrk->event_flags(conn, 0);
+//                    }
+//            };
+//
+//            ctx_cb.prev = ctx_cb.worker->event_on(ctx_cb.conn, std::move(cb));
+//            ctx_cb.pflags = ctx_cb.worker->event_flags(ctx_cb.conn, ev::READ);
+//        });
+//    }
+//    catch (std::bad_alloc const &) {
+//        status = status_resource_exhausted();
+//    }
+//    catch (std::exception const &e) {
+//        manapi_log_error("%s due to %s", "read_body:Failed", e.what());
+//        status = status_internal("read_body:Failed");
+//    }
+//
+//    worker->waiting(*conn, false);
+//
+//    if (ctx_cb.prev) {
+//        worker->event_on(*conn, std::move(ctx_cb.prev));
+//        worker->event_flags(*conn, ctx_cb.pflags);
+//    }
+//
+//    co_return std::move(status);
+//}
+//
+//static manapi::future<manapi::status> manapi__http_req_read_async_body(manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_async_cb handler) {
+//    using namespace manapi;
+//    using namespace manapi::net;
+//    using namespace manapi::net::http;
+//    using promise = manapi::async::promise_sync<manapi::status>;
+//    using handler_t = decltype(handler);
+//
+//    struct manapi__ctx_cb_t {
+//        net::worker::base *worker;
+//        request_data_t *req;
+//        promise::resolve_t resolve;
+//        worker::shared_conn conn;
+//        handler_t handler;
+//        worker::worker_watcher_cb prev{nullptr};
+//        int pflags;
+//        int cnt;
+//        async::mutex mx;
+//    } ctx_cb {};
+//
+//    ctx_cb.handler = std::move(handler);
+//    ctx_cb.worker = worker;
+//    ctx_cb.req = req;
+//    ctx_cb.conn = *conn;
+//
+//    manapi::status status;
+//
+//
+//    worker->waiting(*conn, true);
+//
+//
+//    try {
+//        status = co_await promise ([&ctx_cb] (promise::resolve_t resolve, promise::reject_t reject)
+//            -> void {
+//            ctx_cb.resolve = std::move(resolve);
+//
+//            worker::worker_watcher_cb cb =
+//                [&ctx_cb] (
+//                const worker::shared_conn & conn, int m_flags, const char * buffer, std::size_t nsize, worker::ibuffpool_t *p) mutable -> void {
+//                    if (m_flags & ev::DISCONNECT) {
+//                        ctx_cb.resolve(manapi::status_aborted("read_async_body:Connection was closed"));
+//                        goto finish;
+//                    }
+//
+//                    if (m_flags & ev::READ) {
+//                        slice buffs = manapi::async::memory_fabric()->slice(nsize).unwrap();
+//                        buffs.copy_from(buffer, 0, nsize).unwrap();
+//
+//                        while (ctx_cb.worker->wrk_recv_count(ctx_cb.conn))
+//                            buffs.push_back(ctx_cb.worker->wrk_recv_first_buffer(ctx_cb.conn)).unwrap();
+//
+//                        if (ctx_cb.worker->event_flags(conn) & worker::base::CONN_RECV_END)
+//                            m_flags |= worker::base::CONN_RECV_END;
+//
+//                        ctx_cb.worker->waiting(conn, false);
+//                        ctx_cb.worker->event_toggle(conn, false, ev::READ);
+//                        ctx_cb.cnt++;
+//                        manapi::async::run (manapi::async::invoke(
+//                            [] (const worker::shared_conn & conn, manapi::slice buffs, manapi__ctx_cb_t *ctx_cb, int m_flags) -> manapi::future<> {
+//                                try {
+//
+//                                    std::size_t size;
+//                                    bool flg = false;
+//                                    if (ctx_cb->req->body_size >= 0) {
+//                                        size = std::min(static_cast<std::size_t>(ctx_cb->req->body_size),  (buffs.size()));
+//
+//                                        if (static_cast<std::size_t>(ctx_cb->req->body_size) == size) {
+//                                            flg = true;
+//                                            ctx_cb->worker->event_toggle(conn, true, worker::base::CONN_RECV_END);
+//                                        }
+//                                    }
+//                                    else {
+//                                        size = (buffs.size());
+//                                    }
+//
+//                                    auto buffsview = buffs.subslice(0, size).unwrap();
+//
+//                                    std::size_t rhs = 0;
+//                                    while (rhs < size) {
+//                                        auto const copy = size - rhs;
+//
+//                                        auto const res = co_await ctx_cb->handler (buffsview, flg);
+//                                        if (res >= 0) {
+//                                            if (copy != static_cast<std::size_t>(res)) {
+//                                                ctx_cb->resolve(manapi::status_internal("read_async_body:Something gets wrong"));
+//                                                goto finish;
+//                                            }
+//
+//                                            rhs += static_cast<std::size_t>(res);
+//                                            ctx_cb->req->body_size -= res;
+//
+//                                            buffsview = buffs.subslice(static_cast<std::size_t>(res)).unwrap();
+//
+//                                            continue;
+//                                        }
+//
+//                                        ctx_cb->resolve (manapi::status_internal("read_async_body:Something gets wrong"));
+//                                        goto finish;
+//                                    }
+//
+//                                    if (!ctx_cb->req->body_size) {
+//                                        auto const copy = (buffs.size() - rhs);
+//
+//                                        if (ctx_cb->req->flags & http::internal::REQ_DATA_FLAG_BODY_LIMITED) {
+//                                            if (copy) {
+//                                                ctx_cb->resolve(manapi::status_out_of_range("read_async_body:Too much data"));
+//                                            } else {
+//                                                ctx_cb->resolve(manapi::status_ok());
+//                                            }
+//                                            goto finish;
+//                                        }
+//                                        else {
+//                                            if (copy) {
+//                                                for (auto it = buffsview.begin(); it != buffsview.end(); ++it) {
+//                                                    ctx_cb->worker->feed_event(ctx_cb->conn, worker::base::CONN_TOP_READ,
+//                                                        static_cast<const char *>(it.buffer()), it.size(), nullptr);
+//                                                }
+//                                            }
+//                                            ctx_cb->resolve(manapi::status_ok());
+//                                            goto finish;
+//                                        }
+//                                    }
+//
+//                                }
+//                                catch (std::exception const &e) {
+//                                    manapi_log_error("%s due to %s", "read_async_body:Failed", e.what());
+//                                    goto finish;
+//                                }
+//
+//                                ctx_cb->worker->waiting(conn, true);
+//                                ctx_cb->worker->event_toggle(conn, true, ev::READ);
+//                                ctx_cb->cnt--;
+//                                ctx_cb->mx.unlock();
+//
+//                                co_return;
+//
+//                                finish: {
+//                                    auto const zctx_cb = ctx_cb;
+//                                    zctx_cb->worker->event_on(conn, nullptr);
+//                                    zctx_cb->worker->event_flags(conn, 0);
+//                                    zctx_cb->cnt--;
+//                                    zctx_cb->mx.unlock();
+//                                }
+//                        }, ctx_cb.conn, std::move(buffs), &ctx_cb, m_flags));
+//                    }
+//                    else if (m_flags & worker::base::CONN_RECV_END) {
+//                        ctx_cb.resolve(manapi::status_ok());
+//                        goto finish;
+//                    }
+//
+//                    return;
+//                    finish: {
+//                        auto const wrk = ctx_cb.worker;
+//
+//                        wrk->event_on(conn, nullptr);
+//                        wrk->event_flags(conn, 0);
+//                    }
+//            };
+//
+//            ctx_cb.prev = ctx_cb.worker->event_on(ctx_cb.conn, std::move(cb));
+//            ctx_cb.pflags = ctx_cb.worker->event_flags(ctx_cb.conn, ev::READ);
+//
+//
+//        });
+//    }
+//    catch (std::bad_alloc const &) {
+//        status = status_resource_exhausted();
+//    }
+//    catch (std::exception const &e) {
+//        manapi_log_error("%s due to %s", "read_async_body:Failed", e.what());
+//        status = manapi::status_internal("read_async_body:Failed");
+//    }
+//
+//    while (true) {
+//        if (ctx_cb.cnt) {
+//            co_await ctx_cb.mx.lock();
+//            continue;
+//        }
+//
+//        break;
+//    }
+//
+//    worker->waiting(*conn, false);
+//
+//    if (ctx_cb.prev) {
+//        worker->event_on(ctx_cb.conn, std::move(ctx_cb.prev));
+//        worker->event_flags(ctx_cb.conn, ctx_cb.pflags);
+//    }
+//
+//    co_return std::move(status);
+//}

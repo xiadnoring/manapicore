@@ -3,6 +3,7 @@
 #include "ManapiMath.hpp"
 #include "ManapiErrors.hpp"
 #include "ManapiInitTools.hpp"
+#include "std/ManapiThreadsMutex.hpp"
 
 #include <deque>
 

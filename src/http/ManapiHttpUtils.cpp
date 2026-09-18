@@ -64,19 +64,19 @@ std::size_t manapi::net::http::stringify_header(char *buff, std::size_t sz, cons
 std::size_t manapi::net::http::stringify_header_size(const std::pair<std::string_view, std::string_view> &header) {
     return header.first.size() + header.second.size() + (sizeof (header_delimiter) - 1);
 }
-
-void manapi::net::http::request_data_clear(request_data_t &data) {
-    data.headers = {};
-    data.http = {};
-    data.method = {};
-    data.params = {};
-    data.uri = {};
-    data.path = {};
-    data.body_size = 0;
-    data.flags = 0;
-    data.divided = -1;
-}
-
+//
+//void manapi::net::http::request_data_clear(request_data_t &data) {
+//    data.headers = {};
+//    data.http = {};
+//    data.method = {};
+//    data.params = {};
+//    data.uri = {};
+//    data.path = {};
+//    data.body_size = 0;
+//    data.flags = 0;
+//    data.divided = -1;
+//}
+//
 manapi::status_or<std::vector <manapi::net::http::header_value_t>> manapi::net::http::parse_header_value (std::string_view header_value) MANAPIHTTP_NOEXCEPT {
     try {
         enum header_value_parse_states {
@@ -462,18 +462,18 @@ std::string manapi::net::http::stringify_header_value (const std::vector <header
 
     return std::move(result);
 }
-
-int manapi::net::http::version_ip_by_addr(const sockaddr *addr) {
-    if (addr) {
-        if (addr->sa_family == ev::IPv4)
-            return ev::IPv4;
-        if (addr->sa_family == ev::IPv6)
-            return ev::IPv6;
-    }
-
-    return -1;
-}
-
+//
+//int manapi::net::http::version_ip_by_addr(const sockaddr *addr) {
+//    if (addr) {
+//        if (addr->sa_family == ev::IPv4)
+//            return ev::IPv4;
+//        if (addr->sa_family == ev::IPv6)
+//            return ev::IPv6;
+//    }
+//
+//    return -1;
+//}
+//
 bool manapi::net::http::header_has_more_fields(std::string_view name) MANAPIHTTP_NOEXCEPT {
     if (name == manapi::net::http::H_CACHE_CONTROL
         || name == manapi::net::http::H_WARNING
@@ -483,120 +483,120 @@ bool manapi::net::http::header_has_more_fields(std::string_view name) MANAPIHTTP
 
     return false;
 }
-
-manapi::status_or<std::pair<std::string, uint16_t>> manapi::net::http::strinfigy_ip(const sockaddr *addr) {
-    if (!addr)
-        return status_invalid_argument("ip: null addr");
-
-    std::string buffer;
-    uint32_t size;
-
-    if (addr->sa_family == manapi::ev::IPv4) {
-        size = sizeof ("xxx:xxx:xxx:xxx");
-        buffer.resize(size);
-
-        if (!inet_ntop(AF_INET, &reinterpret_cast<const sockaddr_in *> (addr)->sin_addr, buffer.data(), size))
-            return status_invalid_argument("ip: inet_ntop() returned null");
-
-        while (size > 0 && buffer[size - 1] == '\0') {
-            /* skip null bytes */
-            size--;
-        }
-
-        buffer.resize(size);
-
-        uint16_t const port = (reinterpret_cast<const sockaddr_in *> (addr)->sin_port);
-        return std::make_pair(std::move(buffer), port);
-    }
-
-    if (addr->sa_family == manapi::ev::IPv6) {
-        size = sizeof ("xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx");
-        buffer.resize(size);
-
-        if (!inet_ntop(AF_INET6, &reinterpret_cast<const sockaddr_in6 *>(addr)->sin6_addr, buffer.data(), size))
-            return status_invalid_argument("ip: inet_ntop() returned null");
-
-        while (size > 0 && buffer[size - 1] == '\0') {
-            /* skip null bytes */
-            size--;
-        }
-
-        buffer.resize(size);
-
-        uint16_t const port = (reinterpret_cast<const sockaddr_in6 *> (addr)->sin6_port);
-        return std::make_pair(std::move(buffer), port);
-    }
-
-    return status_invalid_argument("ip: invalid sin_family");
-}
-
-manapi::status_or<uint16_t> manapi::net::http::port_by_addr(const sockaddr *addr) {
-    if (!addr)
-        return status_invalid_argument("ip: null addr");
-
-    if (addr->sa_family == manapi::ev::IPv4)
-        return (reinterpret_cast<const sockaddr_in *> (addr)->sin_port);
-
-    if (addr->sa_family == manapi::ev::IPv6)
-        return (reinterpret_cast<const sockaddr_in6 *> (addr)->sin6_port);
-
-    return status_invalid_argument("ip: invalid sin_family");
-}
-
-manapi::status manapi::net::http::ip_by_addr(const sockaddr *addr, char *arr) {
-    if (!addr)
-        return status_invalid_argument("ip: null addr");
-
-    if (addr->sa_family == manapi::ev::IPv4)
-        memcpy (arr, &reinterpret_cast<const sockaddr_in *>(addr)->sin_addr, sizeof (reinterpret_cast<const sockaddr_in *>(addr)->sin_addr));
-    else if (addr->sa_family == manapi::ev::IPv6)
-        memcpy (arr, &reinterpret_cast<const sockaddr_in6 *>(addr)->sin6_addr, 16);
-    else
-        return status_invalid_argument("ip: invalid sin_family");
-
-    return status_ok();
-}
-
-bool manapi::net::http::split_http_port(std::string_view name, std::string_view &host, std::string_view &port, bool& has_port) {
-    has_port = false;
-    if (!name.empty() && name[0] == '[') {
-        // Parse a bracketed host, typically an IPv6 literal.
-        const size_t rbracket = name.find(']', 1);
-        if (rbracket == std::string_view::npos) {
-            // Unmatched [
-            return false;
-        }
-        if (rbracket == name.size() - 1) {
-            // ]<end>
-            port = std::string_view();
-        } else if (name[rbracket + 1] == ':') {
-            // ]:<port?>
-            port = name.substr(rbracket + 2, name.size() - rbracket - 2);
-            has_port = true;
-        } else {
-            // ]<invalid>
-            return false;
-        }
-        host = name.substr(1, rbracket - 1);
-        if (host.find(':') == std::string_view::npos) {
-            // Require all bracketed hosts to contain a colon, because a hostname or
-            // IPv4 address should never use brackets.
-            host = std::string_view();
-            return false;
-        }
-    } else {
-        size_t colon = name.find(':');
-        if (colon != std::string_view::npos &&
-            name.find(':', colon + 1) == std::string_view::npos) {
-            // Exactly 1 colon.  Split into host:port.
-            host = name.substr(0, colon);
-            port = name.substr(colon + 1, name.size() - colon - 1);
-            has_port = true;
-            } else {
-                // 0 or 2+ colons.  Bare hostname or IPv6 litearal.
-                host = name;
-                port = std::string_view();
-            }
-    }
-    return true;
-}
+//
+//manapi::status_or<std::pair<std::string, uint16_t>> manapi::net::http::strinfigy_ip(const sockaddr *addr) {
+//    if (!addr)
+//        return status_invalid_argument("ip: null addr");
+//
+//    std::string buffer;
+//    uint32_t size;
+//
+//    if (addr->sa_family == manapi::ev::IPv4) {
+//        size = sizeof ("xxx:xxx:xxx:xxx");
+//        buffer.resize(size);
+//
+//        if (!inet_ntop(AF_INET, &reinterpret_cast<const sockaddr_in *> (addr)->sin_addr, buffer.data(), size))
+//            return status_invalid_argument("ip: inet_ntop() returned null");
+//
+//        while (size > 0 && buffer[size - 1] == '\0') {
+//            /* skip null bytes */
+//            size--;
+//        }
+//
+//        buffer.resize(size);
+//
+//        uint16_t const port = (reinterpret_cast<const sockaddr_in *> (addr)->sin_port);
+//        return std::make_pair(std::move(buffer), port);
+//    }
+//
+//    if (addr->sa_family == manapi::ev::IPv6) {
+//        size = sizeof ("xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx:xxxx");
+//        buffer.resize(size);
+//
+//        if (!inet_ntop(AF_INET6, &reinterpret_cast<const sockaddr_in6 *>(addr)->sin6_addr, buffer.data(), size))
+//            return status_invalid_argument("ip: inet_ntop() returned null");
+//
+//        while (size > 0 && buffer[size - 1] == '\0') {
+//            /* skip null bytes */
+//            size--;
+//        }
+//
+//        buffer.resize(size);
+//
+//        uint16_t const port = (reinterpret_cast<const sockaddr_in6 *> (addr)->sin6_port);
+//        return std::make_pair(std::move(buffer), port);
+//    }
+//
+//    return status_invalid_argument("ip: invalid sin_family");
+//}
+//
+//manapi::status_or<uint16_t> manapi::net::http::port_by_addr(const sockaddr *addr) {
+//    if (!addr)
+//        return status_invalid_argument("ip: null addr");
+//
+//    if (addr->sa_family == manapi::ev::IPv4)
+//        return (reinterpret_cast<const sockaddr_in *> (addr)->sin_port);
+//
+//    if (addr->sa_family == manapi::ev::IPv6)
+//        return (reinterpret_cast<const sockaddr_in6 *> (addr)->sin6_port);
+//
+//    return status_invalid_argument("ip: invalid sin_family");
+//}
+//
+//manapi::status manapi::net::http::ip_by_addr(const sockaddr *addr, char *arr) {
+//    if (!addr)
+//        return status_invalid_argument("ip: null addr");
+//
+//    if (addr->sa_family == manapi::ev::IPv4)
+//        memcpy (arr, &reinterpret_cast<const sockaddr_in *>(addr)->sin_addr, sizeof (reinterpret_cast<const sockaddr_in *>(addr)->sin_addr));
+//    else if (addr->sa_family == manapi::ev::IPv6)
+//        memcpy (arr, &reinterpret_cast<const sockaddr_in6 *>(addr)->sin6_addr, 16);
+//    else
+//        return status_invalid_argument("ip: invalid sin_family");
+//
+//    return status_ok();
+//}
+//
+//bool manapi::net::http::split_http_port(std::string_view name, std::string_view &host, std::string_view &port, bool& has_port) {
+//    has_port = false;
+//    if (!name.empty() && name[0] == '[') {
+//        // Parse a bracketed host, typically an IPv6 literal.
+//        const size_t rbracket = name.find(']', 1);
+//        if (rbracket == std::string_view::npos) {
+//            // Unmatched [
+//            return false;
+//        }
+//        if (rbracket == name.size() - 1) {
+//            // ]<end>
+//            port = std::string_view();
+//        } else if (name[rbracket + 1] == ':') {
+//            // ]:<port?>
+//            port = name.substr(rbracket + 2, name.size() - rbracket - 2);
+//            has_port = true;
+//        } else {
+//            // ]<invalid>
+//            return false;
+//        }
+//        host = name.substr(1, rbracket - 1);
+//        if (host.find(':') == std::string_view::npos) {
+//            // Require all bracketed hosts to contain a colon, because a hostname or
+//            // IPv4 address should never use brackets.
+//            host = std::string_view();
+//            return false;
+//        }
+//    } else {
+//        size_t colon = name.find(':');
+//        if (colon != std::string_view::npos &&
+//            name.find(':', colon + 1) == std::string_view::npos) {
+//            // Exactly 1 colon.  Split into host:port.
+//            host = name.substr(0, colon);
+//            port = name.substr(colon + 1, name.size() - colon - 1);
+//            has_port = true;
+//            } else {
+//                // 0 or 2+ colons.  Bare hostname or IPv6 litearal.
+//                host = name;
+//                port = std::string_view();
+//            }
+//    }
+//    return true;
+//}

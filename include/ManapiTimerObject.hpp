@@ -6,9 +6,6 @@
 #include "./ManapiUtils.hpp"
 #include "./ManapiAsync.hpp"
 
-namespace manapi::async {
-    class cthread;
-}
 
 namespace manapi {
     enum timer_types {
@@ -16,6 +13,8 @@ namespace manapi {
         TIMER_DEFAULT,
         TIMER_POOR
     };
+
+    class cthread;
 
     class event_loop;
 

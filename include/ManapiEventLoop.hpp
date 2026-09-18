@@ -312,9 +312,9 @@ namespace manapi {
 
         static void interrupt (int sig) MANAPIHTTP_NOEXCEPT;
 
-        static void lock (async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT;
-
-        static void unlock (async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT;
+//        static void lock (async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT;
+//
+//        static void unlock (async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT;
 
         manapi::ev::status run () MANAPIHTTP_NOEXCEPT;
 

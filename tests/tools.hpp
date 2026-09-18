@@ -11,6 +11,8 @@
 #include "json/ManapiJson.hpp"
 #include "ManapiTimerPool.hpp"
 #include "std/ManapiEasyCancelToken.hpp"
+#include "std/ManapiContext.hpp"
+#include "ManapiEventLoop.hpp"
 
 #define HTTP1PORT "8888"
 #define HTTP2PORT "8887"
@@ -18,13 +20,13 @@
 int main(int argc, const char *const argv[]) { \
     try { manapi::init_tools::log_trace_init(manapi::debug::trace_level::LOG_TRACE_LOW); }\
     catch (...) { manapi::init_tools::log_trace_init(manapi::debug::LOG_TRACE_NONE); }\
-    manapi::async::context::threadpoolfs(2); \
-    manapi::async::context::gbs (manapi::async::context::blockedsignals()); \
+    manapi::context::threadpoolfs(2); \
+    manapi::context::gbs (manapi::context::blockedsignals()); \
     return utest_main(argc, argv); \
 }
 
 inline manapi::async::shared_ctx init_ctx (int *utest_result, std::size_t timout_in_ms = 30000, std::size_t threads = 0) {
-    auto ctx = manapi::async::context::create(threads).unwrap();
+    auto ctx = manapi::context::create(threads).unwrap();
     /* task killer */
     ctx->timerpool()->append_interval_sync(timout_in_ms, manapi::TIMER_DEFAULT,[utest_result, timout_in_ms, flg = bool(false)] (manapi::timer t) mutable -> void {
         manapi_log_error("timeout in %zu ms was reached", timout_in_ms);
@@ -54,114 +56,114 @@ inline void wait_ctx (manapi::async::shared_ctx ctx) {
     });
 }
 
-
-inline std::shared_ptr<manapi::net::http::server> init_router (manapi::json cnf, std::move_only_function<manapi::future<>()> cb) {
-    using http = manapi::net::http::server;
-
-    auto server = manapi::net::http::server_ctx::create();
-    auto router = manapi::net::http::server::create(server.unwrap()).unwrap();
-
-    router->GET ("/", [] (http::req &req, http::uresp resp) -> void {
-        resp->text("Hello, World!");
-    }).unwrap();
-
-    manapi::async::run ([router, cnf, cb = std::move(cb)] () mutable -> manapi::future<> {
-        std::string certkey;
-        std::string certpem;
-
-        std::string current = manapi::fs::path::current_path();
-        while (true) {
-            auto st = co_await manapi::fs::async_exists(manapi::fs::path::join(current, "examples", "self-signed-ssl"));
-            if (st.ok()) {
-                if (st.unwrap())
-                    break;
-            }
-            else {
-                st.err().log();
-            }
-            current = manapi::fs::path::join(current, "..");
-            if (!current.contains(manapi::fs::path::delimiter)) {
-                manapi_log_error("!!! failed to find self-signed-ssl !!!");
-                co_await manapi::async::current()->stop();
-                break;
-            }
-        }
-        current = manapi::fs::path::join(current, "examples", "self-signed-ssl");
-
-        manapi::json config = {
-            {"pools", manapi::json::array()}
-        };
-        if (cnf.contains("http1") && cnf["http1"].cast_bool().as_bool()) {
-            config["pools"].push_back({
-                {"address", "127.0.0.1"},
-                {"port", HTTP1PORT},
-                {"http", manapi::json::array("1.1")},
-                {"transport", "tcp"},
-                {"tcp_no_delay", true},
-                {"simultaneous_accepts", true},
-                {"buffer_size", 4096},
-                {"ssl", {
-                    {"verify_peer", false},
-                    {"key", manapi::fs::path::join(current, "cert.key")},
-                    {"cert", manapi::fs::path::join(current, "cert.crt")},
-                    {"ticket", false},
-                    {"enable", true}
-                }},
-                {"max_buffer_stack", 2},
-                {"max_merge_buffer_stack", 1},
-                {"max_connections", 2},
-                {"max_connections_by_ip", 2},
-                {"keep_alive", 0},
-//                {"speed_check_delay", 1},
-//                {"speed_stream_check_delay", 1}
-            });
-
-            if (cnf.contains("http1_cnf") && cnf["http1_cnf"].is_object()) {
-                auto &custom = cnf["http1_cnf"];
-                for (auto & it : custom.entries())
-                    config["pools"].as_array().back()[it.first] =  std::move(it.second);
-            }
-        }
-        if (cnf.contains("http2") && cnf["http2"].cast_bool().as_bool()) {
-            config["pools"].push_back({
-                {"address", "127.0.0.1"},
-                {"port", HTTP2PORT},
-                {"http", manapi::json::array("2")},
-                {"transport", "tls"},
-                {"ssl", {
-                    {"verify_peer", false},
-                    {"key", manapi::fs::path::join(current, "cert.key")},
-                    {"cert", manapi::fs::path::join(current, "cert.crt")},
-                    {"ticket", false},
-                    {"enable", true}
-                }},
-                {"max_concurrent_streams", 6},
-                {"tcp_no_delay", true},
-                {"simultaneous_accepts", true},
-                {"buffer_size", 4096},
-                {"max_buffer_stack", 2},
-                {"max_merge_buffer_stack", 1},
-                {"max_connections", 100},
-                {"max_connections_by_ip", 100},
-                {"keep_alive", 0}
-            });
-
-            if (cnf.contains("http2_cnf") && cnf["http2_cnf"].is_object()) {
-                auto &custom = cnf["http2_cnf"];
-                for (auto & it : custom.entries())
-                    config["pools"].as_array().back()[it.first] =  std::move(it.second);
-            }
-        }
-        auto res = co_await router->config_object (config);
-        res.unwrap();
-
-        res = co_await router->start();
-        res.unwrap();
-
-        co_await cb();
-
-        co_await manapi::async::current()->stop();
-    });
-
-    return router;
-}
+//
+//inline std::shared_ptr<manapi::net::http::server> init_router (manapi::json cnf, std::move_only_function<manapi::future<>()> cb) {
+//    using http = manapi::net::http::server;
+//
+//    auto server = manapi::net::http::server_ctx::create();
+//    auto router = manapi::net::http::server::create(server.unwrap()).unwrap();
+//
+//    router->GET ("/", [] (http::req &req, http::uresp resp) -> void {
+//        resp->text("Hello, World!");
+//    }).unwrap();
+//
+//    manapi::async::run ([router, cnf, cb = std::move(cb)] () mutable -> manapi::future<> {
+//        std::string certkey;
+//        std::string certpem;
+//
+//        std::string current = manapi::fs::path::current_path();
+//        while (true) {
+//            auto st = co_await manapi::fs::async_exists(manapi::fs::path::join(current, "examples", "self-signed-ssl"));
+//            if (st.ok()) {
+//                if (st.unwrap())
+//                    break;
+//            }
+//            else {
+//                st.err().log();
+//            }
+//            current = manapi::fs::path::join(current, "..");
+//            if (!current.contains(manapi::fs::path::delimiter)) {
+//                manapi_log_error("!!! failed to find self-signed-ssl !!!");
+//                co_await manapi::async::current()->stop();
+//                break;
+//            }
+//        }
+//        current = manapi::fs::path::join(current, "examples", "self-signed-ssl");
+//
+//        manapi::json config = {
+//            {"pools", manapi::json::array()}
+//        };
+//        if (cnf.contains("http1") && cnf["http1"].cast_bool().as_bool()) {
+//            config["pools"].push_back({
+//                {"address", "127.0.0.1"},
+//                {"port", HTTP1PORT},
+//                {"http", manapi::json::array("1.1")},
+//                {"transport", "tcp"},
+//                {"tcp_no_delay", true},
+//                {"simultaneous_accepts", true},
+//                {"buffer_size", 4096},
+//                {"ssl", {
+//                    {"verify_peer", false},
+//                    {"key", manapi::fs::path::join(current, "cert.key")},
+//                    {"cert", manapi::fs::path::join(current, "cert.crt")},
+//                    {"ticket", false},
+//                    {"enable", true}
+//                }},
+//                {"max_buffer_stack", 2},
+//                {"max_merge_buffer_stack", 1},
+//                {"max_connections", 2},
+//                {"max_connections_by_ip", 2},
+//                {"keep_alive", 0},
+////                {"speed_check_delay", 1},
+////                {"speed_stream_check_delay", 1}
+//            });
+//
+//            if (cnf.contains("http1_cnf") && cnf["http1_cnf"].is_object()) {
+//                auto &custom = cnf["http1_cnf"];
+//                for (auto & it : custom.entries())
+//                    config["pools"].as_array().back()[it.first] =  std::move(it.second);
+//            }
+//        }
+//        if (cnf.contains("http2") && cnf["http2"].cast_bool().as_bool()) {
+//            config["pools"].push_back({
+//                {"address", "127.0.0.1"},
+//                {"port", HTTP2PORT},
+//                {"http", manapi::json::array("2")},
+//                {"transport", "tls"},
+//                {"ssl", {
+//                    {"verify_peer", false},
+//                    {"key", manapi::fs::path::join(current, "cert.key")},
+//                    {"cert", manapi::fs::path::join(current, "cert.crt")},
+//                    {"ticket", false},
+//                    {"enable", true}
+//                }},
+//                {"max_concurrent_streams", 6},
+//                {"tcp_no_delay", true},
+//                {"simultaneous_accepts", true},
+//                {"buffer_size", 4096},
+//                {"max_buffer_stack", 2},
+//                {"max_merge_buffer_stack", 1},
+//                {"max_connections", 100},
+//                {"max_connections_by_ip", 100},
+//                {"keep_alive", 0}
+//            });
+//
+//            if (cnf.contains("http2_cnf") && cnf["http2_cnf"].is_object()) {
+//                auto &custom = cnf["http2_cnf"];
+//                for (auto & it : custom.entries())
+//                    config["pools"].as_array().back()[it.first] =  std::move(it.second);
+//            }
+//        }
+//        auto res = co_await router->config_object (config);
+//        res.unwrap();
+//
+//        res = co_await router->start();
+//        res.unwrap();
+//
+//        co_await cb();
+//
+//        co_await manapi::async::current()->stop();
+//    });
+//
+//    return router;
+//}

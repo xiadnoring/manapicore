@@ -13,6 +13,7 @@
 #include "std/ManapiThreadsMutex.hpp"
 #include "./include/ManapiUtils.hpp"
 #include "./include/ManapiEventStructuresInternal.hpp"
+#include "std/ManapiContext.hpp"
 #include "./include/ManapiDefaultErrors.hpp"
 
 #if MANAPIHTTP_CURL_DEPENDENCY
@@ -1429,38 +1430,38 @@ void manapi::event_loop::interrupt(int sig) MANAPIHTTP_NOEXCEPT {
 
     manapi::event_loop::m_events.clear();
 }
-
-void manapi::event_loop::lock(async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT {
-    if (ctx) {
-        auto &ev = ctx->eventloop();
-        while (true) {
-            auto trying_was_ok = ev->m_callback_watcher->adding_mcv.try_lock();
-
-            ev->custom_watcher_callback_async(ev->m_callback_watcher->adding_async);
-
-            if (mx.try_lock()) {
-                mx.unlock();
-                break;
-            }
-
-            std::lock_guard<std::mutex> lk (ev->m_callback_watcher->adding_mcv);
-        }
-    }
-    else {
-        mx.lock();
-    }
-}
-
-void manapi::event_loop::unlock(async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT {
-    if (ctx) {
-        auto &ev = ctx->eventloop();
-        mx.unlock();
-        ev->m_callback_watcher->adding_mcv.unlock();
-    }
-    else {
-        mx.unlock();
-    }
-}
+//
+//void manapi::event_loop::lock(async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT {
+//    if (ctx) {
+//        auto &ev = ctx->eventloop();
+//        while (true) {
+//            auto trying_was_ok = ev->m_callback_watcher->adding_mcv.try_lock();
+//
+//            ev->custom_watcher_callback_async(ev->m_callback_watcher->adding_async);
+//
+//            if (mx.try_lock()) {
+//                mx.unlock();
+//                break;
+//            }
+//
+//            std::lock_guard<std::mutex> lk (ev->m_callback_watcher->adding_mcv);
+//        }
+//    }
+//    else {
+//        mx.lock();
+//    }
+//}
+//
+//void manapi::event_loop::unlock(async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT {
+//    if (ctx) {
+//        auto &ev = ctx->eventloop();
+//        mx.unlock();
+//        ev->m_callback_watcher->adding_mcv.unlock();
+//    }
+//    else {
+//        mx.unlock();
+//    }
+//}
 
 manapi::ev::status manapi::event_loop::run() MANAPIHTTP_NOEXCEPT {
     return this->run(manapi::ev::RUN_DEFAULT);

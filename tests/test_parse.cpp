@@ -1,6 +1,7 @@
 //#ifdef MANAPIHTTP_HTTP_AS_EXECUTABLE
 #    include "ManapiHttp.hpp"
 #    include "ManapiString.hpp"
+#   include "http/ManapiHttpUtils.hpp"
 
 //#    include "http/ManapiHttp1.hpp" // http_v1_1_t
 // #else

@@ -56,9 +56,9 @@ void manapi::init_tools::log_name_enable(const char *name, bool enable) {
 }
 
 void manapi::init_tools::grpc_library_init() {
-#if MANAPIHTTP_GRPC_DEPENDENCY
-    manapi::net::wgrpc::event_engine_wrapper::init_instance();
-#endif
+//#if MANAPIHTTP_GRPC_DEPENDENCY
+//    manapi::net::wgrpc::event_engine_wrapper::init_instance();
+//#endif
 }
 
 void manapi::clear_tools::clear_all() MANAPIHTTP_NOEXCEPT {
@@ -75,16 +75,16 @@ void manapi::clear_tools::clear_thread_all() MANAPIHTTP_NOEXCEPT {
 
 void manapi::clear_tools::grpc_clear() MANAPIHTTP_NOEXCEPT {
     clear_tools::grpc_thread_clear();
-#if MANAPIHTTP_GRPC_DEPENDENCY
-    google::protobuf::ShutdownProtobufLibrary();
-    manapi::net::wgrpc::event_engine_wrapper::get_instance() = nullptr;
-#endif
+//#if MANAPIHTTP_GRPC_DEPENDENCY
+//    google::protobuf::ShutdownProtobufLibrary();
+//    manapi::net::wgrpc::event_engine_wrapper::get_instance() = nullptr;
+//#endif
 }
 
 void manapi::clear_tools::grpc_thread_clear() MANAPIHTTP_NOEXCEPT {
-#if MANAPIHTTP_GRPC_DEPENDENCY
-    net::wgrpc::server_ctx::clean();
-#endif
+//#if MANAPIHTTP_GRPC_DEPENDENCY
+//    net::wgrpc::server_ctx::clean();
+//#endif
 }
 
 void manapi::clear_tools::ssl_library_thread_clear() MANAPIHTTP_NOEXCEPT {

@@ -7,9 +7,7 @@
 #include "../ManapiUtils.hpp"
 
 namespace manapi {
-    namespace async {
-        class cthread;
-    }
+    class cthread;
 
     enum logger_type {
         LOGGER_DEBUG = 0,

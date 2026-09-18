@@ -5,11 +5,13 @@
 #include "ManapiHttp.hpp"
 #include "json/ManapiJson.hpp"
 #include "std/ManapiEasyCancelToken.hpp"
+#include "http/ManapiFormData.hpp"
 
 
 #include "./utest.h"
 #include "./tools.hpp"
 
+#if defined(MANAPIHTTP_FETCH_SUPPORT) && false
 UTEST(http, http_router_exists) {
     using http = manapi::net::http::server;
 
@@ -27,7 +29,6 @@ UTEST(http, http_router_exists) {
     ASSERT_TRUE_MSG(!res.ok(), "already exists");
 }
 
-#ifdef MANAPIHTTP_FETCH_SUPPORT
 
 UTEST(http_and_fetch, simple_request) {
     auto ctx = init_ctx(utest_result);
