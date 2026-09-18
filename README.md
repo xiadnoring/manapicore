@@ -62,17 +62,15 @@ cmake ... -DMANAPIHTTP_BUILD_METHOD=fetch
 ```c++
 int main () {
     /* creates 2 threads for blocking I/O syscalls */
-    manapi::async::context::threadpoolfs(2);
+    manapi::context::threadpoolfs(2);
     /* disable several signals */
-    manapi::async::context::gbs (manapi::async::context::blockedsignals());
+    manapi::context::gbs (manapi::async::context::blockedsignals());
     /* creates 4 additional threads for 4 additional event loops */
-    auto ctx = manapi::async::context::create(4).unwrap();
+    auto ctx = manapi::context::create(4).unwrap();
     /* metric */
     std::atomic<int> cnt = 0;
     /* runs main event loop and 4 additional event loops */
-    ctx->run(4, [&cnt, router_ctx] (std::function<void()> bind) -> void {
-        auto router = manapi::net::http::server::create(router_ctx).unwrap();
-        
+    ctx->run(4, [&cnt] (std::function<void()> bind) -> void {
         auto db = manapi::ext::pq::db::create().unwrap();
 
         manapi::async::run([router, db] () mutable -> manapi::future<> {
