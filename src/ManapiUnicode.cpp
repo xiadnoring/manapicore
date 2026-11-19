@@ -223,11 +223,11 @@ std::string manapi::unicode::escape_string (std::string_view str) {
     return std::move(s);
 }
 
-uint8_t manapi::unicode::onehex2dec(uint8_t c) MANAPIHTTP_NOEXCEPT {
+uint8_t manapi::unicode::onehex2dec(uint8_t c) MANAPICORE_NOEXCEPT {
     return hextable[c - '0'];
 }
 
-uint8_t manapi::unicode::onedec2hex(uint8_t c) MANAPIHTTP_NOEXCEPT {
+uint8_t manapi::unicode::onedec2hex(uint8_t c) MANAPICORE_NOEXCEPT {
     return hextable2[c];
 }
 

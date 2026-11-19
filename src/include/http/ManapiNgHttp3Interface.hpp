@@ -6,14 +6,14 @@
 #include "worker/ManapiHttp3Worker.hpp"
 #include "../ManapiUtils.hpp"
 
-#if defined( MANAPIHTTP_NGHTTP3_DEPENDENCY ) && MANAPIHTTP_NGHTTP3_DEPENDENCY && false
+#if defined( MANAPICORE_NGHTTP3_DEPENDENCY ) && MANAPICORE_NGHTTP3_DEPENDENCY && false
 
 namespace manapi::net::worker {
     struct ng_wrk_http3_ctx_global_t;
 
     struct ng_wrk_http3_ctx_t;
 
-    manapi::status ng_wrk_http3_global_init (manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::interface_worker *w) MANAPIHTTP_NOEXCEPT;
+    manapi::status ng_wrk_http3_global_init (manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::interface_worker *w) MANAPICORE_NOEXCEPT;
 }
 
 #endif

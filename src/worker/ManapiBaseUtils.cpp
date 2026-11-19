@@ -1,26 +1,26 @@
 //#include "worker/ManapiBaseUtils.hpp"
 //
-//int manapi::net::worker::prepared::event_flags(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::prepared::event_flags(const shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    return event_flags(conn, conn->as<connection_prepared_base_t>());
 //}
 //
-//int manapi::net::worker::prepared::event_flags(const shared_conn &conn, connection_prepared_base_t *data) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::prepared::event_flags(const shared_conn &conn, connection_prepared_base_t *data) MANAPICORE_NOEXCEPT {
 //    return (data->flags) & base::CONN_MASK_GETTING;
 //}
 //
-//ssize_t manapi::net::worker::prepared::sync_write(interface_worker *w, const shared_conn &conn, ev::buff_t *buff,uint32_t nbuff, bool finish) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::prepared::sync_write(interface_worker *w, const shared_conn &conn, ev::buff_t *buff,uint32_t nbuff, bool finish) MANAPICORE_NOEXCEPT {
 //    auto const connection = conn->as<connection_prepared_base_t>();
 //    if (w->m_config->speed_limit_rate < connection->transfered) return 0;
 //    return w->sync_write_ex(conn, buff, nbuff, finish, std::min<std::size_t>(w->m_config->speed_limit_rate - connection->transfered, w->m_config->max_buffer_size));
 //}
 //
-//ssize_t manapi::net::worker::prepared::sync_write(interface_worker *w, const shared_conn &conn, connection_prepared_base_t *connection, ev::buff_t *buff, uint32_t nbuff, std::size_t limit_rate, bool finish) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::prepared::sync_write(interface_worker *w, const shared_conn &conn, connection_prepared_base_t *connection, ev::buff_t *buff, uint32_t nbuff, std::size_t limit_rate, bool finish) MANAPICORE_NOEXCEPT {
 //    limit_rate = std::min<std::size_t>(limit_rate, w->m_config->speed_limit_rate);
 //    if (limit_rate < connection->transfered) return 0;
 //    return w->sync_write_ex(conn, buff, nbuff, finish, std::min<std::size_t>(limit_rate - connection->transfered, w->m_config->max_buffer_size));
 //}
 //
-//void manapi::net::worker::prepared::waiting(const shared_conn &conn, connection_base2_t *data, bool state) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::waiting(const shared_conn &conn, connection_base2_t *data, bool state) MANAPICORE_NOEXCEPT {
 //
 //    if (state)
 //        data->flags |= base::CONN_IO_WAITING;
@@ -29,12 +29,12 @@
 //        data->flags ^= base::CONN_IO_WAITING;
 //}
 //
-//void manapi::net::worker::prepared::waiting(const shared_conn &conn, bool state) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::waiting(const shared_conn &conn, bool state) MANAPICORE_NOEXCEPT {
 //    auto const data = conn->as<connection_base2_t>();
 //    return waiting(conn, data, state);
 //}
 //
-//int manapi::net::worker::prepared::flush_read( worker::interface_worker *w, const shared_conn &conn, connection_prepared_t *data) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::prepared::flush_read( worker::interface_worker *w, const shared_conn &conn, connection_prepared_t *data) MANAPICORE_NOEXCEPT {
 //    if (!data->top->recv.empty() && (data->flags & ev::READ)) {
 //        assert (!data->ev_cb.empty());
 //        int flags = ev::READ;
@@ -52,18 +52,18 @@
 //    return ERR_OK;
 //}
 //
-//bool manapi::net::worker::prepared::is_writable(http::config *config,connection_prepared_t *data) MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::worker::prepared::is_writable(http::config *config,connection_prepared_t *data) MANAPICORE_NOEXCEPT {
 //    return data->top->send.size() < config->max_buffer_size && data->transfered < config->speed_limit_rate;
 //}
 //
-//void manapi::net::worker::prepared::top_buffer_clear(connection_prepared_t *s) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::top_buffer_clear(connection_prepared_t *s) MANAPICORE_NOEXCEPT {
 //    if (s->top) {
 //        s->top->send.clear();
 //        s->top->recv.clear();
 //    }
 //}
 //
-//void manapi::net::worker::prepared::event_callback_clear(worker::interface_worker *w, const shared_conn &conn,connection_prepared_base_t *s) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::event_callback_clear(worker::interface_worker *w, const shared_conn &conn,connection_prepared_base_t *s) MANAPICORE_NOEXCEPT {
 //    if (!s->ev_cb.empty()) {
 //        if ( w->notify_cb ( s->ev_cb.back().first, conn, ev::DISCONNECT, nullptr)) {
 //            /* pass */
@@ -73,7 +73,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::prepared::timer_clear(manapi::timer &&t) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::timer_clear(manapi::timer &&t) MANAPICORE_NOEXCEPT {
 //    if (t) {
 //        t.stop();
 //        t.clear();
@@ -81,7 +81,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::prepared::feed_event(worker::interface_worker *w, const shared_conn &conn, connection_prepared_t *data, int flags, manapi::slice_complex *sc) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::feed_event(worker::interface_worker *w, const shared_conn &conn, connection_prepared_t *data, int flags, manapi::slice_complex *sc) MANAPICORE_NOEXCEPT {
 //    if (flags & base::CONN_RECV_END) data->flags |= base::CONN_RECV_END;
 //
 //    if (flags & base::CONN_SEND_END) data->flags |= base::CONN_SEND_END;
@@ -105,11 +105,11 @@
 //    }
 //}
 //
-//void manapi::net::worker::prepared::feed_event(worker::interface_worker *w, const shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::feed_event(worker::interface_worker *w, const shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPICORE_NOEXCEPT {
 //    return feed_event(w, conn, conn->as<connection_prepared_t>(), flags, sc);
 //}
 //
-//void manapi::net::worker::prepared::update_limit_rate_connection(const shared_conn &sconn, connection_prepared_base_t *data, worker::interface_worker *w, wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::update_limit_rate_connection(const shared_conn &sconn, connection_prepared_base_t *data, worker::interface_worker *w, wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    if (data->transfered >= w->m_config->speed_limit_rate) {
 //        data->transfered = 0;
 //
@@ -150,7 +150,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::prepared::event_on(worker::interface_worker *w, const shared_conn &conn , connection_prepared_base_t *data,worker_watcher_cb &&callback, int flags) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::prepared::event_on(worker::interface_worker *w, const shared_conn &conn , connection_prepared_base_t *data,worker_watcher_cb &&callback, int flags) MANAPICORE_NOEXCEPT {
 //    assert (!!callback);
 //
 //    if (!data->ev_cb.empty() && data->ev_cb.back().second & net::worker::EVENT_ON_AUTO_REMOVE) {
@@ -167,7 +167,7 @@
 //    w->event_flags ( conn, flags );
 //}
 //
-//bool manapi::net::worker::prepared::event_unsub(manapi::net::worker::interface_worker *w, const manapi::net::worker::shared_conn &conn, manapi::net::worker::connection_prepared_base_t *data) MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::worker::prepared::event_unsub(manapi::net::worker::interface_worker *w, const manapi::net::worker::shared_conn &conn, manapi::net::worker::connection_prepared_base_t *data) MANAPICORE_NOEXCEPT {
 //    if (data->ev_cb.empty()) return false;
 //
 //    data->ev_cb.pop_back();

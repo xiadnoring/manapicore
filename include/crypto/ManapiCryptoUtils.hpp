@@ -14,12 +14,12 @@
 #include "../fs/ManapiFileStream.hpp"
 
 namespace manapi::crypto {
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
     struct evp_cipher_deleter {
         void operator()(void *ptr);
     };
 #endif
-#if MANAPIHTTP_WOLFSSL_DEPENDENCY
+#if MANAPICORE_WOLFSSL_DEPENDENCY
     struct wolfssl_evp_cipher_deleter {
         void operator()(void *ptr);
     };

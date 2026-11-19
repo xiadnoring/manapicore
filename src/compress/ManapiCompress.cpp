@@ -22,7 +22,7 @@ static manapi::future<manapi::status> manapi__compress_file_init (std::shared_pt
 }
 
 
-#if MANAPIHTTP_BROTLI_DEPENDENCY
+#if MANAPICORE_BROTLI_DEPENDENCY
 
 #   include <brotli/encode.h>
 #   include <brotli/decode.h>
@@ -227,7 +227,7 @@ manapi::compress::brotli_decompress::~brotli_decompress() = default;
 
 #endif
 
-#if MANAPIHTTP_ZSTD_DEPENDENCY
+#if MANAPICORE_ZSTD_DEPENDENCY
 
 #   include <zstd.h>
 
@@ -423,7 +423,7 @@ manapi::compress::zstd_decompress::~zstd_decompress() = default;
 
 #endif
 
-#if MANAPIHTTP_ZLIB_DEPENDENCY
+#if MANAPICORE_ZLIB_DEPENDENCY
 
 #include <zlib.h>
 

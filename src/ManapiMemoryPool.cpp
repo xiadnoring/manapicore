@@ -116,12 +116,12 @@ manapi::object_item_pool_root::object_item_pool_root(void *p) : object(p) {}
 
 manapi::object_item_pool_root::~object_item_pool_root() = default;
 
-manapi::object_item_pool_root::object_item_pool_root(object_item_pool_root &&n) MANAPIHTTP_NOEXCEPT : object_item_pool_root() {
+manapi::object_item_pool_root::object_item_pool_root(object_item_pool_root &&n) MANAPICORE_NOEXCEPT : object_item_pool_root() {
     this->object = n.object;
     n.object = nullptr;
 }
 
-manapi::object_item_pool_root & manapi::object_item_pool_root::operator=(object_item_pool_root &&n) MANAPIHTTP_NOEXCEPT {
+manapi::object_item_pool_root & manapi::object_item_pool_root::operator=(object_item_pool_root &&n) MANAPICORE_NOEXCEPT {
     if (this != &n) {
         this->object = n.object;
         n.object = nullptr;
@@ -264,7 +264,7 @@ manapi::status_or<manapi::bytebuffer> manapi::object_pool::buffer(std::size_t su
     return manapi::bytebuffer (buffer, suggested, size);
 }
 
-void manapi::object_pool::free(void *pointer, std::size_t size) MANAPIHTTP_NOEXCEPT {
+void manapi::object_pool::free(void *pointer, std::size_t size) MANAPICORE_NOEXCEPT {
     if (!size) {
         assert(!pointer);
         return;
@@ -288,7 +288,7 @@ void manapi::object_pool::clear() {
     ::object_item_pool_clear (this->data);
 }
 
-int manapi::object_pool::mem_type(std::size_t size) MANAPIHTTP_NOEXCEPT {
+int manapi::object_pool::mem_type(std::size_t size) MANAPICORE_NOEXCEPT {
     return ::bufflen2level(size);
 }
 

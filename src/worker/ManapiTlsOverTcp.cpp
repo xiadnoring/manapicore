@@ -40,7 +40,7 @@
 //    return TCP::init(deep + 1);
 //}
 //
-//manapi::net::worker::shared_conn manapi::net::worker::TLS::accept(const ev::shared_tcp &w) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::shared_conn manapi::net::worker::TLS::accept(const ev::shared_tcp &w) MANAPICORE_NOEXCEPT {
 //    auto connection = TCP::accept(w, connection_init_cb, this);
 //
 //    if (!connection) return nullptr;
@@ -51,7 +51,7 @@
 //    return std::move(connection);
 //}
 //
-//void manapi::net::worker::TLS::close_connection(shared_conn conn, int flags) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TLS::close_connection(shared_conn conn, int flags) MANAPICORE_NOEXCEPT {
 //    if (!conn)
 //        return;
 //
@@ -134,7 +134,7 @@
 //    }
 //}
 //
-//ssize_t manapi::net::worker::TLS::sync_write_ex(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool flush, std::size_t maxsize) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::TLS::sync_write_ex(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool flush, std::size_t maxsize) MANAPICORE_NOEXCEPT {
 //    auto connection = conn->as<tls_connection_t>();
 //
 //    if (connection->flags & (ev::DISCONNECT)) return -1;
@@ -211,13 +211,13 @@
 //    return static_cast<ssize_t>(total);
 //}
 //
-//ssize_t manapi::net::worker::TLS::sync_write(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::TLS::sync_write(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPICORE_NOEXCEPT {
 //    return prepared::sync_write(this, conn, buff, nbuff, finish);
 //}
 //
-//int manapi::net::worker::TLS::event_flags(const shared_conn & conn, int flags) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::TLS::event_flags(const shared_conn & conn, int flags) MANAPICORE_NOEXCEPT {
 //    auto const data = conn->as<tls_connection_t>();
-//    MANAPIHTTP_WORKER_EVENT_LOOP(data) {
+//    MANAPICORE_WORKER_EVENT_LOOP(data) {
 //        if (data->flags & ev::DISCONNECT) {
 //            if (!data->ev_cb.empty()) {
 //                manapi::net::worker::TLS::notify_cb(data->ev_cb.back().first, conn, CONN_CLOSED, nullptr);
@@ -230,13 +230,13 @@
 //            }
 //        }
 //
-//        MANAPIHTTP_WORKER_EVENT_BREAK(data)
+//        MANAPICORE_WORKER_EVENT_BREAK(data)
 //    }
 //
 //    return prev;
 //}
 //
-////void manapi::net::worker::TLS::update_limit_rate_connection(const shared_conn &sconn) MANAPIHTTP_NOEXCEPT {
+////void manapi::net::worker::TLS::update_limit_rate_connection(const shared_conn &sconn) MANAPICORE_NOEXCEPT {
 ////    auto const data = sconn->as<tcp_connection_t>();
 ////
 ////    if (data->transfered >= this->m_config->speed_limit_rate) {
@@ -281,7 +281,7 @@
 ////    }
 ////}
 //
-//void manapi::net::worker::TLS::connection_interface_eraser(worker::connection *ptr) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TLS::connection_interface_eraser(worker::connection *ptr) MANAPICORE_NOEXCEPT {
 //    auto connection = std::unique_ptr<tls_connection_t> (ptr->as<tls_connection_t>());
 //    auto w = (dynamic_cast<TLS*>(connection->worker));
 //
@@ -408,7 +408,7 @@
 //    TCP::close_connection(conn, CLOSE_CONN_ERR);
 //}
 //
-//void manapi::net::worker::TLS::onrecv(const std::shared_ptr<ev::tcp> &watcher, const shared_conn &conn, ibuffpool_t &&buffer) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TLS::onrecv(const std::shared_ptr<ev::tcp> &watcher, const shared_conn &conn, ibuffpool_t &&buffer) MANAPICORE_NOEXCEPT {
 //    auto buff = buffer.data();
 //    auto size = buffer.size();
 //    auto const data = conn->as<tls_connection_t>();
@@ -480,7 +480,7 @@
 //    }
 //}
 //
-//int manapi::net::worker::TLS::conn_after_write(const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::TLS::conn_after_write(const worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    if (auto rhs = TCP::conn_after_write(conn)) {
 //        return rhs;
 //    }
@@ -500,7 +500,7 @@
 //    return ERR_OK;
 //}
 //
-//manapi::net::worker::shared_conn manapi::net::worker::TLS::connection_init_cb(void *user_data) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::shared_conn manapi::net::worker::TLS::connection_init_cb(void *user_data) MANAPICORE_NOEXCEPT {
 //    auto const w = static_cast<TLS *> (user_data);
 //    try {
 //        auto p = std::make_unique<tls_connection_t>();
@@ -596,7 +596,7 @@
 //    return CONN_IO_AGAIN;
 //}
 //
-//int manapi::net::worker::TLS::ssl_bio_flush_write(const shared_conn &conn, tls_connection_t *m, std::size_t maxsize, bool fin) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::TLS::ssl_bio_flush_write(const shared_conn &conn, tls_connection_t *m, std::size_t maxsize, bool fin) MANAPICORE_NOEXCEPT {
 //
 //
 //    try {

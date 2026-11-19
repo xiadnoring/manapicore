@@ -16,7 +16,7 @@ namespace manapi::async {
         }
         ~delay() = default;
 
-        MANAPIHTTP_NODISCARD bool await_ready () const {
+        MANAPICORE_NODISCARD bool await_ready () const {
             return false;
         }
 

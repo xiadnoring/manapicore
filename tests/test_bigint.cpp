@@ -1,13 +1,13 @@
-//#ifdef MANAPIHTTP_HTTP_AS_EXECUTABLE
+//#ifdef MANAPICORE_HTTP_AS_EXECUTABLE
 #   include "ManapiBigint.hpp"
 #   include "ManapiInitTools.hpp"
 // #else
-// #   include <manapihttp/ManapiBigint.hpp>
+// #   include <manapicore/ManapiBigint.hpp>
 // #endif
 
 #include "./utest.h"
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 
 UTEST(bigint, bigint_integer) {
     manapi::bigint n (78);

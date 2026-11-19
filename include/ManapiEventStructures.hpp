@@ -8,26 +8,26 @@
 #include "./ManapiErrors.hpp"
 #include "./ManapiDebug.hpp"
 
-#define MANAPHTTP_UV_SINCE_AT(major,minor,patch) MANAPIHTTP_SINCE_AT_CUSTOM(UV_VERSION_MAJOR, UV_VERSION_MINOR, UV_VERSION_PATCH,major,minor,patch)
-#define MANAPIHTTP_EV_CAST_STREAM(x) reinterpret_cast<uv_stream_t *> (x)
-#define MANAPIHTTP_EV_CAST_HANDLE(x) reinterpret_cast <uv_handle_t *> (x)
-#define MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(name_class, name_struct)
-#define MANAPIHTTP_EV_DEFAULT(name_class, name_struct) \
-        void unbind (uv_close_cb cb) MANAPIHTTP_NOEXCEPT;\
-        void unbind () MANAPIHTTP_NOEXCEPT;\
-        void data (void *data) MANAPIHTTP_NOEXCEPT;\
-        void *data () MANAPIHTTP_NOEXCEPT; \
-        loop_ref loop () MANAPIHTTP_NOEXCEPT; \
-        name_struct* custom () MANAPIHTTP_NOEXCEPT; \
-        bool is_active () MANAPIHTTP_NOEXCEPT; \
-        void ref () MANAPIHTTP_NOEXCEPT; \
-        void unref () MANAPIHTTP_NOEXCEPT; \
+#define MANAPHTTP_UV_SINCE_AT(major,minor,patch) MANAPICORE_SINCE_AT_CUSTOM(UV_VERSION_MAJOR, UV_VERSION_MINOR, UV_VERSION_PATCH,major,minor,patch)
+#define MANAPICORE_EV_CAST_STREAM(x) reinterpret_cast<uv_stream_t *> (x)
+#define MANAPICORE_EV_CAST_HANDLE(x) reinterpret_cast <uv_handle_t *> (x)
+#define MANAPICORE_EV_DEFAULT_PRIVATE_VAR(name_class, name_struct)
+#define MANAPICORE_EV_DEFAULT(name_class, name_struct) \
+        void unbind (uv_close_cb cb) MANAPICORE_NOEXCEPT;\
+        void unbind () MANAPICORE_NOEXCEPT;\
+        void data (void *data) MANAPICORE_NOEXCEPT;\
+        void *data () MANAPICORE_NOEXCEPT; \
+        loop_ref loop () MANAPICORE_NOEXCEPT; \
+        name_struct* custom () MANAPICORE_NOEXCEPT; \
+        bool is_active () MANAPICORE_NOEXCEPT; \
+        void ref () MANAPICORE_NOEXCEPT; \
+        void unref () MANAPICORE_NOEXCEPT; \
         ~name_class ();
-#define MANAPIHTTP_EV_STREAM(name_class, name_struct) \
-        int listen (int tcp_backlog, uv_connection_cb cb) MANAPIHTTP_NOEXCEPT; \
-        static int ip4_addr (const char *ip, int port, sockaddr_in *addr) MANAPIHTTP_NOEXCEPT; \
-        static int ip6_addr (const char *ip, int port, sockaddr_in6 *addr) MANAPIHTTP_NOEXCEPT;
-#define MANAPIHTTP_EV_CHECK(expr) if (expr) { throw manapi::exception (manapi::ERR_INTERNAL, #expr); }
+#define MANAPICORE_EV_STREAM(name_class, name_struct) \
+        int listen (int tcp_backlog, uv_connection_cb cb) MANAPICORE_NOEXCEPT; \
+        static int ip4_addr (const char *ip, int port, sockaddr_in *addr) MANAPICORE_NOEXCEPT; \
+        static int ip6_addr (const char *ip, int port, sockaddr_in6 *addr) MANAPICORE_NOEXCEPT;
+#define MANAPICORE_EV_CHECK(expr) if (expr) { throw manapi::exception (manapi::ERR_INTERNAL, #expr); }
 
 namespace manapi {
     /**
@@ -462,7 +462,7 @@ namespace manapi::ev {
     typedef uv_stat_t stat_t;
 
     struct dirent_deleter_t {
-        void operator ()(manapi::ev::dirent_t *ptr) MANAPIHTTP_NOEXCEPT;
+        void operator ()(manapi::ev::dirent_t *ptr) MANAPICORE_NOEXCEPT;
     };
 
     class unique_file {
@@ -473,35 +473,35 @@ namespace manapi::ev {
 
         ~unique_file();
 
-        unique_file (unique_file &&n) MANAPIHTTP_NOEXCEPT;
+        unique_file (unique_file &&n) MANAPICORE_NOEXCEPT;
 
         unique_file (const unique_file &n) = delete;
 
-        unique_file &operator= (unique_file &&n) MANAPIHTTP_NOEXCEPT;
+        unique_file &operator= (unique_file &&n) MANAPICORE_NOEXCEPT;
 
         unique_file &operator= (const unique_file &n) = delete;
 
-        manapi::status_or<ev::file> release () MANAPIHTTP_NOEXCEPT;
+        manapi::status_or<ev::file> release () MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD ev::file get () const;
+        MANAPICORE_NODISCARD ev::file get () const;
 
-        void reset () MANAPIHTTP_NOEXCEPT;
+        void reset () MANAPICORE_NOEXCEPT;
 
-        void reset (ev::file fd) MANAPIHTTP_NOEXCEPT;
+        void reset (ev::file fd) MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD bool has_value () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool has_value () const MANAPICORE_NOEXCEPT;
     private:
         std::optional<ev::file> m_fd;
     };
 
     struct dir_deleter_t {
-        void operator ()(ev::dir_t *ptr) MANAPIHTTP_NOEXCEPT;
+        void operator ()(ev::dir_t *ptr) MANAPICORE_NOEXCEPT;
     };
 
     class async {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(async, uv_async_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(async, uv_async_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(async, uv_async_t)
+        MANAPICORE_EV_DEFAULT(async, uv_async_t)
 
         /**
          * initialize the async watcher
@@ -513,7 +513,7 @@ namespace manapi::ev {
          * @param loop the loop reference
          * @return the status code
          */
-        int bind (loop_ref loop) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop) MANAPICORE_NOEXCEPT;
 
         /**
          * bind the watcher
@@ -521,35 +521,35 @@ namespace manapi::ev {
          * @param cb the callback
          * @return the status code
          */
-        int bind (loop_ref loop, uv_async_cb cb) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop, uv_async_cb cb) MANAPICORE_NOEXCEPT;
 
         /**
          * send a request
          * @return the status code
          */
-        int send () MANAPIHTTP_NOEXCEPT;
+        int send () MANAPICORE_NOEXCEPT;
 
         /**
          * set the event loop callback
          * @return the status code
          */
-        int set () MANAPIHTTP_NOEXCEPT;
+        int set () MANAPICORE_NOEXCEPT;
 
         /**
          * set the custom callback
          * @param cb the custom callback
          * @return the status code
          */
-        int set (uv_async_cb cb) MANAPIHTTP_NOEXCEPT;
+        int set (uv_async_cb cb) MANAPICORE_NOEXCEPT;
     private:
 
         uv_async_t m_s;
     };
 
     class idle {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(idle, uv_idle_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(idle, uv_idle_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(idle, uv_idle_t)
+        MANAPICORE_EV_DEFAULT(idle, uv_idle_t)
 
         /**
          * initialize the idle watcher
@@ -561,34 +561,34 @@ namespace manapi::ev {
          * @param loop the loop reference
          * @return the status code
          */
-        int bind (loop_ref loop) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop) MANAPICORE_NOEXCEPT;
 
         /**
          * start listening to the watcher with the event loop callback
          * @return the status code
          */
-        int start () MANAPIHTTP_NOEXCEPT;
+        int start () MANAPICORE_NOEXCEPT;
 
         /**
          * start listening to the watcher with the custom callback
          * @param cb the custom callback
          * @return the status code
          */
-        int start (uv_idle_cb cb) MANAPIHTTP_NOEXCEPT;
+        int start (uv_idle_cb cb) MANAPICORE_NOEXCEPT;
 
         /**
          * stop listening to the watcher
          * @return the status code
          */
-        int stop () MANAPIHTTP_NOEXCEPT;
+        int stop () MANAPICORE_NOEXCEPT;
     private:
         uv_idle_t m_s;
     };
 
     class check {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(check, uv_check_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(check, uv_check_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(check, uv_check_t)
+        MANAPICORE_EV_DEFAULT(check, uv_check_t)
 
         /**
          * initalize the watcher
@@ -600,34 +600,34 @@ namespace manapi::ev {
          * @param loop the loop reference
          * @return the status code
          */
-        int bind (loop_ref loop) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop) MANAPICORE_NOEXCEPT;
 
         /**
          * start listening to the watcher with the event loop callback
          * @return the status code
          */
-        int start () MANAPIHTTP_NOEXCEPT;
+        int start () MANAPICORE_NOEXCEPT;
 
         /**
          * start listening to the watcher with the custom callback
          * @param cb the custom callback
          * @return the status code
          */
-        int start (uv_check_cb cb) MANAPIHTTP_NOEXCEPT;
+        int start (uv_check_cb cb) MANAPICORE_NOEXCEPT;
 
         /**
          * stop listening to the watcher
          * @return the status code
          */
-        int stop () MANAPIHTTP_NOEXCEPT;
+        int stop () MANAPICORE_NOEXCEPT;
     private:
         uv_check_t m_s;
     };
 
     class io {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(io, uv_poll_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(io, uv_poll_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(io, uv_poll_t)
+        MANAPICORE_EV_DEFAULT(io, uv_poll_t)
 
         io ();
 
@@ -641,403 +641,403 @@ namespace manapi::ev {
             return uv_poll_init(loop, &this->m_s, fd);
         }
 
-        int start (int revents, uv_poll_cb cb) MANAPIHTTP_NOEXCEPT;
+        int start (int revents, uv_poll_cb cb) MANAPICORE_NOEXCEPT;
 
-        int start (int revents) MANAPIHTTP_NOEXCEPT;
+        int start (int revents) MANAPICORE_NOEXCEPT;
 
-        int start () MANAPIHTTP_NOEXCEPT;
+        int start () MANAPICORE_NOEXCEPT;
 
-        int restart (int revents) MANAPIHTTP_NOEXCEPT;
+        int restart (int revents) MANAPICORE_NOEXCEPT;
 
-        int stop () MANAPIHTTP_NOEXCEPT;
+        int stop () MANAPICORE_NOEXCEPT;
 
-        int events () MANAPIHTTP_NOEXCEPT;
+        int events () MANAPICORE_NOEXCEPT;
     private:
         uv_poll_t m_s;
     };
 
     class write {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(write, uv_write_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(write, uv_write_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(write, uv_write_t)
+        MANAPICORE_EV_DEFAULT(write, uv_write_t)
 
         write ();
 
-        int bind (uv_stream_t *stream, const uv_buf_t *buf, uint32_t nbufs, uv_write_cb cb) MANAPIHTTP_NOEXCEPT;
+        int bind (uv_stream_t *stream, const uv_buf_t *buf, uint32_t nbufs, uv_write_cb cb) MANAPICORE_NOEXCEPT;
 
-        int bind (uv_stream_t *stream, const uv_buf_t *buf, uint32_t nbufs) MANAPIHTTP_NOEXCEPT;
+        int bind (uv_stream_t *stream, const uv_buf_t *buf, uint32_t nbufs) MANAPICORE_NOEXCEPT;
     private:
         uv_write_t m_s{};
     };
 
     class connect {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(write, uv_write_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(write, uv_write_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(connect, uv_connect_t)
+        MANAPICORE_EV_DEFAULT(connect, uv_connect_t)
 
         connect ();
 
-        int bind (uv_tcp_t *p, const struct sockaddr *addr, uv_connect_cb cb) MANAPIHTTP_NOEXCEPT;
+        int bind (uv_tcp_t *p, const struct sockaddr *addr, uv_connect_cb cb) MANAPICORE_NOEXCEPT;
 
-        int cancel () MANAPIHTTP_NOEXCEPT;
+        int cancel () MANAPICORE_NOEXCEPT;
     private:
         uv_connect_t m_s{};
     };
 
     class tcp {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(tcp, uv_tcp_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(tcp, uv_tcp_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(tcp, uv_tcp_t)
-        MANAPIHTTP_EV_STREAM(tcp, uv_tcp_t)
+        MANAPICORE_EV_DEFAULT(tcp, uv_tcp_t)
+        MANAPICORE_EV_STREAM(tcp, uv_tcp_t)
 
         tcp ();
 
-        int listen (int tcp_backlog) MANAPIHTTP_NOEXCEPT;
+        int listen (int tcp_backlog) MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop) MANAPICORE_NOEXCEPT;
 
-        int connect (uv_connect_t *connect, const struct sockaddr *addr, uv_connect_cb cb) MANAPIHTTP_NOEXCEPT;
+        int connect (uv_connect_t *connect, const struct sockaddr *addr, uv_connect_cb cb) MANAPICORE_NOEXCEPT;
 
-        int accept (tcp *parent) MANAPIHTTP_NOEXCEPT;
+        int accept (tcp *parent) MANAPICORE_NOEXCEPT;
 
-        int read_start () MANAPIHTTP_NOEXCEPT;
+        int read_start () MANAPICORE_NOEXCEPT;
 
-        int read_start (uv_alloc_cb alloc, uv_read_cb cb) MANAPIHTTP_NOEXCEPT;
+        int read_start (uv_alloc_cb alloc, uv_read_cb cb) MANAPICORE_NOEXCEPT;
 
-        int read_stop () MANAPIHTTP_NOEXCEPT;
+        int read_stop () MANAPICORE_NOEXCEPT;
 
-        ssize_t try_write (const void *buff, std::size_t len) MANAPIHTTP_NOEXCEPT;
+        ssize_t try_write (const void *buff, std::size_t len) MANAPICORE_NOEXCEPT;
 
-        ssize_t try_write (const ev::buff_t *buff, uint32_t nbuff) MANAPIHTTP_NOEXCEPT;
+        ssize_t try_write (const ev::buff_t *buff, uint32_t nbuff) MANAPICORE_NOEXCEPT;
 
-        int s_bind (const sockaddr *addr, uint32_t flags) MANAPIHTTP_NOEXCEPT;
+        int s_bind (const sockaddr *addr, uint32_t flags) MANAPICORE_NOEXCEPT;
 
-        int getpeername (sockaddr *name, int *namelen) MANAPIHTTP_NOEXCEPT;
+        int getpeername (sockaddr *name, int *namelen) MANAPICORE_NOEXCEPT;
 
-        int getsockname (sockaddr *name, int *namelen) MANAPIHTTP_NOEXCEPT;
+        int getsockname (sockaddr *name, int *namelen) MANAPICORE_NOEXCEPT;
 
-        int close_reset (uv_close_cb close_cb) MANAPIHTTP_NOEXCEPT;
+        int close_reset (uv_close_cb close_cb) MANAPICORE_NOEXCEPT;
 
-        int close_reset () MANAPIHTTP_NOEXCEPT;
+        int close_reset () MANAPICORE_NOEXCEPT;
 
-        int keepalive (int enable, unsigned int delay) MANAPIHTTP_NOEXCEPT;
+        int keepalive (int enable, unsigned int delay) MANAPICORE_NOEXCEPT;
 
-        int nodelay (int enable) MANAPIHTTP_NOEXCEPT;
+        int nodelay (int enable) MANAPICORE_NOEXCEPT;
 
-        int simultaneous_accepts (int enable) MANAPIHTTP_NOEXCEPT;
+        int simultaneous_accepts (int enable) MANAPICORE_NOEXCEPT;
     private:
         uv_tcp_t m_s;
     };
 
     class udp {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(udp, uv_udp_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(udp, uv_udp_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(udp, uv_udp_t)
-        MANAPIHTTP_EV_STREAM(udp, uv_udp_t)
+        MANAPICORE_EV_DEFAULT(udp, uv_udp_t)
+        MANAPICORE_EV_STREAM(udp, uv_udp_t)
 
         udp ();
 
-        int bind (loop_ref loop) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop) MANAPICORE_NOEXCEPT;
 
-        int s_bind (const sockaddr *addr, uint32_t flags) MANAPIHTTP_NOEXCEPT;
+        int s_bind (const sockaddr *addr, uint32_t flags) MANAPICORE_NOEXCEPT;
 
-        int recv_start () MANAPIHTTP_NOEXCEPT;
-        int recv_start (uv_alloc_cb alloc, uv_udp_recv_cb cb) MANAPIHTTP_NOEXCEPT;
+        int recv_start () MANAPICORE_NOEXCEPT;
+        int recv_start (uv_alloc_cb alloc, uv_udp_recv_cb cb) MANAPICORE_NOEXCEPT;
 
-        int recv_stop () MANAPIHTTP_NOEXCEPT;
+        int recv_stop () MANAPICORE_NOEXCEPT;
 
-        int connect (const struct sockaddr *addr) MANAPIHTTP_NOEXCEPT;
+        int connect (const struct sockaddr *addr) MANAPICORE_NOEXCEPT;
 
-        int try_send (const uv_buf_t *buf, uint32_t nbuf, sockaddr *addr) MANAPIHTTP_NOEXCEPT;
+        int try_send (const uv_buf_t *buf, uint32_t nbuf, sockaddr *addr) MANAPICORE_NOEXCEPT;
     private:
         uv_udp_t m_s;
     };
 
     class udp_send {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(udp_send, uv_udp_send_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(udp_send, uv_udp_send_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(udp_send, uv_udp_send_t)
+        MANAPICORE_EV_DEFAULT(udp_send, uv_udp_send_t)
 
         udp_send ();
 
-        int bind (uv_udp_t *stream, const uv_buf_t *buf, uint32_t nbufs, uv_udp_send_cb cb, const sockaddr *addr) MANAPIHTTP_NOEXCEPT;
-        int bind (uv_udp_t *stream, const uv_buf_t *buf, uint32_t nbufs, const sockaddr *addr) MANAPIHTTP_NOEXCEPT;
+        int bind (uv_udp_t *stream, const uv_buf_t *buf, uint32_t nbufs, uv_udp_send_cb cb, const sockaddr *addr) MANAPICORE_NOEXCEPT;
+        int bind (uv_udp_t *stream, const uv_buf_t *buf, uint32_t nbufs, const sockaddr *addr) MANAPICORE_NOEXCEPT;
     private:
         uv_udp_send_t m_s;
     };
 
     class prepare {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(prepare, uv_prepare_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(prepare, uv_prepare_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(prepare, uv_prepare_t)
+        MANAPICORE_EV_DEFAULT(prepare, uv_prepare_t)
 
         prepare ();
 
-        int bind(loop_ref loop) MANAPIHTTP_NOEXCEPT;
+        int bind(loop_ref loop) MANAPICORE_NOEXCEPT;
 
-        int start () MANAPIHTTP_NOEXCEPT;
-        int start (uv_prepare_cb cb) MANAPIHTTP_NOEXCEPT;
+        int start () MANAPICORE_NOEXCEPT;
+        int start (uv_prepare_cb cb) MANAPICORE_NOEXCEPT;
 
-        int stop () MANAPIHTTP_NOEXCEPT;
+        int stop () MANAPICORE_NOEXCEPT;
     private:
         uv_prepare_t m_s;
     };
 
     class timer {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(timer, uv_timer_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(timer, uv_timer_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(timer, uv_timer_t)
+        MANAPICORE_EV_DEFAULT(timer, uv_timer_t)
 
         timer ();
 
-        int bind(loop_ref loop) MANAPIHTTP_NOEXCEPT;
+        int bind(loop_ref loop) MANAPICORE_NOEXCEPT;
 
-        int start (uint64_t timeout, uint64_t repeat) MANAPIHTTP_NOEXCEPT;
+        int start (uint64_t timeout, uint64_t repeat) MANAPICORE_NOEXCEPT;
 
-        int start (uint64_t timeout, uint64_t repeat, uv_timer_cb cb) MANAPIHTTP_NOEXCEPT;
+        int start (uint64_t timeout, uint64_t repeat, uv_timer_cb cb) MANAPICORE_NOEXCEPT;
 
-        int stop () MANAPIHTTP_NOEXCEPT;
+        int stop () MANAPICORE_NOEXCEPT;
 
-        int again () MANAPIHTTP_NOEXCEPT;
+        int again () MANAPICORE_NOEXCEPT;
 
-        void repeat (uint64_t repeat)  MANAPIHTTP_NOEXCEPT;
+        void repeat (uint64_t repeat)  MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD uint64_t repeat () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD uint64_t repeat () const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD uint64_t due_in () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD uint64_t due_in () const MANAPICORE_NOEXCEPT;
     private:
         uv_timer_t m_s;
     };
 
     class fs {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(fs, uv_fs_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(fs, uv_fs_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(fs, uv_fs_t)
+        MANAPICORE_EV_DEFAULT(fs, uv_fs_t)
 
         fs (loop_ref loop);
 
-        int cancel () MANAPIHTTP_NOEXCEPT;
+        int cancel () MANAPICORE_NOEXCEPT;
 
-        int open (const char *path, int flags, int mode, uv_fs_cb open_cb) MANAPIHTTP_NOEXCEPT;
+        int open (const char *path, int flags, int mode, uv_fs_cb open_cb) MANAPICORE_NOEXCEPT;
 
-        int open (const char *path, int flags, int mode) MANAPIHTTP_NOEXCEPT;
+        int open (const char *path, int flags, int mode) MANAPICORE_NOEXCEPT;
 
-        int read (ev::file fileno, const uv_buf_t *buff, uint32_t nbuff, int64_t offset, uv_fs_cb read_cb) MANAPIHTTP_NOEXCEPT;
+        int read (ev::file fileno, const uv_buf_t *buff, uint32_t nbuff, int64_t offset, uv_fs_cb read_cb) MANAPICORE_NOEXCEPT;
 
-        int read (ev::file fileno, const uv_buf_t *buff, uint32_t nbuff, int64_t offset) MANAPIHTTP_NOEXCEPT;
+        int read (ev::file fileno, const uv_buf_t *buff, uint32_t nbuff, int64_t offset) MANAPICORE_NOEXCEPT;
 
-        int write (ev::file fileno, const uv_buf_t *buff, uint32_t nbuff, int64_t offset, uv_fs_cb write_cb) MANAPIHTTP_NOEXCEPT;
+        int write (ev::file fileno, const uv_buf_t *buff, uint32_t nbuff, int64_t offset, uv_fs_cb write_cb) MANAPICORE_NOEXCEPT;
 
-        int write (ev::file fileno, const uv_buf_t *buff, uint32_t nbuff, int64_t offset) MANAPIHTTP_NOEXCEPT;
+        int write (ev::file fileno, const uv_buf_t *buff, uint32_t nbuff, int64_t offset) MANAPICORE_NOEXCEPT;
 
-        static ssize_t try_write (ev::file fileno, const void *buff, std::size_t nbuff, int64_t offset) MANAPIHTTP_NOEXCEPT;
+        static ssize_t try_write (ev::file fileno, const void *buff, std::size_t nbuff, int64_t offset) MANAPICORE_NOEXCEPT;
 
-        static ssize_t try_read (ev::file fileno, void *buff, std::size_t nbuff, int64_t offset) MANAPIHTTP_NOEXCEPT;
+        static ssize_t try_read (ev::file fileno, void *buff, std::size_t nbuff, int64_t offset) MANAPICORE_NOEXCEPT;
 
-        int close (ev::file fileno, uv_fs_cb close_cb) MANAPIHTTP_NOEXCEPT;
+        int close (ev::file fileno, uv_fs_cb close_cb) MANAPICORE_NOEXCEPT;
 
-        int close (ev::file fileno) MANAPIHTTP_NOEXCEPT;
+        int close (ev::file fileno) MANAPICORE_NOEXCEPT;
 
-        int unlink (const char *path, uv_fs_cb unlink_cb) MANAPIHTTP_NOEXCEPT;
+        int unlink (const char *path, uv_fs_cb unlink_cb) MANAPICORE_NOEXCEPT;
 
-        int unlink (const char *path) MANAPIHTTP_NOEXCEPT;
+        int unlink (const char *path) MANAPICORE_NOEXCEPT;
 
-        int mkdir (const char *path, int mode, uv_fs_cb mkdir_cb) MANAPIHTTP_NOEXCEPT;
+        int mkdir (const char *path, int mode, uv_fs_cb mkdir_cb) MANAPICORE_NOEXCEPT;
 
-        int mkdir (const char *path, int mode) MANAPIHTTP_NOEXCEPT;
+        int mkdir (const char *path, int mode) MANAPICORE_NOEXCEPT;
 
-        int mkdtemp (const char *path, uv_fs_cb mkdtemp_cb) MANAPIHTTP_NOEXCEPT;
+        int mkdtemp (const char *path, uv_fs_cb mkdtemp_cb) MANAPICORE_NOEXCEPT;
 
-        int mkdtemp (const char *path) MANAPIHTTP_NOEXCEPT;
+        int mkdtemp (const char *path) MANAPICORE_NOEXCEPT;
 
-        int mkstemp (const char *path, uv_fs_cb mkstemp_cb) MANAPIHTTP_NOEXCEPT;
+        int mkstemp (const char *path, uv_fs_cb mkstemp_cb) MANAPICORE_NOEXCEPT;
 
-        int mkstemp (const char *path) MANAPIHTTP_NOEXCEPT;
+        int mkstemp (const char *path) MANAPICORE_NOEXCEPT;
 
-        int rmdir (const char *path, uv_fs_cb rmdir_cb) MANAPIHTTP_NOEXCEPT;
+        int rmdir (const char *path, uv_fs_cb rmdir_cb) MANAPICORE_NOEXCEPT;
 
-        int rmdir (const char *path) MANAPIHTTP_NOEXCEPT;
+        int rmdir (const char *path) MANAPICORE_NOEXCEPT;
 
-        int opendir (const char *path, uv_fs_cb opendir) MANAPIHTTP_NOEXCEPT;
+        int opendir (const char *path, uv_fs_cb opendir) MANAPICORE_NOEXCEPT;
 
-        int opendir (const char *path) MANAPIHTTP_NOEXCEPT;
+        int opendir (const char *path) MANAPICORE_NOEXCEPT;
 
-        int closedir (ev::dir_t * dir, uv_fs_cb closedir_cb) MANAPIHTTP_NOEXCEPT;
+        int closedir (ev::dir_t * dir, uv_fs_cb closedir_cb) MANAPICORE_NOEXCEPT;
 
-        int closedir (ev::dir_t * dir) MANAPIHTTP_NOEXCEPT;
+        int closedir (ev::dir_t * dir) MANAPICORE_NOEXCEPT;
 
-        int readdir (ev::dir_t * dir, uv_fs_cb readdir_cb) MANAPIHTTP_NOEXCEPT;
+        int readdir (ev::dir_t * dir, uv_fs_cb readdir_cb) MANAPICORE_NOEXCEPT;
 
-        int readdir (ev::dir_t * dir) MANAPIHTTP_NOEXCEPT;
+        int readdir (ev::dir_t * dir) MANAPICORE_NOEXCEPT;
 
-        int scandir (const char *path, int flags, uv_fs_cb scandir_cb) MANAPIHTTP_NOEXCEPT;
+        int scandir (const char *path, int flags, uv_fs_cb scandir_cb) MANAPICORE_NOEXCEPT;
 
-        int scandir (const char *path, int flags) MANAPIHTTP_NOEXCEPT;
+        int scandir (const char *path, int flags) MANAPICORE_NOEXCEPT;
 
-        int scandir_next (ev::dirent_t *dir) MANAPIHTTP_NOEXCEPT;
+        int scandir_next (ev::dirent_t *dir) MANAPICORE_NOEXCEPT;
 
-        int stat (const char *path, uv_fs_cb stat_cb) MANAPIHTTP_NOEXCEPT;
+        int stat (const char *path, uv_fs_cb stat_cb) MANAPICORE_NOEXCEPT;
 
-        int stat (const char *path) MANAPIHTTP_NOEXCEPT;
+        int stat (const char *path) MANAPICORE_NOEXCEPT;
 
-        int fstat (ev::file file, uv_fs_cb fstat_cb) MANAPIHTTP_NOEXCEPT;
+        int fstat (ev::file file, uv_fs_cb fstat_cb) MANAPICORE_NOEXCEPT;
 
-        int fstat (ev::file file) MANAPIHTTP_NOEXCEPT;
+        int fstat (ev::file file) MANAPICORE_NOEXCEPT;
 
-        int lstat (const char *path, uv_fs_cb lstat_cb) MANAPIHTTP_NOEXCEPT;
+        int lstat (const char *path, uv_fs_cb lstat_cb) MANAPICORE_NOEXCEPT;
 
-        int lstat (const char *path) MANAPIHTTP_NOEXCEPT;
+        int lstat (const char *path) MANAPICORE_NOEXCEPT;
 
-        int statfs (const char *path, uv_fs_cb statfs_cb) MANAPIHTTP_NOEXCEPT;
+        int statfs (const char *path, uv_fs_cb statfs_cb) MANAPICORE_NOEXCEPT;
 
-        int statfs (const char *path) MANAPIHTTP_NOEXCEPT;
+        int statfs (const char *path) MANAPICORE_NOEXCEPT;
 
-        int rename (const char *path, const char *new_path, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int rename (const char *path, const char *new_path, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int rename (const char *path, const char *new_path) MANAPIHTTP_NOEXCEPT;
+        int rename (const char *path, const char *new_path) MANAPICORE_NOEXCEPT;
 
-        int fsync (ev::file file, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int fsync (ev::file file, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int fsync (ev::file file) MANAPIHTTP_NOEXCEPT;
+        int fsync (ev::file file) MANAPICORE_NOEXCEPT;
 
-        int fdatasync (ev::file file, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int fdatasync (ev::file file, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int fdatasync (ev::file file) MANAPIHTTP_NOEXCEPT;
+        int fdatasync (ev::file file) MANAPICORE_NOEXCEPT;
 
-        int ftruncate (ev::file file, int64_t off, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int ftruncate (ev::file file, int64_t off, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int ftruncate (ev::file file, int64_t off) MANAPIHTTP_NOEXCEPT;
+        int ftruncate (ev::file file, int64_t off) MANAPICORE_NOEXCEPT;
 
-        int copyfile (const char *path1, const char *path2, int flags, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int copyfile (const char *path1, const char *path2, int flags, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int copyfile (const char *path1, const char *path2, int flags) MANAPIHTTP_NOEXCEPT;
+        int copyfile (const char *path1, const char *path2, int flags) MANAPICORE_NOEXCEPT;
 
-        int sendfile (ev::file outfd, ev::file infd, int64_t off, size_t length, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int sendfile (ev::file outfd, ev::file infd, int64_t off, size_t length, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int sendfile (ev::file outfd, ev::file infd, int64_t off, size_t length) MANAPIHTTP_NOEXCEPT;
+        int sendfile (ev::file outfd, ev::file infd, int64_t off, size_t length) MANAPICORE_NOEXCEPT;
 
-        int access (const char *path, int mode, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int access (const char *path, int mode, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int access (const char *path, int mode) MANAPIHTTP_NOEXCEPT;
+        int access (const char *path, int mode) MANAPICORE_NOEXCEPT;
 
-        int chmod (const char *path, int mode, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int chmod (const char *path, int mode, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int chmod (const char *path, int mode) MANAPIHTTP_NOEXCEPT;
+        int chmod (const char *path, int mode) MANAPICORE_NOEXCEPT;
 
-        int fchmod (ev::file file, int mode, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int fchmod (ev::file file, int mode, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int fchmod (ev::file file, int mode) MANAPIHTTP_NOEXCEPT;
+        int fchmod (ev::file file, int mode) MANAPICORE_NOEXCEPT;
 
-        int utime (const char *path, double atime, double mtime, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int utime (const char *path, double atime, double mtime, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int utime (const char *path, double atime, double mtime) MANAPIHTTP_NOEXCEPT;
+        int utime (const char *path, double atime, double mtime) MANAPICORE_NOEXCEPT;
 
-        int futime (ev::file file, double atime, double mtime, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int futime (ev::file file, double atime, double mtime, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int futime (ev::file file, double atime, double mtime) MANAPIHTTP_NOEXCEPT;
+        int futime (ev::file file, double atime, double mtime) MANAPICORE_NOEXCEPT;
 
-        int lutime (const char *path, double atime, double mtime, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int lutime (const char *path, double atime, double mtime, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int lutime (const char *path, double atime, double mtime) MANAPIHTTP_NOEXCEPT;
+        int lutime (const char *path, double atime, double mtime) MANAPICORE_NOEXCEPT;
 
-        int link (const char *path, const char *new_path, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int link (const char *path, const char *new_path, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int link (const char *path, const char *new_path) MANAPIHTTP_NOEXCEPT;
+        int link (const char *path, const char *new_path) MANAPICORE_NOEXCEPT;
 
-        int symlink (const char *path, const char *new_path, int flags, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int symlink (const char *path, const char *new_path, int flags, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int symlink (const char *path, const char *new_path, int flags) MANAPIHTTP_NOEXCEPT;
+        int symlink (const char *path, const char *new_path, int flags) MANAPICORE_NOEXCEPT;
 
-        int readlink (const char *path, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int readlink (const char *path, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int readlink (const char *path) MANAPIHTTP_NOEXCEPT;
+        int readlink (const char *path) MANAPICORE_NOEXCEPT;
 
-        int realpath (const char *path, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int realpath (const char *path, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int realpath (const char *path) MANAPIHTTP_NOEXCEPT;
+        int realpath (const char *path) MANAPICORE_NOEXCEPT;
 
-        int chown (const char *path, uid_t uid, gid_t gid, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int chown (const char *path, uid_t uid, gid_t gid, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int chown (const char *path, uid_t uid, gid_t gid) MANAPIHTTP_NOEXCEPT;
+        int chown (const char *path, uid_t uid, gid_t gid) MANAPICORE_NOEXCEPT;
 
-        int fchown (ev::file file, uid_t uid, gid_t gid, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int fchown (ev::file file, uid_t uid, gid_t gid, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int fchown (ev::file file, uid_t uid, gid_t gid) MANAPIHTTP_NOEXCEPT;
+        int fchown (ev::file file, uid_t uid, gid_t gid) MANAPICORE_NOEXCEPT;
 
-        int lchown (const char *path, uid_t uid, gid_t gid, uv_fs_cb cb) MANAPIHTTP_NOEXCEPT;
+        int lchown (const char *path, uid_t uid, gid_t gid, uv_fs_cb cb) MANAPICORE_NOEXCEPT;
 
-        int lchown (const char *path, uid_t uid, gid_t gid) MANAPIHTTP_NOEXCEPT;
+        int lchown (const char *path, uid_t uid, gid_t gid) MANAPICORE_NOEXCEPT;
         
-        MANAPIHTTP_NODISCARD ssize_t result () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD ssize_t result () const MANAPICORE_NOEXCEPT;
 
-        void cleanup () MANAPIHTTP_NOEXCEPT;
+        void cleanup () MANAPICORE_NOEXCEPT;
     private:
         loop_ref m_loop;
         uv_fs_t m_s;
     };
 
     class random {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(random, uv_random_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(random, uv_random_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(random, uv_random_t)
+        MANAPICORE_EV_DEFAULT(random, uv_random_t)
 
         random ();
 
-        int cancel () MANAPIHTTP_NOEXCEPT;
+        int cancel () MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop, char *buff, std::size_t size, uv_random_cb cb) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop, char *buff, std::size_t size, uv_random_cb cb) MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop, char *buff, std::size_t size) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop, char *buff, std::size_t size) MANAPICORE_NOEXCEPT;
     private:
         uv_random_t m_s;
     };
 
     class getaddrinfo {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(getaddrinfo, uv_getaddrinfo_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(getaddrinfo, uv_getaddrinfo_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(getaddrinfo, uv_getaddrinfo_t)
+        MANAPICORE_EV_DEFAULT(getaddrinfo, uv_getaddrinfo_t)
 
         getaddrinfo ();
 
-        int cancel () MANAPIHTTP_NOEXCEPT;
+        int cancel () MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop, const char *node, const char *service, const struct addrinfo *hints, uv_getaddrinfo_cb getaddrinfo_cb) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop, const char *node, const char *service, const struct addrinfo *hints, uv_getaddrinfo_cb getaddrinfo_cb) MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop, const char *node, const char *service, const struct addrinfo *hints) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop, const char *node, const char *service, const struct addrinfo *hints) MANAPICORE_NOEXCEPT;
 
-        static void free (::addrinfo *n) MANAPIHTTP_NOEXCEPT;
+        static void free (::addrinfo *n) MANAPICORE_NOEXCEPT;
     private:
         uv_getaddrinfo_t m_s;
     };
 
     class getnameinfo {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(getnameinfo, uv_getnameinfo_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(getnameinfo, uv_getnameinfo_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(getnameinfo, uv_getnameinfo_t)
+        MANAPICORE_EV_DEFAULT(getnameinfo, uv_getnameinfo_t)
 
         getnameinfo ();
 
-        int cancel () MANAPIHTTP_NOEXCEPT;
+        int cancel () MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop, const sockaddr *addr, int flags, uv_getnameinfo_cb cb) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop, const sockaddr *addr, int flags, uv_getnameinfo_cb cb) MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop, const sockaddr *addr, int flags) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop, const sockaddr *addr, int flags) MANAPICORE_NOEXCEPT;
     private:
         uv_getnameinfo_t m_s;
     };
 
     class work {
-        MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR(work, uv_work_t)
+        MANAPICORE_EV_DEFAULT_PRIVATE_VAR(work, uv_work_t)
     public:
-        MANAPIHTTP_EV_DEFAULT(work, uv_work_t)
+        MANAPICORE_EV_DEFAULT(work, uv_work_t)
 
         work();
 
-        int cancel () MANAPIHTTP_NOEXCEPT;
+        int cancel () MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop, uv_work_cb cb, uv_after_work_cb after_cb) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop, uv_work_cb cb, uv_after_work_cb after_cb) MANAPICORE_NOEXCEPT;
 
-        int bind (loop_ref loop) MANAPIHTTP_NOEXCEPT;
+        int bind (loop_ref loop) MANAPICORE_NOEXCEPT;
     private:
         uv_work_t m_s;
     };
@@ -1058,11 +1058,11 @@ namespace manapi::ev {
     using shared_getnameinfo = std::shared_ptr<getnameinfo>;
     using shared_work = std::shared_ptr<work>;
 
-    const char *strerror (int errnum) MANAPIHTTP_NOEXCEPT;
+    const char *strerror (int errnum) MANAPICORE_NOEXCEPT;
 
-    const char *namerror (int errnum) MANAPIHTTP_NOEXCEPT;
+    const char *namerror (int errnum) MANAPICORE_NOEXCEPT;
 
-    std::size_t hrtime () MANAPIHTTP_NOEXCEPT;
+    std::size_t hrtime () MANAPICORE_NOEXCEPT;
 }
 
 namespace manapi::ev {
@@ -1084,37 +1084,37 @@ namespace manapi::ev {
 
         status (manapi::err_num code, const char * msg, int syserr);
 
-        status (status &&n) MANAPIHTTP_NOEXCEPT;
+        status (status &&n) MANAPICORE_NOEXCEPT;
 
-        status &operator=(status &&n) MANAPIHTTP_NOEXCEPT;
+        status &operator=(status &&n) MANAPICORE_NOEXCEPT;
 
-        status (manapi::status &&n) MANAPIHTTP_NOEXCEPT;
+        status (manapi::status &&n) MANAPICORE_NOEXCEPT;
 
-        status &operator=(manapi::status &&n) MANAPIHTTP_NOEXCEPT;
+        status &operator=(manapi::status &&n) MANAPICORE_NOEXCEPT;
 
         status (const status &n);
 
         status &operator=(const status &n);
 
-        MANAPIHTTP_NODISCARD std::string fullmsg() const override;
+        MANAPICORE_NODISCARD std::string fullmsg() const override;
 
         /**
          * Get the system code error
          * @return the system code error
          */
-        MANAPIHTTP_NODISCARD int syserr () const;
+        MANAPICORE_NODISCARD int syserr () const;
 
         /**
          * Get the system name error
          * @return the system name error
          */
-        MANAPIHTTP_NODISCARD std::string_view sysname () const;
+        MANAPICORE_NODISCARD std::string_view sysname () const;
 
         /**
          * Get the system msg error
          * @return the system msg error
          */
-        MANAPIHTTP_NODISCARD std::string_view sysmsg () const;
+        MANAPICORE_NODISCARD std::string_view sysmsg () const;
     private:
         /* the system error code */
         int m_syserr;
@@ -1135,15 +1135,15 @@ namespace manapi::ev {
 
         status_or (const T &n) : manapi::status_or<T, E>(n) {}
 
-        status_or(status_or &&n) MANAPIHTTP_NOEXCEPT = default;
+        status_or(status_or &&n) MANAPICORE_NOEXCEPT = default;
 
-        status_or&operator=(status_or &&n) MANAPIHTTP_NOEXCEPT = default;
+        status_or&operator=(status_or &&n) MANAPICORE_NOEXCEPT = default;
 
         /**
          * Get the system code error
          * @return the system code error
          */
-        MANAPIHTTP_NODISCARD int syserr () const {
+        MANAPICORE_NODISCARD int syserr () const {
             return this->err_.syserr();
         }
 
@@ -1151,7 +1151,7 @@ namespace manapi::ev {
          * Get the system name error
          * @return the system name error
          */
-        MANAPIHTTP_NODISCARD std::string_view sysname () const {
+        MANAPICORE_NODISCARD std::string_view sysname () const {
             return this->err_.sysname();
         }
 
@@ -1159,7 +1159,7 @@ namespace manapi::ev {
          * Get the system msg error
          * @return the system msg error
          */
-        MANAPIHTTP_NODISCARD std::string_view sysmsg () const {
+        MANAPICORE_NODISCARD std::string_view sysmsg () const {
             return this->err_.sysmsg();
         }
     };
@@ -1190,9 +1190,9 @@ namespace manapi::ev {
 #undef MANAPI__EV_STATUS_GEN
 }
 
-#undef MANAPIHTTP_EV_CAST_HANDLE
-#undef MANAPIHTTP_EV_DEFAULT_PRIVATE_VAR
-#undef MANAPIHTTP_EV_STREAM
-#undef MANAPIHTTP_EV_CHECK
-#undef MANAPIHTTP_EV_DEFAULT
-#undef MANAPIHTTP_EV_CAST_STREAM
+#undef MANAPICORE_EV_CAST_HANDLE
+#undef MANAPICORE_EV_DEFAULT_PRIVATE_VAR
+#undef MANAPICORE_EV_STREAM
+#undef MANAPICORE_EV_CHECK
+#undef MANAPICORE_EV_DEFAULT
+#undef MANAPICORE_EV_CAST_STREAM

@@ -34,11 +34,11 @@ fi
 ROOT=$(pwd)
 
 # 2) configure
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DMANAPIHTTP_GRPC_DEPENDENCY=OFF -DMANAPIHTTP_DISABLE_TRACE_HARD=ON \
-      -DMANAPIHTTP_BUILD_TYPE=lib -DMANAPIHTTP_JSON_DEBUG=OFF -DMANAPIHTTP_NGHTTP2_DEPENDENCY=ON -DMANAPIHTTP_NGHTTP3_DEPENDENCY=OFF \
-      -DMANAPIHTTP_OPENSSL_DEPENDENCY=ON -DMANAPIHTTP_WOFLSSL_DEPENDENCY=OFF -DMANAPIHTTP_BROTLI_DEPENDENCY=ON -DMANAPIHTTP_ZSTD_DEPENDENCY=ON \
-      -DMANAPIHTTP_ZLIB_DEPENDENCY=ON -DBUILD_SHARED_LIBS=ON -DMANAPIHTTP_STD_BACKTRACE_DEPENDENCY=OFF -DCMAKE_INSTALL_PREFIX=$(pwd)/package/usr \
-      -DMANAPIHTTP_INSTALL_ARCH=/x86_64-linux-gnu
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DMANAPICORE_GRPC_DEPENDENCY=OFF -DMANAPICORE_DISABLE_TRACE_HARD=ON \
+      -DMANAPICORE_BUILD_TYPE=lib -DMANAPICORE_JSON_DEBUG=OFF -DMANAPICORE_NGHTTP2_DEPENDENCY=ON -DMANAPICORE_NGHTTP3_DEPENDENCY=OFF \
+      -DMANAPICORE_OPENSSL_DEPENDENCY=ON -DMANAPICORE_WOFLSSL_DEPENDENCY=OFF -DMANAPICORE_BROTLI_DEPENDENCY=ON -DMANAPICORE_ZSTD_DEPENDENCY=ON \
+      -DMANAPICORE_ZLIB_DEPENDENCY=ON -DBUILD_SHARED_LIBS=ON -DMANAPICORE_STD_BACKTRACE_DEPENDENCY=OFF -DCMAKE_INSTALL_PREFIX=$(pwd)/package/usr \
+      -DMANAPICORE_INSTALL_ARCH=/x86_64-linux-gnu
 
 # 3) compile
 cmake --build build -j10
@@ -50,11 +50,11 @@ cmake --install build
 # 5) fake root
 
 # 5.1) pkgconfig
-find package/usr/lib/pkgconfig -name 'manapihttp*.*' -exec sed -i -e 's|'$ROOT'/package||g' {} \;
+find package/usr/lib/pkgconfig -name 'manapicore*.*' -exec sed -i -e 's|'$ROOT'/package||g' {} \;
 # 5.2) cmake
-find package/usr/lib/cmake/manapihttp -name '*.*' -exec sed -i -e 's|'$ROOT'/package||g' {} \;
+find package/usr/lib/cmake/manapicore -name '*.*' -exec sed -i -e 's|'$ROOT'/package||g' {} \;
 # 5.3) includes
-find package/usr/include/x86_64-linux-gnu/manapihttp -name '*.*' -exec sed -i -e 's|'$ROOT'/package||g' {} \;
+find package/usr/include/x86_64-linux-gnu/manapicore -name '*.*' -exec sed -i -e 's|'$ROOT'/package||g' {} \;
 
 # 6) Package
 
@@ -64,7 +64,7 @@ size=$(du -ks ./package/usr|cut -f 1);
 sed -ri "s/^Installed-Size.*$/Installed-Size: $size/g" ./package/DEBIAN/control
 
 # 6.2) Build
-dpkg-deb --root-owner-group --build ./package manapihttp-vx.x.xubuntu22.04.deb
+dpkg-deb --root-owner-group --build ./package manapicore-vx.x.xubuntu22.04.deb
 
 # 7) clean up
 if [ -f include/ManapiParams.hpp ]; then

@@ -106,42 +106,42 @@
 //        /**
 //         * no needed
 //         */
-//        uint64_t (*flags_cb)(const shared_conn &conn, wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT;
+//        uint64_t (*flags_cb)(const shared_conn &conn, wrk_interface_global_t *global) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * required, if the worker interface asks for an alpn support
 //         */
-//        int (*alpn_cb)(wrk_interface_global_t *global, char const *alpn, std::size_t alpn_size) MANAPIHTTP_NOEXCEPT;
+//        int (*alpn_cb)(wrk_interface_global_t *global, char const *alpn, std::size_t alpn_size) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * required
 //         */
-//        int (*init_cb)(const worker::shared_conn &conn, wrk_interface_global_t *global, worker::base *w) MANAPIHTTP_NOEXCEPT;
+//        int (*init_cb)(const worker::shared_conn &conn, wrk_interface_global_t *global, worker::base *w) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * required if the worker interface asks for a multistream support
 //         */
-//        int (*init_stream_cb)(const worker::shared_conn &conn, const worker::shared_conn &stream, wrk_interface_global_t *global, worker::base *w) MANAPIHTTP_NOEXCEPT;
+//        int (*init_stream_cb)(const worker::shared_conn &conn, const worker::shared_conn &stream, wrk_interface_global_t *global, worker::base *w) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * required
 //         */
-//        int (*cleanup_cb)(worker::connection *conn, wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT;
+//        int (*cleanup_cb)(worker::connection *conn, wrk_interface_global_t *global) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * required
 //         */
-//        int (*cleanup_global_cb)(wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT;
+//        int (*cleanup_global_cb)(wrk_interface_global_t *data) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * not required
 //         */
-//        void (*custom_read_cb)(const worker::shared_conn &conn, manapi::slice_complex *sc, wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT;
+//        void (*custom_read_cb)(const worker::shared_conn &conn, manapi::slice_complex *sc, wrk_interface_global_t *global) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * required if the worker interface asks for a custom limit rate callback
 //         */
-//        void (*update_limit_rate_cb)(const manapi::net::worker::shared_conn &conn, wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT;
+//        void (*update_limit_rate_cb)(const manapi::net::worker::shared_conn &conn, wrk_interface_global_t *global) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * required
@@ -152,7 +152,7 @@
 //         * required, if worker interface asks for a shutdown support
 //         * if |shutdown_cb| exists it must call close_connection() after a couple of RTTs
 //         */
-//        int (*shutdown_cb)(const worker::shared_conn &conn, wrk_interface_global_t *global, bool force) MANAPIHTTP_NOEXCEPT;
+//        int (*shutdown_cb)(const worker::shared_conn &conn, wrk_interface_global_t *global, bool force) MANAPICORE_NOEXCEPT;
 //    };
 //
 //    struct connection_io {
@@ -224,23 +224,23 @@
 //
 //        virtual manapi::future<status> init (std::size_t deep) = 0;
 //
-//        virtual void close_connection (shared_conn conn, int flags) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual void close_connection (shared_conn conn, int flags) MANAPICORE_NOEXCEPT = 0;
 //
-//        virtual ssize_t sync_write_ex(const worker::shared_conn &conn, manapi::slice &sv, bool finish, std::size_t maxsize) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual ssize_t sync_write_ex(const worker::shared_conn &conn, manapi::slice &sv, bool finish, std::size_t maxsize) MANAPICORE_NOEXCEPT = 0;
 //
-//        virtual ssize_t sync_write_ex(const worker::shared_conn &conn, ev::buff_t *buf, uint32_t buf_cnt, bool finish, std::size_t maxsize) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual ssize_t sync_write_ex(const worker::shared_conn &conn, ev::buff_t *buf, uint32_t buf_cnt, bool finish, std::size_t maxsize) MANAPICORE_NOEXCEPT = 0;
 //
-//        virtual ssize_t sync_write (const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual ssize_t sync_write (const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPICORE_NOEXCEPT = 0;
 //
-//        ssize_t sync_write_ex (const shared_conn &conn, const void *buff, std::size_t size, bool finish, std::size_t maxsize) MANAPIHTTP_NOEXCEPT;
+//        ssize_t sync_write_ex (const shared_conn &conn, const void *buff, std::size_t size, bool finish, std::size_t maxsize) MANAPICORE_NOEXCEPT;
 //
-//        ssize_t sync_write (const shared_conn &conn, slice_view buffs, bool finish) MANAPIHTTP_NOEXCEPT;
+//        ssize_t sync_write (const shared_conn &conn, slice_view buffs, bool finish) MANAPICORE_NOEXCEPT;
 //
-//        ssize_t sync_write (const shared_conn &conn, const void *buff, std::size_t size, bool finish) MANAPIHTTP_NOEXCEPT;
+//        ssize_t sync_write (const shared_conn &conn, const void *buff, std::size_t size, bool finish) MANAPICORE_NOEXCEPT;
 //
-//        virtual bool is_writable (const shared_conn &conn) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual bool is_writable (const shared_conn &conn) MANAPICORE_NOEXCEPT = 0;
 //
-//        virtual void waiting (const shared_conn &conn, bool state) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual void waiting (const shared_conn &conn, bool state) MANAPICORE_NOEXCEPT = 0;
 //
 //        manapi::future<ssize_t> write (const shared_conn &conn, const void *buff, std::size_t size, bool finish);
 //
@@ -256,44 +256,44 @@
 //
 //        virtual void stop (manapi::stoken token) = 0;
 //
-//        virtual void event_on (const shared_conn & conn, worker_watcher_cb&& callback, int flags) MANAPIHTTP_NOEXCEPT;
+//        virtual void event_on (const shared_conn & conn, worker_watcher_cb&& callback, int flags) MANAPICORE_NOEXCEPT;
 //
-//        virtual void event_unsub (const shared_conn & conn) MANAPIHTTP_NOEXCEPT;
+//        virtual void event_unsub (const shared_conn & conn) MANAPICORE_NOEXCEPT;
 //
-//        virtual int event_flags (const shared_conn & conn, int flags) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual int event_flags (const shared_conn & conn, int flags) MANAPICORE_NOEXCEPT = 0;
 //
-//        virtual int event_flags (const shared_conn & conn) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual int event_flags (const shared_conn & conn) MANAPICORE_NOEXCEPT = 0;
 //
-//        virtual void feed_event (const shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPIHTTP_NOEXCEPT = 0;
+//        virtual void feed_event (const shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPICORE_NOEXCEPT = 0;
 //
-//        void event_toggle (const shared_conn & conn, bool state, int flag) MANAPIHTTP_NOEXCEPT;
+//        void event_toggle (const shared_conn & conn, bool state, int flag) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * Get the ipdata structure from the connection object |conn|
 //         * @param conn connection object
 //         * @return reference to the ipdata structure
 //         */
-//        virtual connection::ipdata_t *ipdata (worker::connection *conn) MANAPIHTTP_NOEXCEPT;
+//        virtual connection::ipdata_t *ipdata (worker::connection *conn) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * Obtain the stream identifier from the stream |s|
 //         * @param s stream
 //         * @return always 0 if streams not supported, otherwise it returns a stream id
 //         */
-//        virtual int64_t stream_id (const shared_conn & s) MANAPIHTTP_NOEXCEPT;
+//        virtual int64_t stream_id (const shared_conn & s) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * It returns a connection object by the stream identifier
 //         * @param id stream identifier
 //         * @return always nullptr if streams not supported or not found, otherwise it returns a connection object
 //         */
-//        virtual shared_conn stream_id (const shared_conn &conn, int64_t id) MANAPIHTTP_NOEXCEPT;
+//        virtual shared_conn stream_id (const shared_conn &conn, int64_t id) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * get the size of the streams in the connection
 //         * @return the size of the streams if a multistream is supported; otherwise, it always returns 0
 //         */
-//        MANAPIHTTP_NODISCARD virtual std::size_t streams_size (const shared_conn &conn) const MANAPIHTTP_NOEXCEPT;
+//        MANAPICORE_NODISCARD virtual std::size_t streams_size (const shared_conn &conn) const MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * Create a new stream in |conn|
@@ -301,7 +301,7 @@
 //         * @param flags stream flags
 //         * @return a stream connection on success, otherwise it returns Unimplemeneted, InternalError, ResourceExhausted
 //         */
-//        virtual status_or<shared_conn> new_stream (const shared_conn & conn, int flags) MANAPIHTTP_NOEXCEPT;
+//        virtual status_or<shared_conn> new_stream (const shared_conn & conn, int flags) MANAPICORE_NOEXCEPT;
 //
 //        std::shared_ptr<manapi::net::worker::worker_data_t> m_worker_data;
 //
@@ -309,7 +309,7 @@
 //
 //        std::shared_ptr<manapi::net::http::config> m_config;
 //
-//        int notify_cb (worker_watcher_cb &cb, const shared_conn & conn, int flags, manapi::slice_complex *sc) MANAPIHTTP_NOEXCEPT;
+//        int notify_cb (worker_watcher_cb &cb, const shared_conn & conn, int flags, manapi::slice_complex *sc) MANAPICORE_NOEXCEPT;
 //
 //        std::vector< net::worker::worker_watcher_cb > m_removed_cbs;
 //

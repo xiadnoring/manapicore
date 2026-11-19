@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.12)
 project(test_package LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
-find_package(manapihttp REQUIRED CONFIG)
+find_package(manapicore REQUIRED CONFIG)
 
 add_executable(${PROJECT_NAME} test_package.cpp utest.h)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE manapihttp::manapihttp)
+target_link_libraries(${PROJECT_NAME} PRIVATE manapicore::manapicore)

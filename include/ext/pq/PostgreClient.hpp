@@ -38,7 +38,7 @@ namespace manapi::ext::pq {
 
         ~connection ();
 
-        static manapi::status_or<std::shared_ptr<pq::connection>> create () MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<pq::connection>> create () MANAPICORE_NOEXCEPT;
 
         manapi::future<manapi::ev::status> connect (std::string_view uri, manapi::ctoken token = nullptr);
 
@@ -97,24 +97,24 @@ namespace manapi::ext::pq {
          * @param text source string
          * @return Ok if in case of sucess; otherwise, it returns DataLoss, InternalError, InvalidArgument
          */
-        manapi::status esc (char *dst, std::size_t *dst_size, std::string_view text) MANAPIHTTP_NOEXCEPT;
+        manapi::status esc (char *dst, std::size_t *dst_size, std::string_view text) MANAPICORE_NOEXCEPT;
 
         /**
          * Escape string
          * @param text source string
          * @return Ok in case of success; otherwise, it returns InternalError, InvalidArgument
          */
-        manapi::status_or<std::string> esc (std::string_view text) MANAPIHTTP_NOEXCEPT;
+        manapi::status_or<std::string> esc (std::string_view text) MANAPICORE_NOEXCEPT;
 
-        void close () MANAPIHTTP_NOEXCEPT;
+        void close () MANAPICORE_NOEXCEPT;
 
-        void notify_cb (std::move_only_function<manapi::future<>(notification notify)> cb) MANAPIHTTP_NOEXCEPT;
+        void notify_cb (std::move_only_function<manapi::future<>(notification notify)> cb) MANAPICORE_NOEXCEPT;
     private:
-        manapi::future<manapi::ev::status> connect_psql (manapi::ctoken token) MANAPIHTTP_NOEXCEPT;
+        manapi::future<manapi::ev::status> connect_psql (manapi::ctoken token) MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD manapi::status check_conn_ () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD manapi::status check_conn_ () const MANAPICORE_NOEXCEPT;
 
-        manapi::status_or<size_t> esc_to_buff (std::string_view text, char *buff) MANAPIHTTP_NOEXCEPT;
+        manapi::status_or<size_t> esc_to_buff (std::string_view text, char *buff) MANAPICORE_NOEXCEPT;
 
         future<manapi::status> flush (manapi::ctoken token);
 
@@ -122,11 +122,11 @@ namespace manapi::ext::pq {
 
         future<manapi::status_or<pq::result>> receive_result (manapi::ctoken token);
 
-        static error_code result_status_to_error_code (result &result) MANAPIHTTP_NOEXCEPT;
+        static error_code result_status_to_error_code (result &result) MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD ::PGconn * native_handle () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD ::PGconn * native_handle () const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD bool connected () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool connected () const MANAPICORE_NOEXCEPT;
 
         manapi::future<> receive_notifications ();
 

@@ -4,19 +4,19 @@
 #include "crypto/ManapiHKDF.hpp"
 #include "../include/ManapiUtils.hpp"
 
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
 # include <openssl/evp.h>
 # include <openssl/err.h>
 # include <openssl/hmac.h>
 # include <openssl/crypto.h>
 #endif
 
-#if MANAPIHTTP_WOLFSSL_DEPENDENCY
+#if MANAPICORE_WOLFSSL_DEPENDENCY
 
 #endif
 manapi::status_or<std::string> manapi::crypto::hmac_digest(std::string_view key, std::string_view data, hashes hash_algorithm) {
     try {
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
         std::array<unsigned char, EVP_MAX_MD_SIZE> hash{};
         unsigned int hashLen;
 

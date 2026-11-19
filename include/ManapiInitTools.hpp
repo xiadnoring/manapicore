@@ -50,23 +50,23 @@ namespace manapi::init_tools {
     /**
      * Max Coroutines Stack
      */
-    void max_coro_stack (std::size_t sz) MANAPIHTTP_NOEXCEPT;
+    void max_coro_stack (std::size_t sz) MANAPICORE_NOEXCEPT;
 }
 
 namespace manapi::clear_tools {
-    void clear_all () MANAPIHTTP_NOEXCEPT;
+    void clear_all () MANAPICORE_NOEXCEPT;
 
-    void clear_thread_all () MANAPIHTTP_NOEXCEPT;
+    void clear_thread_all () MANAPICORE_NOEXCEPT;
 
-    void grpc_clear () MANAPIHTTP_NOEXCEPT;
+    void grpc_clear () MANAPICORE_NOEXCEPT;
 
-    void grpc_thread_clear () MANAPIHTTP_NOEXCEPT;
+    void grpc_thread_clear () MANAPICORE_NOEXCEPT;
 
-    void ssl_library_thread_clear () MANAPIHTTP_NOEXCEPT;
+    void ssl_library_thread_clear () MANAPICORE_NOEXCEPT;
 
-    void ssl_library_clear () MANAPIHTTP_NOEXCEPT;
+    void ssl_library_clear () MANAPICORE_NOEXCEPT;
 
-    void ev_library_clear () MANAPIHTTP_NOEXCEPT;
+    void ev_library_clear () MANAPICORE_NOEXCEPT;
 
-    void curl_library_clear () MANAPIHTTP_NOEXCEPT;
+    void curl_library_clear () MANAPICORE_NOEXCEPT;
 }

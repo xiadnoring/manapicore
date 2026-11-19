@@ -77,7 +77,7 @@ std::size_t manapi::net::http::stringify_header_size(const std::pair<std::string
 //    data.divided = -1;
 //}
 //
-manapi::status_or<std::vector <manapi::net::http::header_value_t>> manapi::net::http::parse_header_value (std::string_view header_value) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::vector <manapi::net::http::header_value_t>> manapi::net::http::parse_header_value (std::string_view header_value) MANAPICORE_NOEXCEPT {
     try {
         enum header_value_parse_states {
             HTTP_HV_FIELD_START = 0,
@@ -474,7 +474,7 @@ std::string manapi::net::http::stringify_header_value (const std::vector <header
 //    return -1;
 //}
 //
-bool manapi::net::http::header_has_more_fields(std::string_view name) MANAPIHTTP_NOEXCEPT {
+bool manapi::net::http::header_has_more_fields(std::string_view name) MANAPICORE_NOEXCEPT {
     if (name == manapi::net::http::H_CACHE_CONTROL
         || name == manapi::net::http::H_WARNING
         || name == manapi::net::http::H_SET_COOKIE) {

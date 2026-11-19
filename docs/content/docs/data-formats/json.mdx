@@ -5,7 +5,7 @@ description: JSON Support in ManapiHttp
 
 ## JSON in C++
 By default, C++ does not have built-in JSON support. 
-To address this, ManapiHttp provides a JSON implementation in the ```<manapihttp/json/ManapiJson.hpp>``` header file.
+To address this, ManapiHttp provides a JSON implementation in the ```<manapicore/json/ManapiJson.hpp>``` header file.
 
 <Callout title="Warning" type="warn">
 Currently, JSON parsing may be slow in some cases.
@@ -289,7 +289,7 @@ The ```manapi::json_builder``` class allows incremental JSON parsing in chunks.
 
 ```cpp
 ...
-#include <manapihttp/json/ManapiJsonBuilder.hpp>
+#include <manapicore/json/ManapiJsonBuilder.hpp>
 ...
 
 manapi::json_builder builder();

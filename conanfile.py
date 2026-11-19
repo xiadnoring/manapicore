@@ -9,7 +9,7 @@ from conan.tools.env import VirtualBuildEnv, VirtualRunEnv
 import os
 
 class ManapiHttpConan(ConanFile):
-    name = "manapihttp"
+    name = "manapicore"
     description = "Fast http server/client"
     version = "1.1.1"
 
@@ -116,23 +116,23 @@ class ManapiHttpConan(ConanFile):
 
         # generator="Ninja"
         tc = CMakeToolchain(self)
-        tc.variables['MANAPIHTTP_BUILD_METHOD'] = "conan"
-        tc.variables['MANAPIHTTP_JSON_DEBUG'] = self.options.get_safe('json_debug', False)
-        tc.variables['MANAPIHTTP_BROTLI_DEPENDENCY'] = self.options.get_safe('brotli_dependency', False)
-        tc.variables['MANAPIHTTP_ZSTD_DEPENDENCY'] =self.options.get_safe('zstd_dependency', False)
-        tc.variables['MANAPIHTTP_WOLFSSL_DEPENDENCY'] = self.options.get_safe('wolfssl_dependency', False)
-        tc.variables['MANAPIHTTP_OPENSSL_DEPENDENCY'] = self.options.get_safe('openssl_dependency', False)
-        tc.variables['MANAPIHTTP_QUICHE_DEPENDENCY'] = self.options.get_safe('quiche_dependency', False)
-        tc.variables['MANAPIHTTP_TQUIC_DEPENDENCY'] = self.options.get_safe('tquic_dependency', False)
-        tc.variables['MANAPIHTTP_CURL_DEPENDENCY'] = self.options.get_safe('curl_dependency', False)
-        tc.variables['MANAPIHTTP_GMP_DEPENDENCY'] = self.options.get_safe('gmp_dependency', False)
-        tc.variables['MANAPIHTTP_ZLIB_DEPENDENCY'] = self.options.get_safe('zlib_dependency', False)
-        tc.variables['MANAPIHTTP_MSQUIC_DEPENDENCY'] = self.options.get_safe('msquic_dependency', False)
-        tc.variables['MANAPIHTTP_GRPC_DEPENDENCY'] = self.options.get_safe('grpc_dependency', False)
-        tc.variables['MANAPIHTTP_NGHTTP2_DEPENDENCY'] = self.options.get_safe('nghttp2_dependency', False)
-        tc.variables['MANAPIHTTP_NGHTTP3_DEPENDENCY'] = self.options.get_safe('nghttp3_dependency', False)
-        tc.variables['MANAPIHTTP_CPPTRACE_DEPENDENCY'] = self.options.get_safe('cpptrace_dependency', False)
-        tc.variables['MANAPIHTTP_BUILD_TYPE'] = 'lib' if self.options.get_safe('lib', False) else 'exe'
+        tc.variables['MANAPICORE_BUILD_METHOD'] = "conan"
+        tc.variables['MANAPICORE_JSON_DEBUG'] = self.options.get_safe('json_debug', False)
+        tc.variables['MANAPICORE_BROTLI_DEPENDENCY'] = self.options.get_safe('brotli_dependency', False)
+        tc.variables['MANAPICORE_ZSTD_DEPENDENCY'] =self.options.get_safe('zstd_dependency', False)
+        tc.variables['MANAPICORE_WOLFSSL_DEPENDENCY'] = self.options.get_safe('wolfssl_dependency', False)
+        tc.variables['MANAPICORE_OPENSSL_DEPENDENCY'] = self.options.get_safe('openssl_dependency', False)
+        tc.variables['MANAPICORE_QUICHE_DEPENDENCY'] = self.options.get_safe('quiche_dependency', False)
+        tc.variables['MANAPICORE_TQUIC_DEPENDENCY'] = self.options.get_safe('tquic_dependency', False)
+        tc.variables['MANAPICORE_CURL_DEPENDENCY'] = self.options.get_safe('curl_dependency', False)
+        tc.variables['MANAPICORE_GMP_DEPENDENCY'] = self.options.get_safe('gmp_dependency', False)
+        tc.variables['MANAPICORE_ZLIB_DEPENDENCY'] = self.options.get_safe('zlib_dependency', False)
+        tc.variables['MANAPICORE_MSQUIC_DEPENDENCY'] = self.options.get_safe('msquic_dependency', False)
+        tc.variables['MANAPICORE_GRPC_DEPENDENCY'] = self.options.get_safe('grpc_dependency', False)
+        tc.variables['MANAPICORE_NGHTTP2_DEPENDENCY'] = self.options.get_safe('nghttp2_dependency', False)
+        tc.variables['MANAPICORE_NGHTTP3_DEPENDENCY'] = self.options.get_safe('nghttp3_dependency', False)
+        tc.variables['MANAPICORE_CPPTRACE_DEPENDENCY'] = self.options.get_safe('cpptrace_dependency', False)
+        tc.variables['MANAPICORE_BUILD_TYPE'] = 'lib' if self.options.get_safe('lib', False) else 'exe'
         
         for [key, dep] in self.dependencies.items():
             p = dep.cpp_info.includedir
@@ -212,13 +212,13 @@ class ManapiHttpConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.set_property("cmake_find_mode", "both")
-        self.cpp_info.set_property("cmake_file_name", "manapihttp")
-        self.cpp_info.set_property("cmake_target_name", "manapihttp::manapihttp")
-        self.cpp_info.set_property("pkg_config_name", "manapihttp")
+        self.cpp_info.set_property("cmake_file_name", "manapicore")
+        self.cpp_info.set_property("cmake_target_name", "manapicore::manapicore")
+        self.cpp_info.set_property("pkg_config_name", "manapicore")
 
         if self.settings.os in ["Linux", "FreeBSD"]:
             self.cpp_info.system_libs = ["dl", "m", "pthread"]
         elif self.settings.os == "Windows":
             self.cpp_info.system_libs = ["ws2_32", "shlwapi"]
 
-        self.cpp_info.libs = ["manapihttp"]
+        self.cpp_info.libs = ["manapicore"]

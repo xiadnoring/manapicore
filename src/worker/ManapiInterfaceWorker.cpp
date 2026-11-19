@@ -13,23 +13,23 @@
 //    }
 //}
 //
-//void manapi::net::worker::interface_worker::wrk_global(wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::interface_worker::wrk_global(wrk_interface_global_t *data) MANAPICORE_NOEXCEPT {
 //    this->m_global = *data;
 //}
 //
-//manapi::net::worker::wrk_interface_global_t * manapi::net::worker::interface_worker::wrk_global() MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::wrk_interface_global_t * manapi::net::worker::interface_worker::wrk_global() MANAPICORE_NOEXCEPT {
 //    return &this->m_global;
 //}
 //
-//void manapi::net::worker::interface_worker::worker_pool_id(std::size_t worker_pool_id) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::interface_worker::worker_pool_id(std::size_t worker_pool_id) MANAPICORE_NOEXCEPT {
 //    this->m_worker_pool_id = worker_pool_id;
 //}
 //
-//std::size_t manapi::net::worker::interface_worker::worker_pool_id() const MANAPIHTTP_NOEXCEPT {
+//std::size_t manapi::net::worker::interface_worker::worker_pool_id() const MANAPICORE_NOEXCEPT {
 //    return this->m_worker_pool_id;
 //}
 //
-//std::size_t manapi::net::worker::interface_worker::deep_worker_id() const MANAPIHTTP_NOEXCEPT {
+//std::size_t manapi::net::worker::interface_worker::deep_worker_id() const MANAPICORE_NOEXCEPT {
 //    return this->m_deep_worker_id;
 //}
 //

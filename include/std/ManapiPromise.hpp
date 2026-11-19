@@ -38,7 +38,7 @@ namespace manapi::async::internal {
     };
 
     template<typename T>
-    void promise_call (const std::shared_ptr<promise_data_t<T>> &data) MANAPIHTTP_NOEXCEPT {
+    void promise_call (const std::shared_ptr<promise_data_t<T>> &data) MANAPICORE_NOEXCEPT {
         auto handle = std::exchange(data->handle, nullptr);
 
         if (data->flags & PROMISE_FLAG_PREALLOCATED_TASK) {
@@ -50,7 +50,7 @@ namespace manapi::async::internal {
     }
 
     template<typename T>
-    void call_promise_resolve (const std::shared_ptr<promise_data_t<T>> &data, T &&v) MANAPIHTTP_NOEXCEPT {
+    void call_promise_resolve (const std::shared_ptr<promise_data_t<T>> &data, T &&v) MANAPICORE_NOEXCEPT {
         if ((data->flags & PROMISE_FLAG_EXECUTED) /* ready */) {
             return;
         }
@@ -60,7 +60,7 @@ namespace manapi::async::internal {
     }
 
     template<typename T>
-    void call_promise_reject (const std::shared_ptr<promise_data_t<T>>& data, std::exception_ptr &&e) MANAPIHTTP_NOEXCEPT {
+    void call_promise_reject (const std::shared_ptr<promise_data_t<T>>& data, std::exception_ptr &&e) MANAPICORE_NOEXCEPT {
         if ((data->flags & PROMISE_FLAG_EXECUTED) /* ready */) {
             return;
         }
@@ -69,7 +69,7 @@ namespace manapi::async::internal {
         promise_call(data);
     }
 
-    inline void call_promise_resolve (const std::shared_ptr<promise_data_t<void>> &data) MANAPIHTTP_NOEXCEPT {
+    inline void call_promise_resolve (const std::shared_ptr<promise_data_t<void>> &data) MANAPICORE_NOEXCEPT {
         if ((data->flags & PROMISE_FLAG_EXECUTED) /* ready */) {
             return;
         }
@@ -88,21 +88,21 @@ namespace manapi::async {
             this->m_data = std::move(data);
         }
 
-        MANAPIHTTP_NODISCARD operator bool () const MANAPIHTTP_NOEXCEPT { return !!this->m_data; }
+        MANAPICORE_NODISCARD operator bool () const MANAPICORE_NOEXCEPT { return !!this->m_data; }
 
-        promise_resolve (promise_resolve &&n) MANAPIHTTP_NOEXCEPT = default;
+        promise_resolve (promise_resolve &&n) MANAPICORE_NOEXCEPT = default;
 
-        promise_resolve &operator=(promise_resolve &&n) MANAPIHTTP_NOEXCEPT = default;
+        promise_resolve &operator=(promise_resolve &&n) MANAPICORE_NOEXCEPT = default;
 
         promise_resolve (const promise_resolve &n) = default;
 
         promise_resolve&operator= (const promise_resolve &n) = default;
 
-        void operator () (const T &v) const MANAPIHTTP_NOEXCEPT {
+        void operator () (const T &v) const MANAPICORE_NOEXCEPT {
             internal::call_promise_resolve<T> (this->m_data, T(v));
         }
 
-        void operator () (T &&v) const MANAPIHTTP_NOEXCEPT {
+        void operator () (T &&v) const MANAPICORE_NOEXCEPT {
             internal::call_promise_resolve<T> (this->m_data, std::forward<decltype(v)>(v));
         }
     private:
@@ -118,17 +118,17 @@ namespace manapi::async {
             this->m_data = std::move(data);
         }
 
-        MANAPIHTTP_NODISCARD operator bool () const MANAPIHTTP_NOEXCEPT { return !!this->m_data; }
+        MANAPICORE_NODISCARD operator bool () const MANAPICORE_NOEXCEPT { return !!this->m_data; }
 
-        promise_resolve (promise_resolve &&n) MANAPIHTTP_NOEXCEPT = default;
+        promise_resolve (promise_resolve &&n) MANAPICORE_NOEXCEPT = default;
 
-        promise_resolve &operator=(promise_resolve &&n) MANAPIHTTP_NOEXCEPT = default;
+        promise_resolve &operator=(promise_resolve &&n) MANAPICORE_NOEXCEPT = default;
 
         promise_resolve (const promise_resolve &n) = default;
 
         promise_resolve&operator= (const promise_resolve &n) = default;
 
-        void operator () () const MANAPIHTTP_NOEXCEPT {
+        void operator () () const MANAPICORE_NOEXCEPT {
             internal::call_promise_resolve (this->m_data);
         }
     private:
@@ -144,23 +144,23 @@ namespace manapi::async {
             this->m_data = std::move(data);
         }
 
-        MANAPIHTTP_NODISCARD operator bool () MANAPIHTTP_NOEXCEPT { return !!this->m_data; }
+        MANAPICORE_NODISCARD operator bool () MANAPICORE_NOEXCEPT { return !!this->m_data; }
 
-        MANAPIHTTP_NODISCARD operator bool () const MANAPIHTTP_NOEXCEPT { return !!this->m_data; }
+        MANAPICORE_NODISCARD operator bool () const MANAPICORE_NOEXCEPT { return !!this->m_data; }
 
-        promise_reject (promise_reject &&n) MANAPIHTTP_NOEXCEPT = default;
+        promise_reject (promise_reject &&n) MANAPICORE_NOEXCEPT = default;
 
-        promise_reject &operator=(promise_reject &&n) MANAPIHTTP_NOEXCEPT = default;
+        promise_reject &operator=(promise_reject &&n) MANAPICORE_NOEXCEPT = default;
 
         promise_reject (const promise_reject &n) = default;
 
         promise_reject&operator= (const promise_reject &n) = default;
 
-        void operator () (const std::exception_ptr &err) MANAPIHTTP_NOEXCEPT {
+        void operator () (const std::exception_ptr &err) MANAPICORE_NOEXCEPT {
             internal::call_promise_reject(this->m_data, std::exception_ptr(err));
         }
 
-        void operator () (std::exception_ptr &&err) MANAPIHTTP_NOEXCEPT {
+        void operator () (std::exception_ptr &&err) MANAPICORE_NOEXCEPT {
             internal::call_promise_reject(this->m_data, std::forward<decltype(err)>(err));
         }
     private:

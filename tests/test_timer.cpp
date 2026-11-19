@@ -144,4 +144,4 @@ UTEST(timer, interval_again) {
     ASSERT_TRUE(a == 5);
 }
 
-MANAPIHTTP_TESTS_MAIN
+MANAPICORE_TESTS_MAIN

@@ -9,7 +9,7 @@
 #include "./http/ManapiFileTransferInfo.hpp"
 #include "./http/ManapiFormData.hpp"
 
-#ifdef MANAPIHTTP_FETCH_SUPPORT
+#ifdef MANAPICORE_FETCH_SUPPORT
 
 namespace manapi::net {
     class fetch2;
@@ -43,11 +43,11 @@ namespace manapi::net {
 
         static manapi::future<manapi::status_or<std::shared_ptr<fetch2>>> fetch (std::string url, manapi::json params, http::file_transfer_info body, ctoken cancellation = nullptr);
 
-        MANAPIHTTP_NODISCARD bool ok () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool ok () const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD uint16_t status () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD uint16_t status () const MANAPICORE_NOEXCEPT;
 
-        std::map<std::string, std::string, std::less<>> &headers () MANAPIHTTP_NOEXCEPT;
+        std::map<std::string, std::string, std::less<>> &headers () MANAPICORE_NOEXCEPT;
 
         manapi::future<manapi::status> callback_async (std::move_only_function<manapi::future<ssize_t>(slice_view buffs, bool fin)> cb);
 
@@ -61,7 +61,7 @@ namespace manapi::net {
 
         manapi::future<manapi::status> form (formdata_recv::onparam_cb_t cb);
 
-        void finish () MANAPIHTTP_NOEXCEPT;
+        void finish () MANAPICORE_NOEXCEPT;
 
         bool is_processing () const;
     private:

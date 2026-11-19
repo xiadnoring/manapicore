@@ -33,23 +33,23 @@ namespace manapi {
 
 namespace manapi::async {
 
-    const std::shared_ptr<cthread> &current () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<cthread> &current () MANAPICORE_NOEXCEPT;
 
-    const std::shared_ptr<cthread> &try_current () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<cthread> &try_current () MANAPICORE_NOEXCEPT;
 
-    const std::shared_ptr<event_loop> &eventloop () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<event_loop> &eventloop () MANAPICORE_NOEXCEPT;
 
-    const std::shared_ptr<timer_pool> &timerpool () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<timer_pool> &timerpool () MANAPICORE_NOEXCEPT;
 
-    const std::shared_ptr<ethread_pool> &etaskpool () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<ethread_pool> &etaskpool () MANAPICORE_NOEXCEPT;
 
-    const std::shared_ptr<mthread_pool> &mtaskpool () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<mthread_pool> &mtaskpool () MANAPICORE_NOEXCEPT;
 
-    const std::shared_ptr<object_pool> &memory_fabric () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<object_pool> &memory_fabric () MANAPICORE_NOEXCEPT;
 
-    const std::shared_ptr<logger> &log () MANAPIHTTP_NOEXCEPT;
+    const std::shared_ptr<logger> &log () MANAPICORE_NOEXCEPT;
 
-    bool context_exists () MANAPIHTTP_NOEXCEPT;
+    bool context_exists () MANAPICORE_NOEXCEPT;
 }
 
 namespace manapi::async::internal {
@@ -58,13 +58,13 @@ namespace manapi::async::internal {
     template<typename T>
     class promise;
 
-    std::size_t current_stack_cnt_crt () MANAPIHTTP_NOEXCEPT;
+    std::size_t current_stack_cnt_crt () MANAPICORE_NOEXCEPT;
 
-    void current_stack_cnt_set (std::size_t cnt) MANAPIHTTP_NOEXCEPT;
+    void current_stack_cnt_set (std::size_t cnt) MANAPICORE_NOEXCEPT;
 
-    std::size_t max_stack_depth_crt () MANAPIHTTP_NOEXCEPT;
+    std::size_t max_stack_depth_crt () MANAPICORE_NOEXCEPT;
 
-    bool future_final_awaiter_ready () MANAPIHTTP_NOEXCEPT;
+    bool future_final_awaiter_ready () MANAPICORE_NOEXCEPT;
 
     void future_awaiter_suspend(promise_base_future *promise, const std::coroutine_handle<> &handle, const std::coroutine_handle<> &waiting);
 
@@ -76,11 +76,11 @@ namespace manapi::async::internal {
 
         void unhandled_exception ();
 
-        std::coroutine_handle<> final_awaiter_suspend () MANAPIHTTP_NOEXCEPT;
+        std::coroutine_handle<> final_awaiter_suspend () MANAPICORE_NOEXCEPT;
 
         std::suspend_always initial_suspend();
 
-        virtual void run_finish_cb () MANAPIHTTP_NOEXCEPT = 0;
+        virtual void run_finish_cb () MANAPICORE_NOEXCEPT = 0;
 
         std::coroutine_handle<> m_waiting;
 
@@ -89,15 +89,15 @@ namespace manapi::async::internal {
 
     template<typename T>
     struct final_awaiter {
-        bool await_ready () MANAPIHTTP_NOEXCEPT {
+        bool await_ready () MANAPICORE_NOEXCEPT {
             return async::internal::future_final_awaiter_ready();
         }
 
-        std::coroutine_handle<> await_suspend (std::coroutine_handle<promise<T>> handle) MANAPIHTTP_NOEXCEPT {
+        std::coroutine_handle<> await_suspend (std::coroutine_handle<promise<T>> handle) MANAPICORE_NOEXCEPT {
             return static_cast<promise_base_future *> (&handle.promise())->final_awaiter_suspend();
         }
 
-        void await_resume () MANAPIHTTP_NOEXCEPT {}
+        void await_resume () MANAPICORE_NOEXCEPT {}
     };
 
     template<typename T>
@@ -106,7 +106,7 @@ namespace manapi::async::internal {
     public:
         promise () = default;
 
-        promise (promise &&n) MANAPIHTTP_NOEXCEPT = default;
+        promise (promise &&n) MANAPICORE_NOEXCEPT = default;
 
         ~promise() override = default;
 
@@ -131,13 +131,13 @@ namespace manapi::async::internal {
             return std::move(this->m_value.value());
         }
 
-        void run_finish_cb() MANAPIHTTP_NOEXCEPT override {
+        void run_finish_cb() MANAPICORE_NOEXCEPT override {
             if (!this->m_finish_cb) return;
             auto ptr = this->m_value.has_value() ? &this->m_value.value() : nullptr;
             this->m_finish_cb (std::move(this->m_exception), ptr);
         }
 
-        final_awaiter<T> final_suspend() MANAPIHTTP_NOEXCEPT { return {}; }
+        final_awaiter<T> final_suspend() MANAPICORE_NOEXCEPT { return {}; }
 
         std::move_only_function<void(std::exception_ptr err, T *v)> m_finish_cb;
         std::optional<T> m_value;
@@ -147,7 +147,7 @@ namespace manapi::async::internal {
 namespace manapi::async {
     void coro_resume (std::coroutine_handle<> handle);
 
-    void coro_finish (std::coroutine_handle<> handle) MANAPIHTTP_NOEXCEPT;
+    void coro_finish (std::coroutine_handle<> handle) MANAPICORE_NOEXCEPT;
 }
 
 namespace manapi {
@@ -175,11 +175,11 @@ namespace manapi {
 
         ~future() { this->reset(); }
 
-        future (future &&n) MANAPIHTTP_NOEXCEPT {
+        future (future &&n) MANAPICORE_NOEXCEPT {
             this->m_handle = std::exchange(n.m_handle, nullptr);
         }
 
-        future &operator=(future &&n) MANAPIHTTP_NOEXCEPT {
+        future &operator=(future &&n) MANAPICORE_NOEXCEPT {
             if (this != &n) {
                 this->m_handle = std::exchange(n.m_handle, nullptr);
             }
@@ -191,19 +191,19 @@ namespace manapi {
                 this->m_handle.destroy();
         }
 
-        std::coroutine_handle<promise_type> release () MANAPIHTTP_NOEXCEPT {
+        std::coroutine_handle<promise_type> release () MANAPICORE_NOEXCEPT {
             return std::exchange(this->m_handle, nullptr);
         }
 
-        void operator()() MANAPIHTTP_NOEXCEPT {
+        void operator()() MANAPICORE_NOEXCEPT {
             async::coro_resume(this->m_handle);
         }
 
-        MANAPIHTTP_NODISCARD bool operator==(const std::nullptr_t &n) const {
+        MANAPICORE_NODISCARD bool operator==(const std::nullptr_t &n) const {
             return this->m_handle == nullptr;
         }
 
-        MANAPIHTTP_NODISCARD bool operator!=(const std::nullptr_t &n) const {
+        MANAPICORE_NODISCARD bool operator!=(const std::nullptr_t &n) const {
             return false == this->operator==(n);
         }
 
@@ -232,22 +232,22 @@ namespace manapi {
             }
         };
 
-        void onfinish (onfinish_future_t<T> cb) MANAPIHTTP_NOEXCEPT {
+        void onfinish (onfinish_future_t<T> cb) MANAPICORE_NOEXCEPT {
             if (this->m_handle) {
                 auto &promise = this->m_handle.promise();
                 promise.m_finish_cb = std::move(cb);
             }
         }
 
-        MANAPIHTTP_NODISCARD bool finished () const {
+        MANAPICORE_NODISCARD bool finished () const {
             return !this->m_handle || this->m_handle.done();
         }
 
-        MANAPIHTTP_NODISCARD const std::coroutine_handle<promise_type> &handle () {
+        MANAPICORE_NODISCARD const std::coroutine_handle<promise_type> &handle () {
             return this->m_handle;
         }
 
-        Awaiter operator co_await () MANAPIHTTP_NOEXCEPT {
+        Awaiter operator co_await () MANAPICORE_NOEXCEPT {
             return Awaiter{this->m_handle};
         }
     private:
@@ -261,15 +261,15 @@ namespace manapi::async::internal {
     public:
         promise ();
 
-        promise (promise &&n) MANAPIHTTP_NOEXCEPT;
+        promise (promise &&n) MANAPICORE_NOEXCEPT;
 
         ~promise() override;
 
         void return_void ();
 
-        void run_finish_cb() MANAPIHTTP_NOEXCEPT override;
+        void run_finish_cb() MANAPICORE_NOEXCEPT override;
 
-        final_awaiter<void> final_suspend() MANAPIHTTP_NOEXCEPT;
+        final_awaiter<void> final_suspend() MANAPICORE_NOEXCEPT;
 
         future<void> get_return_object();
 

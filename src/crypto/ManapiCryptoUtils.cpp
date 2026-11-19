@@ -4,12 +4,12 @@
 #include "../include/ManapiWindows.hpp"
 #include "../include/ManapiDefaultErrors.hpp"
 
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
 #   include <openssl/ssl.h>
 #   include <openssl/evp.h>
 #endif
 
-#if MANAPIHTTP_WOLFSSL_DEPENDENCY && !MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_WOLFSSL_DEPENDENCY && !MANAPICORE_OPENSSL_DEPENDENCY
 #   include <wolfssl/openssl/ssl.h>
 #   include <wolfssl/openssl/evp.h>
 #endif
@@ -59,13 +59,13 @@ static manapi::status manapi__random_string (char *rnd, std::size_t len) {
     return manapi::status_internal("manapi__random_string:Failed");
 }
 
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
 void manapi::crypto::evp_cipher_deleter::operator()(void *ptr) {
     EVP_CIPHER_CTX_free(static_cast<EVP_CIPHER_CTX *>(ptr));
 }
 #endif
 
-#if MANAPIHTTP_WOLFSSL_DEPENDENCY && !MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_WOLFSSL_DEPENDENCY && !MANAPICORE_OPENSSL_DEPENDENCY
 void manapi::crypto::wolfssl_evp_cipher_deleter::operator()(void *ptr) {
     wolfSSL_EVP_CIPHER_CTX_free(static_cast<WOLFSSL_EVP_CIPHER_CTX *>(ptr));
 }

@@ -27,19 +27,19 @@
 //
 //        manapi::ctoken cancellation ();
 //
-//        MANAPIHTTP_NODISCARD const http::manapi_socket_information &ip_data () const;
+//        MANAPICORE_NODISCARD const http::manapi_socket_information &ip_data () const;
 //
-//        MANAPIHTTP_NODISCARD const std::string &method () const;
+//        MANAPICORE_NODISCARD const std::string &method () const;
 //
-//        MANAPIHTTP_NODISCARD int http() const;
+//        MANAPICORE_NODISCARD int http() const;
 //
-//        MANAPIHTTP_NODISCARD const std::map<std::string, std::string, std::less<>> &ref_headers () const;
+//        MANAPICORE_NODISCARD const std::map<std::string, std::string, std::less<>> &ref_headers () const;
 //
-//        MANAPIHTTP_NODISCARD std::map<std::string, std::string, std::less<>> headers () const;
+//        MANAPICORE_NODISCARD std::map<std::string, std::string, std::less<>> headers () const;
 //
-//        MANAPIHTTP_NODISCARD manapi::status_or<std::string_view> param (std::string_view param) const MANAPIHTTP_NOEXCEPT;
+//        MANAPICORE_NODISCARD manapi::status_or<std::string_view> param (std::string_view param) const MANAPICORE_NOEXCEPT;
 //
-//        manapi::status_or<std::pair<std::string, std::string>> param_extract (std::string_view param) MANAPIHTTP_NOEXCEPT;
+//        manapi::status_or<std::pair<std::string, std::string>> param_extract (std::string_view param) MANAPICORE_NOEXCEPT;
 //
 //        future<manapi::status_or<std::string>> text ();
 //
@@ -59,7 +59,7 @@
 //
 //        int64_t left ();
 //
-//        manapi::json_error::status verify_get (const manapi::json_mask *mask) MANAPIHTTP_NOEXCEPT;
+//        manapi::json_error::status verify_get (const manapi::json_mask *mask) MANAPICORE_NOEXCEPT;
 //
 //        manapi::json_error::status_or<std::string_view> get (std::string_view key);
 //
@@ -81,13 +81,13 @@
 //
 //        manapi::future<manapi::status_or<std::map<std::string, std::string, std::less<>>>> trailers ();
 //
-//        MANAPIHTTP_NODISCARD bool propagation () const;
+//        MANAPICORE_NODISCARD bool propagation () const;
 //
-//        MANAPIHTTP_NODISCARD std::string_view url () const;
+//        MANAPICORE_NODISCARD std::string_view url () const;
 //
-//        MANAPIHTTP_NODISCARD const std::vector<std::string> &path () const;
+//        MANAPICORE_NODISCARD const std::vector<std::string> &path () const;
 //
-//        MANAPIHTTP_NODISCARD bool has_body () const;
+//        MANAPICORE_NODISCARD bool has_body () const;
 //    private:
 //        std::unique_ptr<std::map<std::string, std::string, std::less<>>> m_get_params;
 //

@@ -545,4 +545,4 @@ UTEST(slice, slice_split_range1_err2) {
     wait_ctx(ctx);
 }
 
-MANAPIHTTP_TESTS_MAIN
+MANAPICORE_TESTS_MAIN

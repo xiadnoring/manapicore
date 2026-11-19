@@ -34,23 +34,23 @@ manapi::ext::pq::item::~item() {
     this->release();
 }
 
-manapi::ext::pq::connection * manapi::ext::pq::item::operator->() MANAPIHTTP_NOEXCEPT {
+manapi::ext::pq::connection * manapi::ext::pq::item::operator->() MANAPICORE_NOEXCEPT {
     return this->m_conn;
 }
 
-const manapi::ext::pq::connection * manapi::ext::pq::item::operator->() const MANAPIHTTP_NOEXCEPT {
+const manapi::ext::pq::connection * manapi::ext::pq::item::operator->() const MANAPICORE_NOEXCEPT {
     return this->m_conn;
 }
 
-manapi::ext::pq::connection & manapi::ext::pq::item::operator*() MANAPIHTTP_NOEXCEPT {
+manapi::ext::pq::connection & manapi::ext::pq::item::operator*() MANAPICORE_NOEXCEPT {
     return *this->m_conn;
 }
 
-const manapi::ext::pq::connection & manapi::ext::pq::item::operator*() const MANAPIHTTP_NOEXCEPT {
+const manapi::ext::pq::connection & manapi::ext::pq::item::operator*() const MANAPICORE_NOEXCEPT {
     return *this->m_conn;
 }
 
-void manapi::ext::pq::item::release() MANAPIHTTP_NOEXCEPT {
+void manapi::ext::pq::item::release() MANAPICORE_NOEXCEPT {
     try {
         if (this->m_pool && this->m_conn) {
             // we suggest that |available| has
@@ -97,7 +97,7 @@ manapi::ext::pq::pool::~pool() {
     this->m_mx.unlock();
 }
 
-manapi::status_or<std::shared_ptr<manapi::ext::pq::pool>> manapi::ext::pq::pool::create() MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::shared_ptr<manapi::ext::pq::pool>> manapi::ext::pq::pool::create() MANAPICORE_NOEXCEPT {
     std::shared_ptr<pq::pool> m (new (std::nothrow) pq::pool{});
     if (m) return std::move(m);
     return manapi::status_resource_exhausted();
@@ -228,15 +228,15 @@ manapi::future<manapi::status_or<manapi::ext::pq::item>> manapi::ext::pq::pool::
     }
 }
 
-std::size_t manapi::ext::pq::pool::size() const MANAPIHTTP_NOEXCEPT {
+std::size_t manapi::ext::pq::pool::size() const MANAPICORE_NOEXCEPT {
     return this->m_clients.size();
 }
 
-bool manapi::ext::pq::pool::connected() const MANAPIHTTP_NOEXCEPT {
+bool manapi::ext::pq::pool::connected() const MANAPICORE_NOEXCEPT {
     return !(this->m_flags & MANAPI__PSQL_POOL_FLAG_CONN_LOST);
 }
 
-manapi::status manapi::ext::pq::pool::connected(bool active) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::ext::pq::pool::connected(bool active) MANAPICORE_NOEXCEPT {
     try {
         if (this->m_ping) {
             this->m_ping.stop();
@@ -315,7 +315,7 @@ manapi::ext::pq::db::db() {
 
 manapi::ext::pq::db::~db() = default;
 
-manapi::status_or<std::shared_ptr<manapi::ext::pq::db>> manapi::ext::pq::db::create() MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::shared_ptr<manapi::ext::pq::db>> manapi::ext::pq::db::create() MANAPICORE_NOEXCEPT {
     std::shared_ptr<db> m (new (std::nothrow) db);
     if (m)
         return std::move(m);
@@ -340,7 +340,7 @@ void manapi::ext::pq::db::remove_master() {
     }
 }
 
-manapi::status manapi::ext::pq::db::add_slave(std::shared_ptr<pq::pool> slave) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::ext::pq::db::add_slave(std::shared_ptr<pq::pool> slave) MANAPICORE_NOEXCEPT {
     try {
         if (slave) {
             if (slave->m_db) {
@@ -434,7 +434,7 @@ manapi::ext::pq::connection::connection() {
 
 manapi::ext::pq::connection::~connection() = default;
 
-manapi::status_or<std::shared_ptr<manapi::ext::pq::connection>> manapi::ext::pq::connection::create() MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::shared_ptr<manapi::ext::pq::connection>> manapi::ext::pq::connection::create() MANAPICORE_NOEXCEPT {
     try {
         return std::shared_ptr<connection>(new connection());
     }
@@ -586,7 +586,7 @@ manapi::future<bool> manapi::ext::pq::connection::ping(std::size_t timeoutms) {
 }
 
 manapi::status manapi::ext::pq::connection::esc(char *dst, std::size_t *dst_size,
-                                                              std::string_view text) MANAPIHTTP_NOEXCEPT {
+                                                              std::string_view text) MANAPICORE_NOEXCEPT {
     if (!dst || !dst_size)
         return manapi::status_invalid_argument("null");
     auto res = this->check_conn_();
@@ -605,7 +605,7 @@ manapi::status manapi::ext::pq::connection::esc(char *dst, std::size_t *dst_size
     return manapi::status_ok();
 }
 
-manapi::status_or<std::string> manapi::ext::pq::connection::esc(std::string_view text) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::string> manapi::ext::pq::connection::esc(std::string_view text) MANAPICORE_NOEXCEPT {
     try {
         auto res = this->check_conn_();
         if (!res)
@@ -629,7 +629,7 @@ manapi::status_or<std::string> manapi::ext::pq::connection::esc(std::string_view
     }
 }
 
-void manapi::ext::pq::connection::close() MANAPIHTTP_NOEXCEPT {
+void manapi::ext::pq::connection::close() MANAPICORE_NOEXCEPT {
     if (!this->m_data)
         return;
 
@@ -641,12 +641,12 @@ void manapi::ext::pq::connection::close() MANAPIHTTP_NOEXCEPT {
 }
 
 void manapi::ext::pq::connection::notify_cb(
-std::move_only_function<manapi::future<>(notification notify)> cb) MANAPIHTTP_NOEXCEPT {
+std::move_only_function<manapi::future<>(notification notify)> cb) MANAPICORE_NOEXCEPT {
     if (this->m_data)
         this->m_data->notify_cb = std::move(cb);
 }
 
-manapi::future<manapi::ev::status> manapi::ext::pq::connection::connect_psql(manapi::ctoken token) MANAPIHTTP_NOEXCEPT {
+manapi::future<manapi::ev::status> manapi::ext::pq::connection::connect_psql(manapi::ctoken token) MANAPICORE_NOEXCEPT {
     manapi::ev::status status = manapi::ev::status_ok();
     try {
         if (!this->m_data->conn) {
@@ -710,7 +710,7 @@ err:
     co_return std::move(status);
 }
 
-manapi::status manapi::ext::pq::connection::check_conn_() const MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::ext::pq::connection::check_conn_() const MANAPICORE_NOEXCEPT {
     if (this->m_data && this->m_data->conn) {
         return manapi::status_ok();
     }
@@ -718,7 +718,7 @@ manapi::status manapi::ext::pq::connection::check_conn_() const MANAPIHTTP_NOEXC
     return manapi::status_invalid_argument("pq:connection doesn't exist");
 }
 
-manapi::status_or<size_t> manapi::ext::pq::connection::esc_to_buff(std::string_view text, char *buff) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<size_t> manapi::ext::pq::connection::esc_to_buff(std::string_view text, char *buff) MANAPICORE_NOEXCEPT {
     int err{0};
     auto const copied{
         PQescapeStringConn(this->m_data->conn.get(), buff, text.data(), text.size(), &err)};
@@ -839,7 +839,7 @@ manapi::future<manapi::status_or<manapi::ext::pq::result>> manapi::ext::pq::conn
     co_return std::move(res);
 }
 
-manapi::ext::pq::error_code manapi::ext::pq::connection::result_status_to_error_code(result &result) MANAPIHTTP_NOEXCEPT {
+manapi::ext::pq::error_code manapi::ext::pq::connection::result_status_to_error_code(result &result) MANAPICORE_NOEXCEPT {
     auto const hdl = result.native_handle();
     if (!hdl)
         return error_code::RESULT_STATUS_FATAL_ERROR;
@@ -862,14 +862,14 @@ manapi::ext::pq::error_code manapi::ext::pq::connection::result_status_to_error_
     }
 }
 
-::PGconn * manapi::ext::pq::connection::native_handle() const MANAPIHTTP_NOEXCEPT {
+::PGconn * manapi::ext::pq::connection::native_handle() const MANAPICORE_NOEXCEPT {
     auto const res = this->check_conn_();
     if (res)
         return this->m_data->conn.get();
     return nullptr;
 }
 
-bool manapi::ext::pq::connection::connected() const MANAPIHTTP_NOEXCEPT {
+bool manapi::ext::pq::connection::connected() const MANAPICORE_NOEXCEPT {
     if (this->m_data && this->m_data->conn)
         return (PQstatus(this->m_data->conn.get()) == ConnStatusType::CONNECTION_OK);
     return false;
@@ -918,27 +918,27 @@ manapi::ext::pq::status::status(manapi::err_num code, const char *msg, std::size
     this->m_sqlcode = sqlcode;
 }
 
-manapi::ext::pq::status::status(status &&n) MANAPIHTTP_NOEXCEPT {
+manapi::ext::pq::status::status(status &&n) MANAPICORE_NOEXCEPT {
     this->m_sqlcode = std::exchange(n.m_sqlcode, 0);
     this->m_sqlmsg = std::move(n.m_sqlmsg);
     manapi::status::operator=(std::forward<decltype(n)>(n));
 }
 
-manapi::ext::pq::status & manapi::ext::pq::status::operator=(status &&n) MANAPIHTTP_NOEXCEPT {
+manapi::ext::pq::status & manapi::ext::pq::status::operator=(status &&n) MANAPICORE_NOEXCEPT {
     this->m_sqlcode = std::exchange(n.m_sqlcode, 0);
     this->m_sqlmsg = std::move(n.m_sqlmsg);
     manapi::status::operator=(std::forward<decltype(n)>(n));
     return *this;
 }
 
-manapi::ext::pq::status::status(manapi::status &&n) MANAPIHTTP_NOEXCEPT {
+manapi::ext::pq::status::status(manapi::status &&n) MANAPICORE_NOEXCEPT {
     this->m_sqlcode = 0;
     this->m_sqlmsg = "";
     manapi::status::operator=(std::forward<decltype(n)>(n));
 
 }
 
-manapi::ext::pq::status & manapi::ext::pq::status::operator=(manapi::status &&n) MANAPIHTTP_NOEXCEPT {
+manapi::ext::pq::status & manapi::ext::pq::status::operator=(manapi::status &&n) MANAPICORE_NOEXCEPT {
     this->m_sqlcode = 0;
     this->m_sqlmsg = "";
     manapi::status::operator=(std::forward<decltype(n)>(n));
@@ -954,15 +954,15 @@ std::string manapi::ext::pq::status::fullmsg() const {
     return std::format("{} sqlcode={} sqlmsg={}", manapi::status::fullmsg(), this->m_sqlcode, this->m_sqlmsg);
 }
 
-bool manapi::ext::pq::status::is_sqlerr() const MANAPIHTTP_NOEXCEPT {
+bool manapi::ext::pq::status::is_sqlerr() const MANAPICORE_NOEXCEPT {
     return !this->m_sqlmsg.empty();
 }
 
-std::string_view manapi::ext::pq::status::sqlmsg() const MANAPIHTTP_NOEXCEPT{
+std::string_view manapi::ext::pq::status::sqlmsg() const MANAPICORE_NOEXCEPT{
     return this->m_sqlmsg;
 }
 
-manapi::ext::pq::sql_states manapi::ext::pq::status::sqlcode() const MANAPIHTTP_NOEXCEPT {
+manapi::ext::pq::sql_states manapi::ext::pq::status::sqlcode() const MANAPICORE_NOEXCEPT {
     return static_cast<sql_states>(this->m_sqlcode);
 }
 

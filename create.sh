@@ -1,7 +1,7 @@
 conan create .  \
-              -o "manapihttp/*:shared=True" -o "manapihttp/*:json_debug=True" \
-              -o "manapihttp/*:wolfssl_dependency=False" -o "manapihttp/*:openssl_dependency=True" \
-              -o "manapihttp/*:quiche_dependency=False" -o "manapihttp/*:tquic_dependency=False" \
-              -o "manapihttp/*:curl_dependency=True" -o "manapihttp/*:gmp_dependency=False" \
-              -o "manapihttp/*:zlib_dependency=False" -o "manapihttp/*:lib=True" -o "libcurl/*:shared=True" \
+              -o "manapicore/*:shared=True" -o "manapicore/*:json_debug=True" \
+              -o "manapicore/*:wolfssl_dependency=False" -o "manapicore/*:openssl_dependency=True" \
+              -o "manapicore/*:quiche_dependency=False" -o "manapicore/*:tquic_dependency=False" \
+              -o "manapicore/*:curl_dependency=True" -o "manapicore/*:gmp_dependency=False" \
+              -o "manapicore/*:zlib_dependency=False" -o "manapicore/*:lib=True" -o "libcurl/*:shared=True" \
               -o "openssl/*:shared=True" -o "libev/*:shared=True" --build=missing

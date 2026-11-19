@@ -27,11 +27,11 @@ namespace manapi {
             this->m_used = 0;
         }
 
-        MANAPIHTTP_NODISCARD std::size_t size () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD std::size_t size () const MANAPICORE_NOEXCEPT {
             return this->m_items.size();
         }
 
-        MANAPIHTTP_NODISCARD bool contains (const K &key) const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD bool contains (const K &key) const MANAPICORE_NOEXCEPT {
             return this->m_items.contains(key);
         }
 
@@ -73,7 +73,7 @@ namespace manapi {
             this->cleanup();
         }
 
-        MANAPIHTTP_NODISCARD manapi::status_or<V*> get (const K &key) MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD manapi::status_or<V*> get (const K &key) MANAPICORE_NOEXCEPT {
             auto it = this->m_items.find(key);
             if (it == this->m_items.end()) {
                 return manapi::status_not_found();
@@ -88,7 +88,7 @@ namespace manapi {
             return &it->second.item->second;
         }
 
-        void remove (const K &key) MANAPIHTTP_NOEXCEPT {
+        void remove (const K &key) MANAPICORE_NOEXCEPT {
             auto it = this->m_items.find(key);
             if (it != this->m_items.end()) {
                 this->m_list.erase(it->second.item);
@@ -97,13 +97,13 @@ namespace manapi {
             }
         }
 
-        void clear () MANAPIHTTP_NOEXCEPT {
+        void clear () MANAPICORE_NOEXCEPT {
             this->m_used = 0;
             this->m_items.clear();
             this->m_list.clear();
         }
 
-        MANAPIHTTP_NODISCARD std::size_t used () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD std::size_t used () const MANAPICORE_NOEXCEPT {
             return this->m_used;
         }
 
@@ -112,11 +112,11 @@ namespace manapi {
             this->cleanup();
         }
 
-        MANAPIHTTP_NODISCARD std::size_t max () MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD std::size_t max () MANAPICORE_NOEXCEPT {
             return this->m_max;
         }
 
-        void cleanup () MANAPIHTTP_NOEXCEPT {
+        void cleanup () MANAPICORE_NOEXCEPT {
             while (this->m_used > this->m_max) {
                 auto it = this->m_list.rbegin();
                 auto data = this->m_items.extract(it->first);

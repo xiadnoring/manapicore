@@ -14,20 +14,20 @@ First, clone the project from https://github.com/xiadnoring/manapi-http and inst
 Then configure the project parameters and start the compilation.
 
 ```bash
-cmake -B build -DMANAPIHTTP_BUILD_TYPE="lib" \
-    -DMANAPIHTTP_JSON_DEBUG=ON \
-    -DMANAPIHTTP_BUILD_METHOD="default" \
-    -DMANAPIHTTP_QUICHE_DEPENDENCY=ON \
-    -DMANAPIHTTP_OPENSSL_DEPENDENCY=ON \
-    -DMANAPIHTTP_WOLFSSL_DEPENDENCY=OFF \
-    -DMANAPIHTTP_GRPC_DEPENDENCY=ON \
-    -DMANAPIHTTP_BROTLI_DEPENDENCY=ON \
-    -DMANAPIHTTP_ZSTD_DEPENDENCY=ON \
-    -DMANAPIHTTP_NGHTTP2_DEPENDENCY=ON \
-    -DMANAPIHTTP_CPPTRACE_DEPENDENCY=OFF \
-    -DMANAPIHTTP_NGHTTP3_DEPENDENCY=ON \
-    -DMANAPIHTTP_ENABLE_TESTS=ON \
-    -DMANAPIHTTP_STD_BACKTRACE_DEPENDENCY=ON \
+cmake -B build -DMANAPICORE_BUILD_TYPE="lib" \
+    -DMANAPICORE_JSON_DEBUG=ON \
+    -DMANAPICORE_BUILD_METHOD="default" \
+    -DMANAPICORE_QUICHE_DEPENDENCY=ON \
+    -DMANAPICORE_OPENSSL_DEPENDENCY=ON \
+    -DMANAPICORE_WOLFSSL_DEPENDENCY=OFF \
+    -DMANAPICORE_GRPC_DEPENDENCY=ON \
+    -DMANAPICORE_BROTLI_DEPENDENCY=ON \
+    -DMANAPICORE_ZSTD_DEPENDENCY=ON \
+    -DMANAPICORE_NGHTTP2_DEPENDENCY=ON \
+    -DMANAPICORE_CPPTRACE_DEPENDENCY=OFF \
+    -DMANAPICORE_NGHTTP3_DEPENDENCY=ON \
+    -DMANAPICORE_ENABLE_TESTS=ON \
+    -DMANAPICORE_STD_BACKTRACE_DEPENDENCY=ON \
     -DBUILD_SHARED_LIBS=ON
 ```
 
@@ -49,11 +49,11 @@ You can use Conan v2 to manage dependencies for the library.
 Install Conan v2 on your system and download all dependencies by executing the following command in the library directory:
 
 ```bash
-conan create . -o "manapihttp/*:shared=True" -o "manapihttp/*:openssl_dependency=True" -o "manapihttp/*:quiche_dependency=True" -o "manapihttp/*:grpc_dependency=True" -o "manapihttp/*:zlib_dependency=True" -o "manapihttp/*:nghttp2_dependency=True" \
- -o "manapihttp/*:nghttp3_dependency=True" -o "manapihttp/*:lib=True" -o "manapihttp/*:wolfssl_dependency=False" --build missing --settings=build_type=Debug -o "manapihttp/*:curl_dependency=True" -o "abseil/*:shared=True" -o "grpc/*:shared=True" -o "protobuf/*:shared=True" --settings=compiler.cppstd=23
+conan create . -o "manapicore/*:shared=True" -o "manapicore/*:openssl_dependency=True" -o "manapicore/*:quiche_dependency=True" -o "manapicore/*:grpc_dependency=True" -o "manapicore/*:zlib_dependency=True" -o "manapicore/*:nghttp2_dependency=True" \
+ -o "manapicore/*:nghttp3_dependency=True" -o "manapicore/*:lib=True" -o "manapicore/*:wolfssl_dependency=False" --build missing --settings=build_type=Debug -o "manapicore/*:curl_dependency=True" -o "abseil/*:shared=True" -o "grpc/*:shared=True" -o "protobuf/*:shared=True" --settings=compiler.cppstd=23
 ```
 
 ### Experimental Method
 
 Another way to download dependencies is using CMake's fetch mode.
-Set the ```MANAPIHTTP_BUILD_METHOD``` parameter to ```fetch``` and set ```MANAPIHTTP_DEPENDENCY_FETCH_SHARED``` to ```ON``` if you want to build shared libraries.
+Set the ```MANAPICORE_BUILD_METHOD``` parameter to ```fetch``` and set ```MANAPICORE_DEPENDENCY_FETCH_SHARED``` to ```ON``` if you want to build shared libraries.

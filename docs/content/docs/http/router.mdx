@@ -20,8 +20,8 @@ auto router_ctx = manapi::net::http::server_ctx::create().unwrap();
 You can then use the context in HTTP routers with `manapi::net::http::server::create`.
 
 ```c++
-#include <manapihttp/ManapiHttp.hpp>
-#include <manapihttp/ManapiInitTools.hpp>
+#include <manapicore/ManapiHttp.hpp>
+#include <manapicore/ManapiInitTools.hpp>
 
 int main() {
     /* creates 2 threads for blocking I/O syscalls */

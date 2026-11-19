@@ -43,9 +43,9 @@
 //        EHTTP_V1_1_CHUNKED_WAIT = -3
 //    };
 //
-//    bool http_v1_1_is_token_char (const char &c) MANAPIHTTP_NOEXCEPT;
+//    bool http_v1_1_is_token_char (const char &c) MANAPICORE_NOEXCEPT;
 //
-//    int http_v1_1_work (http_v1_1_t *ctx, request_data_t *req, http::config *config, const char **nbuffer, std::size_t *nsize) MANAPIHTTP_NOEXCEPT;
+//    int http_v1_1_work (http_v1_1_t *ctx, request_data_t *req, http::config *config, const char **nbuffer, std::size_t *nsize) MANAPICORE_NOEXCEPT;
 //
-//    int http_v1_1_chunked_read (http_v1_1_chunked_t *ctx, http::request_data_t *req, worker::base *worker, const worker::shared_conn &conn/*, http::config *config*/, const char *buffer, std::size_t size) MANAPIHTTP_NOEXCEPT;
+//    int http_v1_1_chunked_read (http_v1_1_chunked_t *ctx, http::request_data_t *req, worker::base *worker, const worker::shared_conn &conn/*, http::config *config*/, const char *buffer, std::size_t size) MANAPICORE_NOEXCEPT;
 //}

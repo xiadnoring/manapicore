@@ -24,7 +24,7 @@ namespace manapi::ext::pq {
 
         ~row () = default;
 
-        MANAPIHTTP_NODISCARD field at (const char *name) const {
+        MANAPICORE_NODISCARD field at (const char *name) const {
             if (auto i = PQfnumber(this->m_res, name); i != -1) {
                 return field {this->m_res, this->m_row, i};
             }
@@ -33,7 +33,7 @@ namespace manapi::ext::pq {
             throw std::runtime_error("field doesn't exist");
         }
 
-        MANAPIHTTP_NODISCARD field at (int index) const {
+        MANAPICORE_NODISCARD field at (int index) const {
             if (index >= 0 && index < this->size()) {
                 return field{this->m_res, this->m_row, index};
             }
@@ -42,25 +42,25 @@ namespace manapi::ext::pq {
             throw std::runtime_error("field doesn't exist");
         }
 
-        MANAPIHTTP_NODISCARD field operator[] (int index) const {
+        MANAPICORE_NODISCARD field operator[] (int index) const {
             return this->at(index);
         }
 
-        MANAPIHTTP_NODISCARD field operator[] (const char *name) const {
+        MANAPICORE_NODISCARD field operator[] (const char *name) const {
             return this->at(name);
         }
 
-        MANAPIHTTP_NODISCARD int size () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD int size () const MANAPICORE_NOEXCEPT {
             return PQnfields(this->m_res);
         }
 
-        MANAPIHTTP_NODISCARD bool empty () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD bool empty () const MANAPICORE_NOEXCEPT {
             return this->size() == 0;
         }
 
-        MANAPIHTTP_NODISCARD const_iterator begin() const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const_iterator begin() const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const_iterator end() const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const_iterator end() const MANAPICORE_NOEXCEPT;
     private:
         const PGresult *m_res;
         int m_row;
@@ -136,11 +136,11 @@ namespace manapi::ext::pq {
     };
 
 
-    inline row::const_iterator row::begin() const MANAPIHTTP_NOEXCEPT {
+    inline row::const_iterator row::begin() const MANAPICORE_NOEXCEPT {
         return const_iterator{this->m_res, this->m_row, 0};
     }
 
-    inline row::const_iterator row::end() const MANAPIHTTP_NOEXCEPT {
+    inline row::const_iterator row::end() const MANAPICORE_NOEXCEPT {
         return const_iterator{this->m_res, this->m_row, this->size()};
     }
 }

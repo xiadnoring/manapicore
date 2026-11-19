@@ -17,15 +17,15 @@ namespace manapi::async {
 
         mutex_locker (mutex *mx);
 
-        mutex_locker (mutex_locker &&n) MANAPIHTTP_NOEXCEPT;
+        mutex_locker (mutex_locker &&n) MANAPICORE_NOEXCEPT;
 
-        mutex_locker &operator= (mutex_locker &&) MANAPIHTTP_NOEXCEPT;
+        mutex_locker &operator= (mutex_locker &&) MANAPICORE_NOEXCEPT;
 
         ~mutex_locker();
 
-        void call () MANAPIHTTP_NOEXCEPT;
+        void call () MANAPICORE_NOEXCEPT;
 
-        void disable () MANAPIHTTP_NOEXCEPT;
+        void disable () MANAPICORE_NOEXCEPT;
     private:
         mutex *mx;
     };
@@ -35,9 +35,9 @@ namespace manapi::async {
     public:
         mutex ();
 
-        mutex (mutex &&n) MANAPIHTTP_NOEXCEPT;
+        mutex (mutex &&n) MANAPICORE_NOEXCEPT;
 
-        mutex &operator=(mutex &&n) MANAPIHTTP_NOEXCEPT;
+        mutex &operator=(mutex &&n) MANAPICORE_NOEXCEPT;
 
         manapi::future<void> lock ();
 
@@ -47,9 +47,9 @@ namespace manapi::async {
          */
         manapi::future<bool> lock (manapi::ctoken cancellation);
 
-        bool try_to_lock () MANAPIHTTP_NOEXCEPT;
+        bool try_to_lock () MANAPICORE_NOEXCEPT;
 
-        void unlock () MANAPIHTTP_NOEXCEPT;
+        void unlock () MANAPICORE_NOEXCEPT;
 
         future<mutex_locker> lock_guard ();
 
@@ -59,7 +59,7 @@ namespace manapi::async {
          */
         future<manapi::status_or<mutex_locker>> lock_guard (manapi::ctoken cancellation);
 
-        MANAPIHTTP_NODISCARD std::size_t waiting () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD std::size_t waiting () const MANAPICORE_NOEXCEPT;
 
         ~mutex ();
     private:

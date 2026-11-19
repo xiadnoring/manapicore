@@ -11,17 +11,17 @@
 //
 //        void setup ( std::shared_ptr<net::worker::base_http> site, std::shared_ptr<manapi::net::worker::worker_data_t> worker_data, std::shared_ptr<manapi::net::http::config> config );
 //
-//        void wrk_global (wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT override;
+//        void wrk_global (wrk_interface_global_t *data) MANAPICORE_NOEXCEPT override;
 //
-//        wrk_interface_global_t *wrk_global () MANAPIHTTP_NOEXCEPT override;
+//        wrk_interface_global_t *wrk_global () MANAPICORE_NOEXCEPT override;
 //
-//        MANAPIHTTP_NODISCARD int worker_flags () MANAPIHTTP_NOEXCEPT { return this->m_flags; }
+//        MANAPICORE_NODISCARD int worker_flags () MANAPICORE_NOEXCEPT { return this->m_flags; }
 //
-//        void worker_pool_id (std::size_t worker_pool_id) MANAPIHTTP_NOEXCEPT;
+//        void worker_pool_id (std::size_t worker_pool_id) MANAPICORE_NOEXCEPT;
 //
-//        MANAPIHTTP_NODISCARD std::size_t worker_pool_id () const MANAPIHTTP_NOEXCEPT;
+//        MANAPICORE_NODISCARD std::size_t worker_pool_id () const MANAPICORE_NOEXCEPT;
 //
-//        MANAPIHTTP_NODISCARD std::size_t deep_worker_id () const MANAPIHTTP_NOEXCEPT;
+//        MANAPICORE_NODISCARD std::size_t deep_worker_id () const MANAPICORE_NOEXCEPT;
 //
 //        manapi::future<status> init(std::size_t deep) override;
 //

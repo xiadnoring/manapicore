@@ -5,14 +5,14 @@
 #include "std/ManapiPromise.hpp"
 #include "std/ManapiScopePtr.hpp"
 
-#ifdef MANAPIHTTP_FETCH_SUPPORT
+#ifdef MANAPICORE_FETCH_SUPPORT
 
 struct manapi::net::fetch2::fetch_data_t {
     std::shared_ptr<manapi::net::fetch> data;
     manapi::async::promise_sync<manapi::status>::resolve_t resolve;
 };
 
-static manapi::status manapi__fetch2_setup_fetch(manapi::net::fetch2::fetch_data_t *m_data, manapi::json params) MANAPIHTTP_NOEXCEPT {
+static manapi::status manapi__fetch2_setup_fetch(manapi::net::fetch2::fetch_data_t *m_data, manapi::json params) MANAPICORE_NOEXCEPT {
     manapi::status res;
     try {
         auto &params_obj = params.as_object();
@@ -116,7 +116,7 @@ manapi::future<manapi::status> manapi::net::fetch2_response(std::shared_ptr<mana
     try {
         using promise = manapi::async::promise_sync<manapi::status>;
 
-        manapi_log_trace2 ("manapihttp::fetch", "fetch2:init");
+        manapi_log_trace2 ("manapicore::fetch", "fetch2:init");
         co_await promise ([ &fetch, &token ] ( promise::resolve_t resolve ) -> void {
             fetch->m_data->resolve = std::move(resolve);
 
@@ -124,13 +124,13 @@ manapi::future<manapi::status> manapi::net::fetch2_response(std::shared_ptr<mana
                     (const std::shared_ptr<manapi::net::fetch> &) mutable
                 -> manapi::future<bool> {
 
-                manapi_log_trace2 ("manapihttp::fetch", "fetch2:recv_async_headers wait");
+                manapi_log_trace2 ("manapicore::fetch", "fetch2:recv_async_headers wait");
                 auto st = co_await promise ([ data ] ( promise::resolve_t resolve )
                     -> void {
                     if (data->resolve) std::exchange(data->resolve, std::move(resolve)) ( manapi::status_ok() );
                     else resolve ( manapi::status_unavailable() );
                 });
-                manapi_log_trace2 ("manapihttp::fetch", "fetch2:recv_async_headers finish");
+                manapi_log_trace2 ("manapicore::fetch", "fetch2:recv_async_headers finish");
 
                 co_return st.ok() || st.code() == manapi::ERR_ABORTED;
             }).unwrap();
@@ -140,7 +140,7 @@ manapi::future<manapi::status> manapi::net::fetch2_response(std::shared_ptr<mana
                         ( std::exception_ptr err, manapi::status *st ) -> void {
                 auto fetch2 = z.lock();
 
-                manapi_log_trace2 ("manapihttp::fetch", "fetch2:perform finish");
+                manapi_log_trace2 ("manapicore::fetch", "fetch2:perform finish");
                 
                 if (!fetch2 || !fetch2->m_data->resolve) {
                     return;
@@ -152,7 +152,7 @@ manapi::future<manapi::status> manapi::net::fetch2_response(std::shared_ptr<mana
             });
         });
 
-        manapi_log_trace2 ("manapihttp::fetch", "fetch2:init finish");
+        manapi_log_trace2 ("manapicore::fetch", "fetch2:init finish");
 
         co_return manapi::status_ok();
     }
@@ -181,7 +181,7 @@ manapi::future<manapi::status_or<std::shared_ptr<manapi::net::fetch2>>> manapi::
     if (!( res = co_await manapi::net::fetch2_response(response, std::move(cancellation)) ))
         co_return std::move(res);
 
-    manapi_log_trace2 ("manapihttp::fetch", "fetch2:response finish");
+    manapi_log_trace2 ("manapicore::fetch", "fetch2:response finish");
 
     co_return std::move(response);
 }
@@ -203,16 +203,16 @@ manapi::future<manapi::status_or<std::shared_ptr<manapi::net::fetch2>>> manapi::
         if (!(res = manapi__fetch2_setup_fetch(response->m_data.get(), std::move(params))))
             co_return std::move(res);
 
-        manapi_log_trace2 ("manapihttp::fetch", "fetch2:response finish #0");
+        manapi_log_trace2 ("manapicore::fetch", "fetch2:response finish #0");
 
         if (!(res = co_await manapi::net::fetch2_response(response, std::move(cancellation))))
             co_return std::move(res);
 
-        manapi_log_trace2 ("manapihttp::fetch", "fetch2:response finish #1");
+        manapi_log_trace2 ("manapicore::fetch", "fetch2:response finish #1");
 
     }
 
-    manapi_log_trace2 ("manapihttp::fetch", "fetch2:response finish #2");
+    manapi_log_trace2 ("manapicore::fetch", "fetch2:response finish #2");
 
     co_return std::move(response);
 
@@ -247,7 +247,7 @@ manapi::future<manapi::status_or<std::shared_ptr<manapi::net::fetch2>>> manapi::
     if (! ( res = co_await manapi::net::fetch2_response(response, std::move(cancellation)) ))
         co_return std::move(res);
 
-    manapi_log_trace2 ("manapihttp::fetch", "fetch2:response finish");
+    manapi_log_trace2 ("manapicore::fetch", "fetch2:response finish");
 
     co_return std::move(response);
 }
@@ -267,21 +267,21 @@ manapi::future<manapi::status_or<std::shared_ptr<manapi::net::fetch2>>> manapi::
     if (! ( res = co_await manapi::net::fetch2_response(response, std::move(cancellation)) ))
         co_return std::move(res);
 
-    manapi_log_trace2 ("manapihttp::fetch", "fetch2:response finish");
+    manapi_log_trace2 ("manapicore::fetch", "fetch2:response finish");
 
     co_return std::move(response);
 }
 
-bool manapi::net::fetch2::ok() const MANAPIHTTP_NOEXCEPT {
+bool manapi::net::fetch2::ok() const MANAPICORE_NOEXCEPT {
     auto const s = this->status();
     return s >= 200 && s <= 299;
 }
 
-uint16_t manapi::net::fetch2::status() const MANAPIHTTP_NOEXCEPT {
+uint16_t manapi::net::fetch2::status() const MANAPICORE_NOEXCEPT {
     return this->m_data->data->status_code();
 }
 
-std::map<std::string, std::string, std::less<>> &manapi::net::fetch2::headers() MANAPIHTTP_NOEXCEPT {
+std::map<std::string, std::string, std::less<>> &manapi::net::fetch2::headers() MANAPICORE_NOEXCEPT {
     return this->m_data->data->headers();
 }
 
@@ -312,13 +312,13 @@ manapi::future<manapi::status> manapi::net::fetch2::callback_sync(std::move_only
 manapi::future<manapi::status_or<std::string>> manapi::net::fetch2::text() {
     try {
         std::string data;
-        manapi_log_trace2 ("manapihttp::fetch", "fetch2:text() init");
+        manapi_log_trace2 ("manapicore::fetch", "fetch2:text() init");
         auto res = co_await this->callback_sync ([&data] (char *buffer, std::size_t size) -> ssize_t {
             data.append(buffer, (size));
-            manapi_log_trace2 ("manapihttp::fetch", "fetch2:text() append");
+            manapi_log_trace2 ("manapicore::fetch", "fetch2:text() append");
             return static_cast<ssize_t>(size);
         });
-        manapi_log_trace2 ("manapihttp::fetch", "fetch2:text() finish");
+        manapi_log_trace2 ("manapicore::fetch", "fetch2:text() finish");
 
         if (!res)
             co_return std::move(res);
@@ -391,7 +391,7 @@ bool manapi::net::fetch2::is_processing() const {
     return !!this->m_data->resolve;
 }
 
-void manapi::net::fetch2::finish() MANAPIHTTP_NOEXCEPT {
+void manapi::net::fetch2::finish() MANAPICORE_NOEXCEPT {
     if (this->m_data->resolve) {
         std::exchange( this->m_data->resolve, {} ) ( manapi::status_aborted("fetch2:finish") );
     }

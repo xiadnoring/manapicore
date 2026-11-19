@@ -29,9 +29,9 @@ namespace manapi {
 
         ~bytebuffer ();
 
-        bytebuffer (bytebuffer &&n) MANAPIHTTP_NOEXCEPT;
+        bytebuffer (bytebuffer &&n) MANAPICORE_NOEXCEPT;
 
-        bytebuffer &operator=(bytebuffer &&n) MANAPIHTTP_NOEXCEPT;
+        bytebuffer &operator=(bytebuffer &&n) MANAPICORE_NOEXCEPT;
 
         char *data ();
 
@@ -39,33 +39,33 @@ namespace manapi {
 
         char &at (std::size_t i_);
 
-        MANAPIHTTP_NODISCARD const char *data () const;
+        MANAPICORE_NODISCARD const char *data () const;
 
         operator bool () const;
 
-        MANAPIHTTP_NODISCARD std::size_t size () const;
+        MANAPICORE_NODISCARD std::size_t size () const;
 
-        MANAPIHTTP_NODISCARD std::size_t realsize () const;
+        MANAPICORE_NODISCARD std::size_t realsize () const;
 
-        manapi::status realresize (std::size_t s) MANAPIHTTP_NOEXCEPT;
+        manapi::status realresize (std::size_t s) MANAPICORE_NOEXCEPT;
 
-        manapi::status resize (std::size_t s) MANAPIHTTP_NOEXCEPT;
+        manapi::status resize (std::size_t s) MANAPICORE_NOEXCEPT;
 
-        manapi::status resize_max (std::size_t s) MANAPIHTTP_NOEXCEPT;
+        manapi::status resize_max (std::size_t s) MANAPICORE_NOEXCEPT;
 
-        void reset_shift () MANAPIHTTP_NOEXCEPT;
+        void reset_shift () MANAPICORE_NOEXCEPT;
 
-        void clear () MANAPIHTTP_NOEXCEPT;
+        void clear () MANAPICORE_NOEXCEPT;
 
         void *release ();
 
-        MANAPIHTTP_NODISCARD std::size_t shift () const;
+        MANAPICORE_NODISCARD std::size_t shift () const;
 
         void shift (std::size_t n);
 
         void shift_add (std::size_t n);
 
-        MANAPIHTTP_NODISCARD bool empty () const;
+        MANAPICORE_NODISCARD bool empty () const;
     private:
         uint32_t m_shift;
         uint32_t m_s;

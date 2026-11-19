@@ -18,7 +18,7 @@
 
 #define MANAPI__COMPRESS_TEXT "Hello World!\n\nMy name is Timur.\nI am 19 years old"
 
-#if MANAPIHTTP_ZLIB_DEPENDENCY
+#if MANAPICORE_ZLIB_DEPENDENCY
 
 UTEST(compress, compress_deflate) {
     auto ctx = init_ctx(utest_result);
@@ -119,7 +119,7 @@ UTEST(compress, compress_gzip_small_data) {
 
 #endif
 
-#if MANAPIHTTP_ZSTD_DEPENDENCY
+#if MANAPICORE_ZSTD_DEPENDENCY
 
 UTEST(compress, compress_zstd) {
     auto ctx = init_ctx(utest_result);
@@ -190,7 +190,7 @@ UTEST(compress, compress_zstd_small_data) {
 
 #endif
 
-#if MANAPIHTTP_BROTLI_DEPENDENCY
+#if MANAPICORE_BROTLI_DEPENDENCY
 
 UTEST(compress, compress_brotli) {
     auto ctx = init_ctx(utest_result);
@@ -261,4 +261,4 @@ UTEST(compress, compress_brotli_small_data) {
 
 #endif
 
-MANAPIHTTP_TESTS_MAIN
+MANAPICORE_TESTS_MAIN

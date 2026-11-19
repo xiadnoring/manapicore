@@ -1,4 +1,4 @@
-# <img src="assets/icon.png" alt="logo" style="width:20px;vertical-align:middle; margin-left:10px;"> <span>Manapi Http</span>
+# <img src="assets/icon.png" alt="logo" style="width:20px;vertical-align:middle; margin-left:10px;"> <span>Manapi Core</span>
 
 
 ## Introduction
@@ -35,17 +35,17 @@ cmake -DCMAKE_BUILD_TYPE=Debug/Release ...
 
 ### Build as Executable
 ```bash
-cmake ... -DMANAPIHTTP_BUILD_TYPE=exe
+cmake ... -DMANAPICORE_BUILD_TYPE=exe
 ```
 
 ### Build as Library
 ```bash
-cmake ... -DMANAPIHTTP_BUILD_TYPE=lib
+cmake ... -DMANAPICORE_BUILD_TYPE=lib
 ```
 
 ### Build with Conan
 ```bash
-cmake ... -DMANAPIHTTP_BUILD_METHOD=conan
+cmake ... -DMANAPICORE_BUILD_METHOD=conan
 ```
 
 ### Build with cmake Fetch
@@ -54,7 +54,7 @@ cmake ... -DMANAPIHTTP_BUILD_METHOD=conan
 > 
 > (gmp (linux), libuv, zlib, curl, openssl, nghttp2, nghttp3)
 ```bash
-cmake ... -DMANAPIHTTP_BUILD_METHOD=fetch
+cmake ... -DMANAPICORE_BUILD_METHOD=fetch
 ```
 
 ## Example
@@ -96,29 +96,29 @@ int main () {
 
 | Option name                         | Description              | Values                  |
 |:------------------------------------|:-------------------------|:------------------------|
-| MANAPIHTTP_GMP_DEPENDENCY           | Bigint Support           | **ON**/OFF              |
-| MANAPIHTTP_CURL_DEPENDENCY          | Fetch Support            | **ON**/OFF              |
-| MANAPIHTTP_ZLIB_DEPENDENCY          | gzip/deflate Support     | **ON**/OFF              |
-| MANAPIHTTP_QUICHE_DEPENDENCY        | HTTP3/QUIC by Cloudflare | **ON**/OFF              | 
-| MANAPIHTTP_OPENSSL_DEPENDENCY       | TLS/QUIC by OpenSSL      | **ON**/OFF              |
-| MANAPIHTTP_WOLFSSL_DEPENDENCY       | TLS by WolfSSL           | ON/**OFF**              |
-| MANAPIHTTP_GRPC_DEPENDENCY          | gRPC Support             | **ON**/OFF              |
-| MANAPIHTTP_BROTLI_DEPENDENCY        | brotli Support           | **ON**/OFF              |
-| MANAPIHTTP_ZSTD_DEPENDENCY          | zstd Support             | **ON**/OFF              |
-| MANAPIHTTP_WOLFSSL_WITH_ALPN        | WolfSSL with ALPN        | **ON**/OFF              |
-| MANAPIHTTP_NGHTTP2_DEPENDENCY       | HTTP2 by nghttp2         | **ON**/OFF              |
-| MANAPIHTTP_NGHTTP3_DEPENDENCY       | HTTP3 by nghttp3         | **ON**/OFF              |
-| MANAPIHTTP_CPPTRACE_DEPENDENCY      | CppTrace                 | ON/**OFF**              |
-| MANAPIHTTP_JSON_DEBUG               | JSON debug symbols       | **ON**/OFF              |
-| MANAPIHTTP_STD_BACKTRACE_DEPENDENCY | STD C++23 stacktrace     | **ON**/OFF              |
+| MANAPICORE_GMP_DEPENDENCY           | Bigint Support           | **ON**/OFF              |
+| MANAPICORE_CURL_DEPENDENCY          | Fetch Support            | **ON**/OFF              |
+| MANAPICORE_ZLIB_DEPENDENCY          | gzip/deflate Support     | **ON**/OFF              |
+| MANAPICORE_QUICHE_DEPENDENCY        | HTTP3/QUIC by Cloudflare | **ON**/OFF              | 
+| MANAPICORE_OPENSSL_DEPENDENCY       | TLS/QUIC by OpenSSL      | **ON**/OFF              |
+| MANAPICORE_WOLFSSL_DEPENDENCY       | TLS by WolfSSL           | ON/**OFF**              |
+| MANAPICORE_GRPC_DEPENDENCY          | gRPC Support             | **ON**/OFF              |
+| MANAPICORE_BROTLI_DEPENDENCY        | brotli Support           | **ON**/OFF              |
+| MANAPICORE_ZSTD_DEPENDENCY          | zstd Support             | **ON**/OFF              |
+| MANAPICORE_WOLFSSL_WITH_ALPN        | WolfSSL with ALPN        | **ON**/OFF              |
+| MANAPICORE_NGHTTP2_DEPENDENCY       | HTTP2 by nghttp2         | **ON**/OFF              |
+| MANAPICORE_NGHTTP3_DEPENDENCY       | HTTP3 by nghttp3         | **ON**/OFF              |
+| MANAPICORE_CPPTRACE_DEPENDENCY      | CppTrace                 | ON/**OFF**              |
+| MANAPICORE_JSON_DEBUG               | JSON debug symbols       | **ON**/OFF              |
+| MANAPICORE_STD_BACKTRACE_DEPENDENCY | STD C++23 stacktrace     | **ON**/OFF              |
 | BUILD_SHARED_LIBS                   | Build as a shared lib    | ON/**OFF**              |
-| MANAPIHTTP_BUILD_METHOD             | Build Method             | conan/**default**/fetch | 
-| MANAPIHTTP_DEPENDENCY_FETCH_SHARED  | Bsuild shared depends    | ON/**OFF**              |
-| MANAPIHTTP_OPENSSL_SYSTEM_DISABLE   | Disable default OpenSSL  | ON/**OFF**              |
-| MANAPIHTTP_CURL_SYSTEM_DISABLE      | Disable default cURL     | ON/**OFF**              |
-| MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT  | Depends Output Path      | \<PATH\>/**OFF**        |
-| MANAPIHTTP_BUILD_TYPE               | Binary or Library        | exe/**lib**/test        |
-| MANAPIHTTP_INSTALL_ARCH             | '/x86_64-linux-gnu'      | '/\<PATH\>'/**OFF**     |
+| MANAPICORE_BUILD_METHOD             | Build Method             | conan/**default**/fetch | 
+| MANAPICORE_DEPENDENCY_FETCH_SHARED  | Bsuild shared depends    | ON/**OFF**              |
+| MANAPICORE_OPENSSL_SYSTEM_DISABLE   | Disable default OpenSSL  | ON/**OFF**              |
+| MANAPICORE_CURL_SYSTEM_DISABLE      | Disable default cURL     | ON/**OFF**              |
+| MANAPICORE_DEPENDENCY_FETCH_OUTPUT  | Depends Output Path      | \<PATH\>/**OFF**        |
+| MANAPICORE_BUILD_TYPE               | Binary or Library        | exe/**lib**/test        |
+| MANAPICORE_INSTALL_ARCH             | '/x86_64-linux-gnu'      | '/\<PATH\>'/**OFF**     |
 
 ## Made in
 

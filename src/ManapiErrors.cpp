@@ -75,7 +75,7 @@ void manapi::debug::set_log_name_enabled(const char *name, bool enabled) {
     }
 }
 
-void manapi::debug::set_log_trace_enabled (int value) MANAPIHTTP_NOEXCEPT {
+void manapi::debug::set_log_trace_enabled (int value) MANAPICORE_NOEXCEPT {
     ::manapi__log_trace_enabled = value;
 }
 
@@ -163,7 +163,7 @@ manapi::messages::~messages() {
     }
 }
 
-manapi::messages::messages(messages &&n) MANAPIHTTP_NOEXCEPT {
+manapi::messages::messages(messages &&n) MANAPICORE_NOEXCEPT {
     this->m_errnum = std::exchange(n.m_errnum, 0);
     if (this->m_errnum & (1U<<31)) {
         new (&this->m_data.m_str) std::string (std::move(n.m_data.m_str));
@@ -174,7 +174,7 @@ manapi::messages::messages(messages &&n) MANAPIHTTP_NOEXCEPT {
     }
 }
 
-manapi::messages & manapi::messages::operator=(messages &&n) MANAPIHTTP_NOEXCEPT {
+manapi::messages & manapi::messages::operator=(messages &&n) MANAPICORE_NOEXCEPT {
     if (this != &n) {
         if (this->m_errnum & (1U<<31)) this->m_data.m_str.~basic_string();
         this->m_errnum = std::exchange(n.m_errnum, 0);
@@ -213,26 +213,26 @@ manapi::messages & manapi::messages::operator=(const messages &n) {
     return *this;
 }
 
-void manapi::messages::errnum(manapi::err_num code) MANAPIHTTP_NOEXCEPT {
+void manapi::messages::errnum(manapi::err_num code) MANAPICORE_NOEXCEPT {
     this->m_errnum = static_cast<uint32_t> (code)|(this->m_errnum & (1U<<31));
 }
 
-manapi::err_num manapi::messages::errnum() const MANAPIHTTP_NOEXCEPT {
+manapi::err_num manapi::messages::errnum() const MANAPICORE_NOEXCEPT {
     if (this->m_errnum & (1U<<31)) return static_cast<manapi::err_num>(this->m_errnum ^ (1U<<31));
     return static_cast<manapi::err_num>(this->m_errnum);
 }
 
-std::string_view manapi::messages::msg_view() const MANAPIHTTP_NOEXCEPT {
+std::string_view manapi::messages::msg_view() const MANAPICORE_NOEXCEPT {
     if (this->m_errnum & (1U<<31)) return this->m_data.m_str;
     return this->m_data.m_view;
 }
 
-std::string manapi::messages::msg() MANAPIHTTP_NOEXCEPT {
+std::string manapi::messages::msg() MANAPICORE_NOEXCEPT {
     if (this->m_errnum & (1U<<31)) return std::move(this->m_data.m_str);
     return std::string{this->m_data.m_view};
 }
 
-void manapi::messages::msg_view(std::string_view msg) MANAPIHTTP_NOEXCEPT {
+void manapi::messages::msg_view(std::string_view msg) MANAPICORE_NOEXCEPT {
     if (this->m_errnum & (1U<<31)) {
         this->m_data.m_str.~basic_string();
         this->m_errnum ^= (1U<<31);
@@ -240,7 +240,7 @@ void manapi::messages::msg_view(std::string_view msg) MANAPIHTTP_NOEXCEPT {
     this->m_data.m_view = msg;
 }
 
-void manapi::messages::msg(std::string msg) MANAPIHTTP_NOEXCEPT {
+void manapi::messages::msg(std::string msg) MANAPICORE_NOEXCEPT {
     if (this->m_errnum & (1U<<31)) {
         this->m_data.m_str = std::move(msg);
         return;
@@ -308,7 +308,7 @@ manapi::exception & manapi::exception::operator=(const exception &n) {
 manapi::exception::~exception() = default;
 
 
-const char *manapi::exception::what() const MANAPIHTTP_NOEXCEPT {
+const char *manapi::exception::what() const MANAPICORE_NOEXCEPT {
     return this->m_data.msg_view().data();
 }
 
@@ -341,11 +341,11 @@ manapi::status::status(err_num code, std::string msg) {
     this->m_data.msg(std::move(msg));
 }
 
-manapi::status::status(status &&n) MANAPIHTTP_NOEXCEPT {
+manapi::status::status(status &&n) MANAPICORE_NOEXCEPT {
     this->m_data = std::move(n.m_data);
 }
 
-manapi::status & manapi::status::operator=(status &&n) MANAPIHTTP_NOEXCEPT {
+manapi::status & manapi::status::operator=(status &&n) MANAPICORE_NOEXCEPT {
     if (this != &n) {
         this->m_data = std::move(n.m_data);
     }
@@ -397,11 +397,11 @@ std::string manapi::status::fullmsg() const {
     return std::format("{}: msg={}", this->status_msg(), msg);
 }
 
-void manapi::status::stacktrace() const MANAPIHTTP_NOEXCEPT {
+void manapi::status::stacktrace() const MANAPICORE_NOEXCEPT {
     print_stacktrace();
 }
 
-manapi::status::operator bool() const MANAPIHTTP_NOEXCEPT {
+manapi::status::operator bool() const MANAPICORE_NOEXCEPT {
     return this->m_data.errnum() == ERR_OK;
 }
 
@@ -474,28 +474,28 @@ static void manapi__log (manapi::debug::log_level type, int level, const char *f
     fflush(stdout);
 }
 
-void manapi::debug::logit(log_level type, const char *file, int line, const char *name, const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
+void manapi::debug::logit(log_level type, const char *file, int line, const char *name, const char *fmt, ...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     ::manapi__log(type, LOG_TRACE_HIGH, file, nullptr, line, name, fmt, args);
     va_end(args);
 }
 
-void manapi::debug::logit(log_level type, const char *file, int line, const char *name, int level, const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
+void manapi::debug::logit(log_level type, const char *file, int line, const char *name, int level, const char *fmt, ...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     ::manapi__log(type, level, file, nullptr, line, name, fmt, args);
     va_end(args);
 }
 
-void manapi::debug::flogit(log_level type, const char *file, const char *func, int line, const char *name, const char *fmt,...) MANAPIHTTP_NOEXCEPT {
+void manapi::debug::flogit(log_level type, const char *file, const char *func, int line, const char *name, const char *fmt,...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     ::manapi__log(type, LOG_TRACE_HIGH, file, func, line, name, fmt, args);
     va_end(args);
 }
 
-void manapi::debug::flogit(log_level type, const char *file, const char *func, int line, const char *name, int level, const char *fmt,...) MANAPIHTTP_NOEXCEPT {
+void manapi::debug::flogit(log_level type, const char *file, const char *func, int line, const char *name, int level, const char *fmt,...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     ::manapi__log(type, LOG_TRACE_HIGH, file, func, line, name, fmt, args);

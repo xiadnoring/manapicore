@@ -73,9 +73,9 @@ manapi::net::formdata_recv::formdata_recv(onrecv_cb_t onrecv_cb) : m_ctx(), m_on
 
 manapi::net::formdata_recv::~formdata_recv() = default;
 
-manapi::net::formdata_recv::formdata_recv(formdata_recv &&n) MANAPIHTTP_NOEXCEPT = default;
+manapi::net::formdata_recv::formdata_recv(formdata_recv &&n) MANAPICORE_NOEXCEPT = default;
 
-manapi::net::formdata_recv & manapi::net::formdata_recv::operator=(formdata_recv &&n) MANAPIHTTP_NOEXCEPT = default;
+manapi::net::formdata_recv & manapi::net::formdata_recv::operator=(formdata_recv &&n) MANAPICORE_NOEXCEPT = default;
 
 manapi::future<manapi::status> manapi::net::formdata_recv::get(std::string_view content_type, onparam_cb_t cb) {
     assert(this->m_onparam_cb == nullptr);
@@ -717,11 +717,11 @@ manapi::net::formdata_send::formdata_send() {}
 
 manapi::net::formdata_send::~formdata_send() = default;
 
-manapi::net::formdata_send::formdata_send(formdata_send &&n) MANAPIHTTP_NOEXCEPT = default;
+manapi::net::formdata_send::formdata_send(formdata_send &&n) MANAPICORE_NOEXCEPT = default;
 
-manapi::net::formdata_send & manapi::net::formdata_send::operator=(formdata_send &&n) MANAPIHTTP_NOEXCEPT = default;
+manapi::net::formdata_send & manapi::net::formdata_send::operator=(formdata_send &&n) MANAPICORE_NOEXCEPT = default;
 
-manapi::status manapi::net::formdata_send::set_file(const std::string &name, std::string filepath) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::formdata_send::set_file(const std::string &name, std::string filepath) MANAPICORE_NOEXCEPT {
     try {
         auto filename = manapi::fs::path::basename(filepath);
         auto filemime = manapi::mime::mime_by_file_path(filename);
@@ -736,7 +736,7 @@ manapi::status manapi::net::formdata_send::set_file(const std::string &name, std
     }
 }
 
-manapi::status manapi::net::formdata_send::set_file(const std::string &name, std::string filepath, std::string filename, std::string filemime) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::formdata_send::set_file(const std::string &name, std::string filepath, std::string filename, std::string filemime) MANAPICORE_NOEXCEPT {
     try {
         this->data[name].push_back({DATA_FILE,
             std::move(filepath), data_file_storage{std::move(filename), std::move(filemime)}});
@@ -748,7 +748,7 @@ manapi::status manapi::net::formdata_send::set_file(const std::string &name, std
     }
 }
 
-manapi::status manapi::net::formdata_send::set_text(const std::string &name, std::string data) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::formdata_send::set_text(const std::string &name, std::string data) MANAPICORE_NOEXCEPT {
     try {
         this->data[name].push_back({DATA_PLAIN,
             std::move(data), data_file_storage{}});
@@ -759,13 +759,13 @@ manapi::status manapi::net::formdata_send::set_text(const std::string &name, std
     }
 }
 
-void manapi::net::formdata_send::erase(std::string_view name) MANAPIHTTP_NOEXCEPT {
+void manapi::net::formdata_send::erase(std::string_view name) MANAPICORE_NOEXCEPT {
     auto it = this->data.find(name);
     if (it != this->data.end())
         this->data.erase(it);
 }
 
-bool manapi::net::formdata_send::contains(std::string_view name) const MANAPIHTTP_NOEXCEPT {
+bool manapi::net::formdata_send::contains(std::string_view name) const MANAPICORE_NOEXCEPT {
     return this->data.contains(name);
 }
 
@@ -792,7 +792,7 @@ manapi::future<manapi::status_or<uint64_t>> manapi::net::formdata_send::payload_
     co_return s;
 }
 
-manapi::status_or<std::size_t> manapi::net::formdata_send::multipart_size(std::size_t boundary_size) const MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::size_t> manapi::net::formdata_send::multipart_size(std::size_t boundary_size) const MANAPICORE_NOEXCEPT {
     try {
         auto s = (boundary_size + (sizeof ("--\r\n") - 1));
         for (const auto &params : this->data) {

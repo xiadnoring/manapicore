@@ -15,7 +15,7 @@ namespace manapi {
     const constexpr char *json_type_to_str (int type) {
         switch (type) {
             case manapi::json::type_array: return "array";
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
             case manapi::json::type_bigint: return "bigint";
 #endif
             case manapi::json::type_boolean: return "boolean";

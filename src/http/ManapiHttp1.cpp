@@ -35,11 +35,11 @@
 //
 //static const std::unordered_set<char> tcharlist = {'!', '#', '$', '%', '&', '\'', '*', '+', '-', '.', '^', '_', '`', '|', '~'};
 //
-//bool manapi::net::http::http_v1_1_is_token_char (const char &c) MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::http::http_v1_1_is_token_char (const char &c) MANAPICORE_NOEXCEPT {
 //    return ::isalpha(c) || ::isdigit(c) || tcharlist.contains(c);
 //}
 //
-//int manapi::net::http::http_v1_1_work(http_v1_1_t *ctx, request_data_t *req, http::config *config, const char **nbuffer, std::size_t *nsize) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v1_1_work(http_v1_1_t *ctx, request_data_t *req, http::config *config, const char **nbuffer, std::size_t *nsize) MANAPICORE_NOEXCEPT {
 //
 //    try {
 //        std::size_t pos = 0;
@@ -567,7 +567,7 @@
 //    HTTP_V1_1_CHUNK_ERR,
 //};
 //
-//int manapi::net::http::http_v1_1_chunked_read(http_v1_1_chunked_t *ctx/*, http::request_data_t *req, worker::base *worker*/, const worker::shared_conn &conn/*, http::config *config*/,const char *buffer, std::size_t size) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v1_1_chunked_read(http_v1_1_chunked_t *ctx/*, http::request_data_t *req, worker::base *worker*/, const worker::shared_conn &conn/*, http::config *config*/,const char *buffer, std::size_t size) MANAPICORE_NOEXCEPT {
 //    std::size_t pos = 0;
 //    auto &worker = ctx->worker;
 //    auto &config = ctx->config;
@@ -878,7 +878,7 @@
 //    return EHTTP_V1_1_CHUNKED_READ;
 //}
 //
-//int manapi::net::http::http_v1_1_chunked_flush(http_v1_1_chunked_t *ctx/*, worker::base *worker*/, const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v1_1_chunked_flush(http_v1_1_chunked_t *ctx/*, worker::base *worker*/, const worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    auto &worker = ctx->worker;
 //    while (ctx->top.last_deque) {
 //        if ((worker->event_flags(conn) & ev::READ)) {

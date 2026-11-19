@@ -18,13 +18,13 @@
 #   pragma warning(disable: 5232)
 #endif
 
-#define RETHROW_MANAPIHTTP_JSON_ERROR(errnum, msg, ...) manapi::json_parse_exception (errnum, std::format(msg, __VA_ARGS__));
-#define THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type__) throw RETHROW_MANAPIHTTP_JSON_ERROR(manapi::ERR_JSON_UNSUPPORTED_TYPE, "json object with type {}({}) could not use func: {}", \
+#define RETHROW_MANAPICORE_JSON_ERROR(errnum, msg, ...) manapi::json_parse_exception (errnum, std::format(msg, __VA_ARGS__));
+#define THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type__) throw RETHROW_MANAPICORE_JSON_ERROR(manapi::ERR_JSON_UNSUPPORTED_TYPE, "json object with type {}({}) could not use func: {}", \
 manapi::json_type_to_str(m_type__), static_cast <int> (m_type__), __FUNCTION__)
-#define THROW_MANAPIHTTP_JSON_MISSING_FUNCTION THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(this->m_type)
-#define THROW_MANAPIHTTP_JSON_ERROR(errnum, msg, ...) throw RETHROW_MANAPIHTTP_JSON_ERROR(errnum, msg, __VA_ARGS__)
+#define THROW_MANAPICORE_JSON_MISSING_FUNCTION THROW_MANAPICORE_JSON_MISSING_FUNCTION2(this->m_type)
+#define THROW_MANAPICORE_JSON_ERROR(errnum, msg, ...) throw RETHROW_MANAPICORE_JSON_ERROR(errnum, msg, __VA_ARGS__)
 
-static void json_delete_value_static(int type, void *src) MANAPIHTTP_NOEXCEPT {
+static void json_delete_value_static(int type, void *src) MANAPICORE_NOEXCEPT {
     switch (type) {
         case manapi::json::type_null:
             break;
@@ -53,7 +53,7 @@ static void json_delete_value_static(int type, void *src) MANAPIHTTP_NOEXCEPT {
         case manapi::json::type_decimal:
             delete static_cast<manapi::json::DECIMAL *> (src);
         break;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
         case manapi::json::type_bigint:
             delete static_cast<manapi::json::BIGINT *> (src);
         break;
@@ -70,7 +70,7 @@ static void json_delete_value_static(int type, void *src) MANAPIHTTP_NOEXCEPT {
     }
 }
 
-static void json_delete_value(int &m_type, manapi::json::data_t &m_data) MANAPIHTTP_NOEXCEPT {
+static void json_delete_value(int &m_type, manapi::json::data_t &m_data) MANAPICORE_NOEXCEPT {
     ::json_delete_value_static(
         std::exchange(m_type, manapi::json::types::type_null), std::exchange(m_data.src, nullptr));
 }
@@ -127,7 +127,7 @@ static void json_set_decimal_(int &m_type, manapi::json::data_t &m_data) {
     m_type = manapi::json::types::type_decimal;
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 static void json_set_bigint_(int &m_type, manapi::json::data_t &m_data) {
     auto const z = new manapi::json::BIGINT();
     ::json_delete_value(m_type, m_data);
@@ -191,7 +191,7 @@ static void json_set_decimal_(int &m_type, manapi::json::data_t &m_data, manapi:
     *m_data.m_decimal_src = val;
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 static void json_set_bigint_(int &m_type, manapi::json::data_t &m_data, manapi::json::BIGINT val) {
     ::json_set_bigint_(m_type, m_data);
     *m_data.m_bigint_src = std::move(val);
@@ -234,7 +234,7 @@ static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,double 
     ::manapi__json_parse(m_type, m_data, static_cast<manapi::json::DECIMAL> (num));
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 static void manapi__json_parse(int &m_type, manapi::json::data_t &m_data,manapi::json::BIGINT num) {
     ::json_set_bigint_(m_type, m_data, std::move(num));
 }
@@ -264,42 +264,42 @@ static manapi::json::OBJECT & json_as_object_(const int &m_type, const manapi::j
     if (m_type == manapi::json::type_object) {
         return *static_cast<manapi::json::OBJECT *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 
 static manapi::json_source & json_as_source_(const int &m_type, const manapi::json::data_t &m_data) {
     if (m_type == manapi::json::type_source) {
         return *static_cast<manapi::json_source *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 
 static manapi::json::ARRAY & json_as_array_(const int &m_type, const manapi::json::data_t &m_data) {
     if (m_type == manapi::json::type_array) {
         return *static_cast<manapi::json::ARRAY *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 
 static manapi::json::STRING & json_as_string_(const int &m_type, const manapi::json::data_t &m_data) {
     if (m_type == manapi::json::type_string) {
         return *static_cast<manapi::json::STRING *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 
 static manapi::json::INTEGER & json_as_integer_(const int &m_type, const manapi::json::data_t &m_data) {
     if (m_type == manapi::json::type_integer) {
         return *static_cast<manapi::json::INTEGER *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 static manapi::json::BIGINT & json_as_bigint_(const int &m_type, const manapi::json::data_t &m_data) {
     if (m_type == manapi::json::type_bigint) {
         return *static_cast<manapi::json::BIGINT *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 #endif
 
@@ -307,27 +307,27 @@ static manapi::json::PAIR & json_as_pair_(const int &m_type, const manapi::json:
     if (m_type == manapi::json::type_pair) {
         return *static_cast<manapi::json::PAIR *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 static manapi::json::BOOLEAN & json_as_bool_(const int &m_type, const manapi::json::data_t &m_data) {
     if (m_type == manapi::json::type_boolean) {
         return *static_cast<manapi::json::BOOLEAN *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 
 static manapi::slice & json_as_slice_(const int &m_type, const manapi::json::data_t &m_data) {
     if (m_type == manapi::json::type_slice) {
         return *static_cast<manapi::slice *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 
 static manapi::json::DECIMAL & json_as_decimal_(const int &m_type, const manapi::json::data_t &m_data) {
     if (m_type == manapi::json::type_decimal) {
         return *static_cast<manapi::json::DECIMAL *> (m_data.src);
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(m_type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(m_type);
 }
 
 static void json_copy_value(int &m_type, manapi::json::data_t &m_data, int o_type, const manapi::json::data_t &o_data) {
@@ -341,7 +341,7 @@ static void json_copy_value(int &m_type, manapi::json::data_t &m_data, int o_typ
         case manapi::json::type_decimal:
             ::json_set_decimal_(m_type, m_data,*o_data.m_decimal_src);
         break;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
         case manapi::json::type_bigint:
             ::json_set_bigint_(m_type, m_data,*o_data.m_bigint_src);
         break;
@@ -387,7 +387,7 @@ manapi::json::STRING json_as_string_cast(const manapi::json&v) {
     if (type == manapi::json::type_integer) {
         return std::to_string(v.as_integer());
     }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     if (type == manapi::json::type_bigint) {
         return v.as_bigint().stringify();
     }
@@ -404,7 +404,7 @@ manapi::json::STRING json_as_string_cast(const manapi::json&v) {
         return "false";
     }
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(type);
 }
 
 static manapi::json::INTEGER json_as_integer_cast(const manapi::json&v) {
@@ -416,7 +416,7 @@ static manapi::json::INTEGER json_as_integer_cast(const manapi::json&v) {
     if (type == manapi::json::type_integer) {
         return v.as_integer();
     }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     if (type == manapi::json::type_bigint) {
         return v.as_bigint().integerify();
     }
@@ -429,7 +429,7 @@ static manapi::json::INTEGER json_as_integer_cast(const manapi::json&v) {
         return static_cast <manapi::json::INTEGER> (v.as_bool());
     }
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(type);
 }
 
 static manapi::json::NULLPTR json_as_null_cast(const manapi::json&v) {
@@ -439,7 +439,7 @@ static manapi::json::NULLPTR json_as_null_cast(const manapi::json&v) {
         return v.as_null();
     }
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(type);
 }
 
 static manapi::json::DECIMAL json_as_decimal_cast(const manapi::json&v) {
@@ -451,16 +451,16 @@ static manapi::json::DECIMAL json_as_decimal_cast(const manapi::json&v) {
     if (type == manapi::json::type_integer) {
         return static_cast<manapi::json::DECIMAL> (v.as_integer());
     }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     if (type == manapi::json::type_bigint) {
         return v.as_bigint().decimalify();
     }
 #endif
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(type);
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 static manapi::bigint json_as_bigint_cast(const manapi::json&v) {
     const auto type = v.data_type();
 
@@ -477,7 +477,7 @@ static manapi::bigint json_as_bigint_cast(const manapi::json&v) {
         return manapi::bigint (v.as_string());
     }
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(type);
 }
 #endif
 
@@ -489,7 +489,7 @@ static bool json_as_bool_cast(const manapi::json &v) {
     if (type == manapi::json::type_array) {
         return !v.as_array().empty();
     }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     if (type == manapi::json::type_bigint) {
         return v.as_bigint() != 0;
     }
@@ -509,7 +509,7 @@ static bool json_as_bool_cast(const manapi::json &v) {
     if (type == manapi::json::type_null) {
         return false;
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(type);
 }
 
 static manapi::slice json_as_slice_cast(const manapi::json &v) {
@@ -523,7 +523,7 @@ static manapi::slice json_as_slice_cast(const manapi::json &v) {
     if (type == manapi::json::type_integer) {
         return manapi::slice(std::to_string(v.as_integer()));
     }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     if (type == manapi::json::type_bigint) {
         return manapi::slice(v.as_bigint().stringify());
     }
@@ -540,7 +540,7 @@ static manapi::slice json_as_slice_cast(const manapi::json &v) {
         return manapi::slice("false");
     }
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION2(type);
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION2(type);
 }
 
 manapi::json::json() : m_data{} {
@@ -576,7 +576,7 @@ manapi::json::json(const manapi::json &other) : json() {
     *this = other;
 }
 
-manapi::json::json(json &&other) MANAPIHTTP_NOEXCEPT : json() {
+manapi::json::json(json &&other) MANAPICORE_NOEXCEPT : json() {
     ::json_delete_value(this->m_type, this->m_data);
 
     this->m_data.src = std::exchange(other.m_data.src, nullptr);
@@ -593,7 +593,7 @@ manapi::json::json(DECIMAL num) : json() {
     ::manapi__json_parse(this->m_type, this->m_data, num);
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json::json(BIGINT num) : json() {
     ::manapi__json_parse(this->m_type, this->m_data, std::move(num));
 }
@@ -939,7 +939,7 @@ static void json_dump_bool (manapi::json_dump_buffer *p, bool data) {
     else p->push_back("false", sizeof ("false") - 1);
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 static void json_dump_bigint (manapi::json_dump_buffer *p, const manapi::bigint&data) {
     auto z = data.stringify();
     p->push_back(z.data(), z.size());
@@ -971,7 +971,7 @@ static void json_dump_calc_size (manapi::json_dump_buffer *p, manapi::json_dump_
         case manapi::json::type_object: data->sz += ::json_dump_obj_calc_size (data); return;
         case manapi::json::type_array: data->sz += ::json_dump_arr_calc_size (data); return;
         case manapi::json::type_integer: data->sz += ::json_dump_int_calc_size(b.p->as_integer()); break;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
         case manapi::json::type_bigint: data->sz += ::json_dump_bigint_calc_size(b.p->as_bigint());  break;
 #endif
         case manapi::json::type_slice: data->sz += manapi::unicode::escape_string_size(&b.p->as_slice()); break;
@@ -1000,7 +1000,7 @@ static void json_dump_stringify (manapi::json_dump_buffer *p, manapi::json_dump_
         case manapi::json::type_object: ::json_dump_obj(p, data); return;
         case manapi::json::type_array: ::json_dump_arr(p, data); return;
         case manapi::json::type_integer: ::json_dump_int(p, b.p->as_integer()); break;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
         case manapi::json::type_bigint: ::json_dump_bigint(p, b.p->as_bigint());break;
 #endif
         case manapi::json::type_source: b.p->as_source().dump(p, data); return;
@@ -1099,7 +1099,7 @@ const manapi::json & manapi::json::operator[](size_t index) const {
 
 manapi::json &manapi::json::at(const std::string &key)  {
     if (this->m_type != type_object)
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 
     auto &map = this->as_object();
     return map[key];
@@ -1107,36 +1107,36 @@ manapi::json &manapi::json::at(const std::string &key)  {
 
 manapi::json &manapi::json::at(size_t index)  {
     if (this->m_type != type_array)
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 
     auto &arr = this->as_array();
 
     if (arr.size() <= index)
-        THROW_MANAPIHTTP_JSON_ERROR(ERR_JSON_OUT_OF_RANGE, "Out of range. Index: {}. Size: {}", index, arr.size())
+        THROW_MANAPICORE_JSON_ERROR(ERR_JSON_OUT_OF_RANGE, "Out of range. Index: {}. Size: {}", index, arr.size())
 
     return arr.at(index);
 }
 
 const manapi::json & manapi::json::at(const std::string &key) const {
     if (this->m_type != type_object)
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 
     auto &map = this->as_object();
 
     if (!map.contains(key))
-        THROW_MANAPIHTTP_JSON_ERROR(ERR_JSON_NO_SUCH_KEY, "No such key. ({})", unicode::escape_string(key));
+        THROW_MANAPICORE_JSON_ERROR(ERR_JSON_NO_SUCH_KEY, "No such key. ({})", unicode::escape_string(key));
 
     return map.at(key);
 }
 
 const manapi::json & manapi::json::at(size_t index) const {
     if (this->m_type != type_array)
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 
     auto &arr = this->as_array();
 
     if (arr.size() <= index)
-        THROW_MANAPIHTTP_JSON_ERROR(ERR_JSON_OUT_OF_RANGE, "Out of range. Index: {}. Size: {}", index, arr.size());
+        THROW_MANAPICORE_JSON_ERROR(ERR_JSON_OUT_OF_RANGE, "Out of range. Index: {}. Size: {}", index, arr.size());
 
     return arr.at(index);
 }
@@ -1180,7 +1180,7 @@ manapi::json &manapi::json::operator=(const char *str) {
     return *this;
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json &manapi::json::operator=(BIGINT num) {
     ::json_set_bigint_(this->m_type, this->m_data, std::move(num));
 
@@ -1196,7 +1196,7 @@ manapi::json &manapi::json::operator=(const manapi::json &obj) {
     return *this;
 }
 
-manapi::json & manapi::json::operator=(json &&obj) MANAPIHTTP_NOEXCEPT {
+manapi::json & manapi::json::operator=(json &&obj) MANAPICORE_NOEXCEPT {
     if (&obj != this) {
         manapi::json tmp (std::forward<decltype(obj)>(obj));
 
@@ -1240,7 +1240,7 @@ manapi::json manapi::json::operator*(DECIMAL num) const {
     return std::move(n);
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json manapi::json::operator*(const BIGINT &num) const {
     auto n = *this;
     n *= num;
@@ -1251,28 +1251,28 @@ manapi::json manapi::json::operator*(const BIGINT &num) const {
 manapi::json &manapi::json::operator*=(INTEGER num) {
     if (this->is_integer())
         this->as_integer() *= num;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     else if (this->is_bigint())
         this->as_bigint() *= num;
 #endif
     else if (this->is_decimal())
         this->as_decimal() *= num;
     else
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     return *this;
 }
 
 manapi::json &manapi::json::operator*=(DECIMAL num) {
     if (this->is_integer())
         this->as_integer() *= static_cast<INTEGER>(num);
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     else if (this->is_bigint())
         this->as_bigint() *= num;
 #endif
     else if (this->is_decimal())
         this->as_decimal() *= num;
     else
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     return *this;
 }
 
@@ -1291,32 +1291,32 @@ manapi::json manapi::json::operator/(DECIMAL num) const {
 manapi::json & manapi::json::operator/=(INTEGER num) {
     if (this->is_integer())
         this->as_integer() /= static_cast<INTEGER>(num);
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     else if (this->is_bigint())
         this->as_bigint() /= num;
 #endif
     else if (this->is_decimal())
         this->as_decimal() /= num;
     else
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     return *this;
 }
 
 manapi::json & manapi::json::operator/=(DECIMAL num) {
     if (this->is_integer())
         this->as_integer() /= static_cast<INTEGER>(num);
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     else if (this->is_bigint())
         this->as_bigint() /= num;
 #endif
     else if (this->is_decimal())
         this->as_decimal() /= num;
     else
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     return *this;
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json &manapi::json::operator*=(const BIGINT &num) {
     if (this->is_integer())
         this->as_integer() *= num.integerify();
@@ -1325,7 +1325,7 @@ manapi::json &manapi::json::operator*=(const BIGINT &num) {
     else if (this->is_decimal())
         this->as_decimal() *= num.decimalify();
     else
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     return *this;
 }
 #endif
@@ -1336,7 +1336,7 @@ std::pair<manapi::json::OBJECT::iterator, bool> manapi::json::insert(const OBJEC
 
 std::pair<manapi::json::OBJECT::iterator, bool> manapi::json::insert(OBJECT::value_type &&v) {
     if (this->m_type != type_object)
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 
     return as_object().insert(std::forward<decltype(v)>(v));
 }
@@ -1350,7 +1350,7 @@ std::pair<manapi::json::OBJECT::iterator, bool> manapi::json::insert(const STRIN
 }
 
 void manapi::json::push_back(manapi::json::ARRAY::const_iterator begin, manapi::json::ARRAY::const_iterator end) {
-    if (this->m_type != type_array) { THROW_MANAPIHTTP_JSON_MISSING_FUNCTION; }
+    if (this->m_type != type_array) { THROW_MANAPICORE_JSON_MISSING_FUNCTION; }
     for (auto it = begin; it != end; ++it)
         push_back(*it);
 }
@@ -1361,12 +1361,12 @@ void manapi::json::push_back(manapi::json obj) {
 
 void manapi::json::pop_back() {
     if (this->m_type != type_array)
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 
     as_array().pop_back();
 }
 
-int manapi::json::data_type() const MANAPIHTTP_NOEXCEPT {
+int manapi::json::data_type() const MANAPICORE_NOEXCEPT {
     return this->m_type;
 }
 
@@ -1550,49 +1550,49 @@ void manapi::json::erase(const std::string &key) {
     this->as_object().erase(key);
 }
 
-bool manapi::json::is_object() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_object() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_object;
 }
 
-bool manapi::json::is_array() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_array() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_array;
 }
 
-bool manapi::json::is_string() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_string() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_string;
 }
 
-bool manapi::json::is_slice() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_slice() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_slice;
 }
 
-bool manapi::json::is_integer() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_integer() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_integer;
 }
 
-bool manapi::json::is_null() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_null() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_null;
 }
 
-bool manapi::json::is_decimal() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_decimal() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_decimal;
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
-bool manapi::json::is_bigint() const MANAPIHTTP_NOEXCEPT {
+#ifdef MANAPICORE_BIGINT_SUPPORT
+bool manapi::json::is_bigint() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_bigint;
 }
 #endif
 
-bool manapi::json::is_bool() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_bool() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_boolean;
 }
 
-bool manapi::json::is_pair() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_pair() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_pair;
 }
 
-bool manapi::json::is_source() const MANAPIHTTP_NOEXCEPT {
+bool manapi::json::is_source() const MANAPICORE_NOEXCEPT {
     return this->m_type == type_source;
 }
 
@@ -1644,13 +1644,13 @@ manapi::json::INTEGER & manapi::json::as_integer() {
     return ::json_as_integer_(this->m_type, this->m_data);
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 const manapi::json::BIGINT & manapi::json::as_bigint() const {
     return ::json_as_bigint_(this->m_type, this->m_data);
 }
 #endif
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json::BIGINT & manapi::json::as_bigint() {
     return ::json_as_bigint_(this->m_type, this->m_data);
 }
@@ -1684,7 +1684,7 @@ manapi::json::NULLPTR manapi::json::as_null() const {
     if (this->m_type == type_null) {
         return nullptr;
     }
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 }
 
 manapi::json& manapi::json::cast_string() {
@@ -1726,7 +1726,7 @@ manapi::json& manapi::json::cast_decimal() {
     return *this;
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json& manapi::json::cast_bigint() {
     if (this->m_type == type_bigint) {
 
@@ -1776,7 +1776,7 @@ size_t manapi::json::size() const {
         return as_object().size();
     }
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 }
 
 bool manapi::json::empty () const {
@@ -1789,7 +1789,7 @@ manapi::json manapi::json::operator+(INTEGER num) const {
     {
         n.as_integer() += num;
     }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     else if (n.is_bigint())
     {
         n.as_bigint() += num;
@@ -1801,7 +1801,7 @@ manapi::json manapi::json::operator+(INTEGER num) const {
     }
     else
     {
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     }
 
     return std::move(n);
@@ -1813,7 +1813,7 @@ manapi::json manapi::json::operator+(DECIMAL num) const {
     {
         n.as_integer() += static_cast<INTEGER> (num);
     }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
     else if (n.is_bigint())
     {
         n.as_bigint() += num;
@@ -1824,12 +1824,12 @@ manapi::json manapi::json::operator+(DECIMAL num) const {
         n.as_decimal() += num;
     }
     else {
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     }
     return std::move(n);
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json manapi::json::operator+(const BIGINT &num) const {
     auto n = *this;
     if (n.is_bigint())
@@ -1845,7 +1845,7 @@ manapi::json manapi::json::operator+(const BIGINT &num) const {
         n.as_decimal() += num.decimalify();
     }
     else {
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     }
     return std::move(n);
 }
@@ -1860,7 +1860,7 @@ manapi::json manapi::json::operator+(const STRING &str) const {
         n.as_slice().push_back(str.data(), str.size());
     }
     else {
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     }
     return std::move(n);
 }
@@ -1874,7 +1874,7 @@ manapi::json manapi::json::operator+(const char *str) const {
         n.as_slice().push_back(str, std::strlen(str));
     }
     else {
-        THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+        THROW_MANAPICORE_JSON_MISSING_FUNCTION;
     }
     return std::move(n);
 }
@@ -1904,7 +1904,7 @@ manapi::json & manapi::json::operator-=(DECIMAL num) {
     return *this;
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json & manapi::json::operator-=(const BIGINT &num) {
     *this = this->operator-(num);
     return *this;
@@ -1921,7 +1921,7 @@ manapi::json & manapi::json::operator+=(DECIMAL num) {
     return *this;
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json & manapi::json::operator+=(const BIGINT &num) {
     *this = this->operator+(num);
     return *this;
@@ -1936,7 +1936,7 @@ bool manapi::json::operator==(const json &x) const {
     {
         case type_integer:
             return as_integer() == x.as_integer();
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
         case type_bigint:
             return as_bigint() == x.as_bigint();
 #endif
@@ -2061,7 +2061,7 @@ bool manapi::json::operator<=(DECIMAL n) const {
 bool manapi::json::operator==(const NULLPTR &n) const {
     return this->is_null();
 }
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 bool manapi::json::operator!=(const BIGINT &n) const {
     return !this->operator==(n);
 }
@@ -2074,7 +2074,7 @@ bool manapi::json::operator==(const BIGINT &n) const {
     if (this->is_bigint())
         return this->as_bigint() == n;
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 }
 
 bool manapi::json::operator<(const BIGINT &n) const {
@@ -2085,7 +2085,7 @@ bool manapi::json::operator<(const BIGINT &n) const {
     if (this->is_bigint())
         return this->as_bigint() < n;
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 }
 
 bool manapi::json::operator>(const BIGINT &n) const {
@@ -2096,7 +2096,7 @@ bool manapi::json::operator>(const BIGINT &n) const {
     if (this->is_bigint())
         return this->as_bigint() > n;
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 }
 
 bool manapi::json::operator<=(const BIGINT &n) const {
@@ -2107,7 +2107,7 @@ bool manapi::json::operator<=(const BIGINT &n) const {
     if (this->is_bigint())
         return this->as_bigint() <= n;
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 }
 
 bool manapi::json::operator>=(const BIGINT &n) const {
@@ -2118,7 +2118,7 @@ bool manapi::json::operator>=(const BIGINT &n) const {
     if (this->is_bigint())
         return this->as_bigint() >= n;
 
-    THROW_MANAPIHTTP_JSON_MISSING_FUNCTION;
+    THROW_MANAPICORE_JSON_MISSING_FUNCTION;
 
 }
 
@@ -2132,7 +2132,7 @@ manapi::json manapi::json::operator-(DECIMAL num) const {
     return std::move(this->operator+(-num));
 }
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
 manapi::json manapi::json::operator-(const BIGINT &num) const {
     return std::move(this->operator+(-num));
 }
@@ -2150,7 +2150,7 @@ const manapi::json_err_num &manapi::json_parse_exception::err_num () const {
     return this->errnum;
 }
 
-const char *manapi::json_parse_exception::what() const MANAPIHTTP_NOEXCEPT {
+const char *manapi::json_parse_exception::what() const MANAPICORE_NOEXCEPT {
     return message.data();
 }
 

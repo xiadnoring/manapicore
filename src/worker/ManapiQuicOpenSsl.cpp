@@ -13,7 +13,7 @@
 //#include "std/ManapiEasyCancelToken.hpp"
 //#include "../include/worker/ManapiQuicOpenSsl.hpp"
 //
-//#ifdef MANAPIHTTP_OPENSSL_QUIC_SUPPORT
+//#ifdef MANAPICORE_OPENSSL_QUIC_SUPPORT
 //
 //#   include <openssl/ssl.h>
 //#   include <openssl/quic.h>
@@ -55,25 +55,25 @@
 //};
 //
 //struct openssl_quic_bio_deleter_t {
-//    void operator() (BIO *b) const MANAPIHTTP_NOEXCEPT {
+//    void operator() (BIO *b) const MANAPICORE_NOEXCEPT {
 //        BIO_free(b);
 //    }
 //};
 //
 //struct openssl_quic_ctx_deleter_t {
-//    void operator() (SSL_CTX *b) const MANAPIHTTP_NOEXCEPT {
+//    void operator() (SSL_CTX *b) const MANAPICORE_NOEXCEPT {
 //        SSL_CTX_free(b);
 //    }
 //};
 //
 //struct openssl_quic_bio_addr_deleter {
-//    void operator() (BIO_ADDR *b) const MANAPIHTTP_NOEXCEPT {
+//    void operator() (BIO_ADDR *b) const MANAPICORE_NOEXCEPT {
 //        BIO_ADDR_free(b);
 //    }
 //};
 //
 //struct openssl_quic_addrinfofree_deleter {
-//    void operator () (addrinfo *n) const MANAPIHTTP_NOEXCEPT {
+//    void operator () (addrinfo *n) const MANAPICORE_NOEXCEPT {
 //        manapi::ev::getaddrinfo::free(n);
 //    }
 //};
@@ -531,7 +531,7 @@
 //    udp::stop( token );
 //}
 //
-//void manapi::net::worker::openssl_quic::close_connection(shared_conn conn, int flags) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::close_connection(shared_conn conn, int flags) MANAPICORE_NOEXCEPT {
 //    if (!conn)
 //        return;
 //
@@ -599,7 +599,7 @@
 //
 //    s->flags |= CONN_REMOVED|CONN_CLOSED;
 //
-//    // MANAPIHTTP_MUST_ALLOC_START
+//    // MANAPICORE_MUST_ALLOC_START
 //    // manapi::async::current()->etaskpool()->append_static_task([conn] () -> void {
 //        std::array<char, 17> arr;
 //        memset(arr.data(), '\0', arr.size());
@@ -632,17 +632,17 @@
 //
 //        w->bio_flush_write();
 //    // });
-//    // MANAPIHTTP_MUST_ALLOC_END
+//    // MANAPICORE_MUST_ALLOC_END
 //}
 //
-//int manapi::net::worker::openssl_quic::event_flags(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::openssl_quic::event_flags(const shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    return prepared::event_flags(conn);
 //}
 //
-//int manapi::net::worker::openssl_quic::event_flags(const shared_conn &conn, int flags) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::openssl_quic::event_flags(const shared_conn &conn, int flags) MANAPICORE_NOEXCEPT {
 //    auto const data = conn->as<quic_stream_t>();
 //
-//    MANAPIHTTP_WORKER_EVENT_LOOP_STREAM(data) {
+//    MANAPICORE_WORKER_EVENT_LOOP_STREAM(data) {
 //        if (data->flags & ev::DISCONNECT) {
 //            manapi::net::worker::openssl_quic::notify_cb(data->ev_cb, conn, CONN_CLOSED, nullptr, 0, nullptr);
 //        } else {
@@ -665,41 +665,41 @@
 //            }
 //        }
 //
-//        MANAPIHTTP_WORKER_EVENT_BREAK(data)
+//        MANAPICORE_WORKER_EVENT_BREAK(data)
 //    }
 //
 //    return prev;
 //}
 //
 //manapi::net::worker::worker_watcher_cb manapi::net::worker::openssl_quic::event_on(
-//    const shared_conn &conn, worker_watcher_cb callback) MANAPIHTTP_NOEXCEPT {
+//    const shared_conn &conn, worker_watcher_cb callback) MANAPICORE_NOEXCEPT {
 //    assert(conn->wrk.flags & WRK_INTERFACE_IS_STREAM);
 //    return prepared::event_on(conn, std::move(callback));
 //}
 //
-//void manapi::net::worker::openssl_quic::feed_event(const shared_conn &conn, int flags, const char *buff, std::size_t size, ibuffpool_t *p) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::feed_event(const shared_conn &conn, int flags, const char *buff, std::size_t size, ibuffpool_t *p) MANAPICORE_NOEXCEPT {
 //    prepared::feed_event(this, conn, flags, buff, size, p);
 //}
 //
-//bool manapi::net::worker::openssl_quic::is_writable(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::worker::openssl_quic::is_writable(const shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    auto const data = conn->as<quic_stream_t>();
 //    return prepared::is_writable(this->m_config.get(), conn, data);
 //}
 //
-//std::size_t manapi::net::worker::openssl_quic::recv_count(const shared_conn &conn) const MANAPIHTTP_NOEXCEPT {
+//std::size_t manapi::net::worker::openssl_quic::recv_count(const shared_conn &conn) const MANAPICORE_NOEXCEPT {
 //    return prepared::recv_count(conn);
 //}
 //
-//manapi::bytebuffer manapi::net::worker::openssl_quic::recv_first_buffer(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//manapi::bytebuffer manapi::net::worker::openssl_quic::recv_first_buffer(const shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    return prepared::recv_first_buffer(conn);
 //}
 //
-//ssize_t manapi::net::worker::openssl_quic::sync_write(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::openssl_quic::sync_write(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPICORE_NOEXCEPT {
 //    auto p = conn->as<quic_stream_t>();
 //    return prepared::sync_write(this, conn, p, buff, nbuff, p->cur_speed_lim, finish);
 //}
 //
-//ssize_t manapi::net::worker::openssl_quic::sync_write_ex(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, std::size_t size, bool finish, std::size_t maxcnt) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::openssl_quic::sync_write_ex(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, std::size_t size, bool finish, std::size_t maxcnt) MANAPICORE_NOEXCEPT {
 //    auto const s = conn->as<quic_stream_t>();
 //    ssize_t res = 0;
 //
@@ -800,19 +800,19 @@
 //    return res;
 //}
 //
-//void manapi::net::worker::openssl_quic::waiting(const shared_conn &conn, bool state) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::waiting(const shared_conn &conn, bool state) MANAPICORE_NOEXCEPT {
 //    return prepared::waiting(conn, state);
 //}
 //
-//std::string_view manapi::net::worker::openssl_quic::alpn_ossltest() MANAPIHTTP_NOEXCEPT {
+//std::string_view manapi::net::worker::openssl_quic::alpn_ossltest() MANAPICORE_NOEXCEPT {
 //    return this->m_alpn_ossltest;
 //}
 //
-//void manapi::net::worker::openssl_quic::alpn_ossltest(std::string test) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::alpn_ossltest(std::string test) MANAPICORE_NOEXCEPT {
 //    this->m_alpn_ossltest = std::move(test);
 //}
 //
-//void manapi::net::worker::openssl_quic::close_stream(shared_conn s, int flags) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::close_stream(shared_conn s, int flags) MANAPICORE_NOEXCEPT {
 //    auto const data = s->as<quic_stream_t>();
 //
 //    if (!data)
@@ -872,7 +872,7 @@
 //    prepared::top_buffer_clear(data);
 //
 //
-//    // MANAPIHTTP_MUST_ALLOC_START
+//    // MANAPICORE_MUST_ALLOC_START
 //    // manapi::async::current()->etaskpool()->append_static_task([s, flags] () mutable -> void {
 //    //     if (s) {
 //            // auto const data = s->as<quic_stream_t>();
@@ -910,10 +910,10 @@
 //            }
 //    //     }
 //    // });
-//    // MANAPIHTTP_MUST_ALLOC_END
+//    // MANAPICORE_MUST_ALLOC_END
 //}
 //
-//void manapi::net::worker::openssl_quic::rst_stream(shared_conn s) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::rst_stream(shared_conn s) MANAPICORE_NOEXCEPT {
 //    auto data = s->as<quic_stream_t>();
 //    assert(data);
 //
@@ -922,12 +922,12 @@
 //    this->close_stream(s, CLOSE_CONN_ERR);
 //}
 //
-//manapi::net::worker::connection::ipdata_t * manapi::net::worker::openssl_quic::ipdata(worker::connection *conn) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::connection::ipdata_t * manapi::net::worker::openssl_quic::ipdata(worker::connection *conn) MANAPICORE_NOEXCEPT {
 //    auto const s = conn->as<quic_stream_t>();
 //    return base::ipdata(s->parent);
 //}
 //
-//manapi::status_or<manapi::net::worker::shared_conn> manapi::net::worker::openssl_quic::new_stream(const shared_conn &conn, int flags) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<manapi::net::worker::shared_conn> manapi::net::worker::openssl_quic::new_stream(const shared_conn &conn, int flags) MANAPICORE_NOEXCEPT {
 //    try {
 //        if (!conn)
 //            goto args;
@@ -971,11 +971,11 @@
 //    args: return status_invalid_argument("new_stream");
 //}
 //
-//int64_t manapi::net::worker::openssl_quic::stream_id(const shared_conn &s) MANAPIHTTP_NOEXCEPT {
+//int64_t manapi::net::worker::openssl_quic::stream_id(const shared_conn &s) MANAPICORE_NOEXCEPT {
 //    return static_cast<int64_t>(SSL_get_stream_id(s->as<quic_stream_t>()->stream));
 //}
 //
-//manapi::net::worker::shared_conn manapi::net::worker::openssl_quic::stream_id(const shared_conn &conn, int64_t id) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::shared_conn manapi::net::worker::openssl_quic::stream_id(const shared_conn &conn, int64_t id) MANAPICORE_NOEXCEPT {
 //    assert(!(conn->wrk.flags & WRK_INTERFACE_IS_STREAM));
 //    auto const data = conn->as<quic_conn_t>();
 //    auto it = data->streams.find(id);
@@ -984,12 +984,12 @@
 //    return it->second;
 //}
 //
-//std::size_t manapi::net::worker::openssl_quic::streams_size(const shared_conn &conn) const MANAPIHTTP_NOEXCEPT {
+//std::size_t manapi::net::worker::openssl_quic::streams_size(const shared_conn &conn) const MANAPICORE_NOEXCEPT {
 //    assert(conn && !(conn->wrk.flags & WRK_INTERFACE_IS_STREAM));
 //    return conn->as<quic_conn_t>()->streams_size;
 //}
 //
-//void manapi::net::worker::openssl_quic::bio_flush_write() MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::bio_flush_write() MANAPICORE_NOEXCEPT {
 //    ERR_clear_error();
 //    try {
 //        char buffer[4096];
@@ -1083,7 +1083,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::openssl_quic::remove_poll_id(std::size_t poll_id) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::remove_poll_id(std::size_t poll_id) MANAPICORE_NOEXCEPT {
 //    if (this->m_flags & CONN_QUIC_WORKER_POLL_LOOP) {
 //        assert(this->m_polls.size() > poll_id);
 //
@@ -1133,11 +1133,11 @@
 //    }
 //}
 //
-//void manapi::net::worker::openssl_quic::flush_read(const shared_conn &conn, quic_stream_t *data) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::flush_read(const shared_conn &conn, quic_stream_t *data) MANAPICORE_NOEXCEPT {
 //    return prepared::flush_read(this, conn, data);
 //}
 //
-//void manapi::net::worker::openssl_quic::flush_write(const shared_conn &conn, quic_stream_t *data) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::flush_write(const shared_conn &conn, quic_stream_t *data) MANAPICORE_NOEXCEPT {
 //    while (data->top->send.last_deque) {
 //        std::size_t flags = 0;
 //        bool const last = data->top->send.deque.get() == data->top->send.last_deque;
@@ -1228,7 +1228,7 @@
 //        this->feed_event(conn, ev::WRITE, nullptr, 0, nullptr);
 //}
 //
-//void manapi::net::worker::openssl_quic::update_limit_rate() MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::update_limit_rate() MANAPICORE_NOEXCEPT {
 //    this->bio_flush_write ();
 //
 //    /* in event loop */
@@ -1254,7 +1254,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::openssl_quic::update_limit_rate_connection(const shared_conn &sconn) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::update_limit_rate_connection(const shared_conn &sconn) MANAPICORE_NOEXCEPT {
 //    auto conn_data = sconn->as<quic_conn_t>();
 //    auto &config = this->m_config;
 //
@@ -1344,7 +1344,7 @@
 //    conn_data->transfered = 0;
 //}
 //
-//void manapi::net::worker::openssl_quic::stream_interface_eraser(worker::connection *n) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::stream_interface_eraser(worker::connection *n) MANAPICORE_NOEXCEPT {
 //    if (!n)
 //        return;
 //
@@ -1385,7 +1385,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::openssl_quic::connection_interface_eraser(worker::connection *n) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::connection_interface_eraser(worker::connection *n) MANAPICORE_NOEXCEPT {
 //    if (!n)
 //        return;
 //
@@ -1409,7 +1409,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::openssl_quic::timeout_event_cb(uv_timer_t *s) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::timeout_event_cb(uv_timer_t *s) MANAPICORE_NOEXCEPT {
 //    try {
 //        auto w = static_cast<openssl_quic *>(s->data);
 //        if (w->m_udp_accept)
@@ -1748,7 +1748,7 @@
 //    this->bio_flush_write ();
 //}
 //
-//void manapi::net::worker::openssl_quic::io_unbind_cb(ev::handle *s) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::io_unbind_cb(ev::handle *s) MANAPICORE_NOEXCEPT {
 //
 //    auto w = static_cast<openssl_quic *>(s->data);
 //    assert (!!w);
@@ -1757,7 +1757,7 @@
 //    w->m_token.unref();
 //}
 //
-//manapi::status_or<manapi::net::worker::shared_conn> manapi::net::worker::openssl_quic::stream_accept(const shared_conn &conn, SSL *stream, int flags) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<manapi::net::worker::shared_conn> manapi::net::worker::openssl_quic::stream_accept(const shared_conn &conn, SSL *stream, int flags) MANAPICORE_NOEXCEPT {
 //    shared_conn stream_conn;
 //    try {
 //        if (!conn->wrk.data) {
@@ -1855,7 +1855,7 @@
 //    return status_internal("openssl_quic:stream_accept");
 //}
 //
-//void manapi::net::worker::openssl_quic::stream_processing(const shared_conn &s) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::stream_processing(const shared_conn &s) MANAPICORE_NOEXCEPT {
 //    auto sn = s->as<quic_stream_t>();
 //
 //    if (sn->flags & ev::DISCONNECT)
@@ -1911,7 +1911,7 @@
 //        this->feed_event(s, ev::WRITE, nullptr, 0, nullptr);
 //}
 //
-//manapi::status_or<manapi::net::worker::shared_conn> manapi::net::worker::openssl_quic::conn_accept(SSL *client, const sockaddr *addr) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<manapi::net::worker::shared_conn> manapi::net::worker::openssl_quic::conn_accept(SSL *client, const sockaddr *addr) MANAPICORE_NOEXCEPT {
 //    shared_conn conn;
 //    quic_conn_t *sn;
 //    try {
@@ -2014,7 +2014,7 @@
 //    return std::move(conn);
 //}
 //
-//void manapi::net::worker::openssl_quic::conn_processing(SSL *client) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::openssl_quic::conn_processing(SSL *client) MANAPICORE_NOEXCEPT {
 //    auto app_data = SSL_get_app_data(client);
 //    shared_conn conn;
 //    quic_conn_t *sn;
@@ -2091,7 +2091,7 @@
 //    }
 //}
 //
-//int manapi::net::worker::openssl_quic::try_init_conn(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::openssl_quic::try_init_conn(const shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    if (!conn->wrk.data) {
 //        if (this->event_flags(conn) & (CONN_CLOSED))
 //            return ERR_INTERNAL;

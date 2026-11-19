@@ -14,7 +14,7 @@ const char error_label[] = "ERROR";
 
 
 
-static const char default_service[] = "manapihttp";
+static const char default_service[] = "manapicore";
 
 static std::mutex sync_mx_locker;
 
@@ -47,11 +47,11 @@ manapi::logger::logger(std::string service, std::shared_ptr<data_t> data) {
 
 manapi::logger::~logger() = default;
 
-manapi::logger::logger(logger &&n) MANAPIHTTP_NOEXCEPT {
+manapi::logger::logger(logger &&n) MANAPICORE_NOEXCEPT {
     this->m_data = std::move(n.m_data);
 }
 
-manapi::logger & manapi::logger::operator=(logger &&n) MANAPIHTTP_NOEXCEPT {
+manapi::logger & manapi::logger::operator=(logger &&n) MANAPICORE_NOEXCEPT {
     if (this != &n) {
         this->m_data = std::move(n.m_data);
     }
@@ -71,7 +71,7 @@ void manapi::logger::callback(callback_t callback) {
     this->m_data->callback = std::move(callback);
 }
 
-void manapi::logger::callback(logger_type type, std::string_view service, int error_code, std::string msg) MANAPIHTTP_NOEXCEPT {
+void manapi::logger::callback(logger_type type, std::string_view service, int error_code, std::string msg) MANAPICORE_NOEXCEPT {
     try {
         if (this->m_data)
             this->m_data->callback (type, service, error_code, std::move(msg));
@@ -81,7 +81,7 @@ void manapi::logger::callback(logger_type type, std::string_view service, int er
     }
 }
 
-void manapi::logger::fcallback(logger_type type, std::string_view service, int error_code, const char *fmt, va_list args) MANAPIHTTP_NOEXCEPT {
+void manapi::logger::fcallback(logger_type type, std::string_view service, int error_code, const char *fmt, va_list args) MANAPICORE_NOEXCEPT {
     try {
         if (this->m_data) {
             va_list args_copy;
@@ -106,28 +106,28 @@ std::shared_ptr<manapi::logger> manapi::logger::create(std::string service) {
     return std::make_shared<logger>(std::move(service), this->m_data);
 }
 
-void manapi::logger::fsdebug(std::string_view service, const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
+void manapi::logger::fsdebug(std::string_view service, const char *fmt, ...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     fcallback (logger_type::LOGGER_DEBUG, service, 0, fmt, args);
     va_end(args);
 }
 
-void manapi::logger::fserror(std::string_view service, int error_code, const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
+void manapi::logger::fserror(std::string_view service, int error_code, const char *fmt, ...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     fcallback (logger_type::LOGGER_ERROR, service, error_code, fmt, args);
     va_end(args);
 }
 
-void manapi::logger::fswarning(std::string_view service, const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
+void manapi::logger::fswarning(std::string_view service, const char *fmt, ...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     fcallback (logger_type::LOGGER_WARNING, service, 0, fmt, args);
     va_end(args);
 }
 
-void manapi::logger::fdebug(const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
+void manapi::logger::fdebug(const char *fmt, ...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     fcallback (logger_type::LOGGER_DEBUG, this->m_service, 0, fmt, args);
@@ -135,14 +135,14 @@ void manapi::logger::fdebug(const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
 
 }
 
-void manapi::logger::ferror(int error_code, const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
+void manapi::logger::ferror(int error_code, const char *fmt, ...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     fcallback (logger_type::LOGGER_ERROR, this->m_service, error_code, fmt, args);
     va_end(args);
 }
 
-void manapi::logger::fwarning(const char *fmt, ...) MANAPIHTTP_NOEXCEPT {
+void manapi::logger::fwarning(const char *fmt, ...) MANAPICORE_NOEXCEPT {
     va_list args;
     va_start(args, fmt);
     fcallback (logger_type::LOGGER_WARNING, this->m_service, 0, fmt, args);

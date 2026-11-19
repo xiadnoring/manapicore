@@ -283,7 +283,7 @@ static bool json_builder_check_type(manapi::json_builder::data_t *data, const ma
         if (data->state == JSON_CALLBACK_BUILD_NUMERIC) {
             if (
                 type == manapi::json::type_decimal ||
-    #ifdef MANAPIHTTP_BIGINT_SUPPORT
+    #ifdef MANAPICORE_BIGINT_SUPPORT
                 type == manapi::json::type_bigint ||
     #endif
                 type == manapi::json::type_integer ||
@@ -511,7 +511,7 @@ static bool json_builder_check_max_mean(manapi::json_builder::data_t *data, mana
                 if (manapi::json_verify_max_mean(z->flags, z->max_mean, path.p->as_integer()))
                     return true;
             break;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
             case manapi::json::type_bigint:
                 if (manapi::json_verify_max_mean(z->flags, z->max_mean, path.p->as_bigint()))
                     return true;
@@ -554,7 +554,7 @@ static bool json_builder_check_min_mean(manapi::json_builder::data_t *data, mana
                 if (manapi::json_verify_min_mean(z->flags, z->max_mean, path.p->as_integer()))
                     goto ok;
             break;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
             case manapi::json::type_bigint:
                 if (manapi::json_verify_min_mean(z->flags, z->max_mean, path.p->as_bigint()))
                     goto ok;

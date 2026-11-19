@@ -8,6 +8,7 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 
 #include "./ManapiUtils.hpp"
 
@@ -22,7 +23,7 @@ namespace manapi::math {
      * @param n the power
      * @return a raised to the power of n
      */
-    int64_t binpow(int64_t a, int n) MANAPIHTTP_NOEXCEPT;
+    int64_t binpow(int64_t a, int n) MANAPICORE_NOEXCEPT;
 
     /**
      * Get a random integer between nmin and nmax, inclusive
@@ -31,7 +32,7 @@ namespace manapi::math {
      * @param nmax maximum limit
      * @return the randomly generated integer
      */
-    size_t random (size_t nmin, size_t nmax) MANAPIHTTP_NOEXCEPT;
+    size_t random (size_t nmin, size_t nmax) MANAPICORE_NOEXCEPT;
 
     /**
      * Get a random integer between nmin and nmax, inclusive
@@ -40,7 +41,7 @@ namespace manapi::math {
      * @param nmax maximum limit
      * @return the randomly generated integer
      */
-    uint64_t random64 (uint64_t nmin, uint64_t nmax) MANAPIHTTP_NOEXCEPT;
+    uint64_t random64 (uint64_t nmin, uint64_t nmax) MANAPICORE_NOEXCEPT;
 
     /**
      * Get a random integer between nmin and nmax, inclusive
@@ -49,5 +50,5 @@ namespace manapi::math {
      * @param nmax maximum limit
      * @return the randomly generated integer
      */
-    uint32_t random32 (uint32_t nmin, uint32_t nmax) MANAPIHTTP_NOEXCEPT;
+    uint32_t random32 (uint32_t nmin, uint32_t nmax) MANAPICORE_NOEXCEPT;
 }

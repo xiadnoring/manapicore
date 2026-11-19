@@ -18,9 +18,9 @@ namespace manapi {
 
         manapi::future<manapi::status> send (manapi::slice &&z, bool fin);
 
-        MANAPIHTTP_NODISCARD bool is_finished () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_finished () const MANAPICORE_NOEXCEPT;
 
-        void finish () MANAPIHTTP_NOEXCEPT;
+        void finish () MANAPICORE_NOEXCEPT;
     private:
         std::shared_ptr<channel_data_t> m_data;
     };
@@ -33,9 +33,9 @@ namespace manapi {
 
         manapi::future<manapi::status_or<manapi::slice>> recv (ssize_t max_size = -1);
 
-        MANAPIHTTP_NODISCARD bool is_finished () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_finished () const MANAPICORE_NOEXCEPT;
 
-        void finish () MANAPIHTTP_NOEXCEPT;
+        void finish () MANAPICORE_NOEXCEPT;
     private:
         std::shared_ptr<channel_data_t> m_data;
     };

@@ -3,8 +3,8 @@ project(Test)
 
 set(CMAKE_CXX_STANDARD 23)
 
-find_package(manapihttp REQUIRED)
+find_package(manapicore REQUIRED)
 
 add_executable(${PROJECT_NAME} 00-main.cpp)
 
-target_link_libraries(${PROJECT_NAME} manapihttp)
+target_link_libraries(${PROJECT_NAME} manapicore)

@@ -36,7 +36,7 @@ namespace manapi::async {
                 }
             }
 
-            MANAPIHTTP_NODISCARD bool some () const MANAPIHTTP_NOEXCEPT {
+            MANAPICORE_NODISCARD bool some () const MANAPICORE_NOEXCEPT {
                 return this->value.has_value();
             }
 
@@ -63,7 +63,7 @@ namespace manapi::async {
             this->st = std::move(st);
         }
 
-        static manapi::status_or<std::shared_ptr<parallel_run>> create (manapi::reference<parallel_t> st) MANAPIHTTP_NOEXCEPT {
+        static manapi::status_or<std::shared_ptr<parallel_run>> create (manapi::reference<parallel_t> st) MANAPICORE_NOEXCEPT {
             try {
                 return std::make_shared<parallel_run>(std::move(st));
             }
@@ -72,7 +72,7 @@ namespace manapi::async {
             }
         }
 
-        static manapi::status_or<std::shared_ptr<parallel_run>> create (manapi::reference<parallel_t> st, manapi::future<T> task) MANAPIHTTP_NOEXCEPT {
+        static manapi::status_or<std::shared_ptr<parallel_run>> create (manapi::reference<parallel_t> st, manapi::future<T> task) MANAPICORE_NOEXCEPT {
             try {
                 auto z = std::make_shared<parallel_run>(std::move(st));
                 z->run(std::move(task));
@@ -87,22 +87,22 @@ namespace manapi::async {
 
         manapi::status run (manapi::future<T> task);
 
-        MANAPIHTTP_NODISCARD manapi::future<manapi::status_or<T>> get () {
+        MANAPICORE_NODISCARD manapi::future<manapi::status_or<T>> get () {
             auto lk = co_await this->mx.lock_guard();
             co_return this->value.get();
         }
 
-        MANAPIHTTP_NODISCARD manapi::future<T> get_or (T &&v) {
+        MANAPICORE_NODISCARD manapi::future<T> get_or (T &&v) {
             auto lk = co_await this->mx.lock_guard();
             co_return this->value.get_or(std::forward<decltype(v)>(v));
         }
 
-        MANAPIHTTP_NODISCARD manapi::future<T> get_or (const T &v) {
+        MANAPICORE_NODISCARD manapi::future<T> get_or (const T &v) {
             auto lk = co_await this->mx.lock_guard();
             co_return this->value.get_or(T (v));
         }
 
-        MANAPIHTTP_NODISCARD bool some () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD bool some () const MANAPICORE_NOEXCEPT {
             return this->value.some();
         }
     private:
@@ -134,7 +134,7 @@ namespace manapi::async {
             this->st = std::move(st);
         }
 
-        static manapi::status_or<std::shared_ptr<parallel_run>> create (manapi::reference<parallel_t> st) MANAPIHTTP_NOEXCEPT {
+        static manapi::status_or<std::shared_ptr<parallel_run>> create (manapi::reference<parallel_t> st) MANAPICORE_NOEXCEPT {
             try {
                 return std::make_shared<parallel_run>(std::move(st));
             }
@@ -143,7 +143,7 @@ namespace manapi::async {
             }
         }
 
-        static manapi::status_or<std::shared_ptr<parallel_run>> create (manapi::reference<parallel_t> st, manapi::future<> task) MANAPIHTTP_NOEXCEPT {
+        static manapi::status_or<std::shared_ptr<parallel_run>> create (manapi::reference<parallel_t> st, manapi::future<> task) MANAPICORE_NOEXCEPT {
             try {
                 auto z = std::make_shared<parallel_run>(std::move(st));
                 z->run(std::move(task));
@@ -158,7 +158,7 @@ namespace manapi::async {
 
         manapi::status run (manapi::future<> task);
 
-        MANAPIHTTP_NODISCARD manapi::future<> get () {
+        MANAPICORE_NODISCARD manapi::future<> get () {
             auto lk = co_await this->mx.lock_guard();
         }
     private:

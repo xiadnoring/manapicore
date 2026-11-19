@@ -8,7 +8,7 @@
 //
 //extern manapi::net::worker::http_v2_callbacks_t default_wrk_http2_callbacks;
 //
-//int default_wrk_http2_cleanup (manapi::net::worker::connection *conn, manapi::net::worker::wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//int default_wrk_http2_cleanup (manapi::net::worker::connection *conn, manapi::net::worker::wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    auto wrk_data = static_cast<manapi::net::worker::wrk_http2_ctx_t *>(conn->wrk.data);
 //    delete wrk_data;
 //    conn->wrk.flags = 0;
@@ -16,8 +16,8 @@
 //    return 0;
 //}
 //
-//static void wrk_close_conn2 ( manapi::net::worker::shared_conn conn, manapi::net::worker::shared_conn sconn, manapi::net::worker::base *w, bool ok) MANAPIHTTP_NOEXCEPT {
-//    //MANAPIHTTP_MUST_ALLOC_START
+//static void wrk_close_conn2 ( manapi::net::worker::shared_conn conn, manapi::net::worker::shared_conn sconn, manapi::net::worker::base *w, bool ok) MANAPICORE_NOEXCEPT {
+//    //MANAPICORE_MUST_ALLOC_START
 //    // manapi::async::current()->etaskpool()->append_static_task(
 //    //     [w, ok, conn = std::move(conn), sconn = std::move(sconn)] () -> void {
 //            auto const sdata = sconn->as<manapi::net::http::http_v2_stream_t>();
@@ -40,10 +40,10 @@
 //                }
 //            }
 //    // });
-//    // MANAPIHTTP_MUST_ALLOC_END
+//    // MANAPICORE_MUST_ALLOC_END
 //}
 //
-//static int default_wrk_http2(const manapi::net::worker::shared_conn &conn, int flags, const char *buffer, std::size_t nsize, manapi::net::worker::ibuffpool_t *p, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http2(const manapi::net::worker::shared_conn &conn, int flags, const char *buffer, std::size_t nsize, manapi::net::worker::ibuffpool_t *p, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPICORE_NOEXCEPT {
 //    auto wrk_ctx = static_cast<manapi::net::worker::wrk_http2_ctx_t *> (conn->wrk.data);
 //    auto http_v2_ctx = wrk_ctx->ctx.get();
 //
@@ -180,7 +180,7 @@
 //    return 0;
 //}
 //
-//int default_wrk_http2_init (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPIHTTP_NOEXCEPT {
+//int default_wrk_http2_init (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPICORE_NOEXCEPT {
 //    try {
 //        assert(!conn->wrk.data);
 //
@@ -215,7 +215,7 @@
 //    return manapi::ERR_UNKNOWN;
 //}
 //
-//void default_wrk_http2_update_limit_rate (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//void default_wrk_http2_update_limit_rate (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    auto const http_v2_ctx = static_cast<manapi::net::worker::wrk_http2_ctx_t *> (conn->wrk.data);
 //    try {
 //        for (auto it = http_v2_ctx->ctx->streams.begin(); it != http_v2_ctx->ctx->streams.end(); ) {
@@ -234,7 +234,7 @@
 //    }
 //}
 //
-//int default_wrk_http2_global_cleanup (manapi::net::worker::wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT {
+//int default_wrk_http2_global_cleanup (manapi::net::worker::wrk_interface_global_t *data) MANAPICORE_NOEXCEPT {
 //    auto ctx = static_cast<manapi::net::worker::wrk_http2_ctx_global_t *> (data->data);
 //    delete ctx;
 //    data->data = nullptr;
@@ -266,7 +266,7 @@
 //    return status_ok();
 //}
 //
-//bool default_wrk_http2_is_writable (const manapi::net::worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//bool default_wrk_http2_is_writable (const manapi::net::worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    auto s = conn->as<manapi::net::http::http_v2_stream_t>();
 //    // if (s->flags & manapi::net::http::HTTP2_STREAM_PRIORITY_LOCKED)
 //    //     return false;
@@ -276,13 +276,13 @@
 //    return true;
 //}
 //
-//int default_wrk_http2_want_write (const manapi::net::worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int default_wrk_http2_want_write (const manapi::net::worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    auto s = conn->as<manapi::net::http::http_v2_stream_t>();
 //    s->ctx->worker->event_toggle(s->ctx->conn, true, manapi::ev::WRITE);
 //    return 0;
 //}
 //
-//manapi::net::worker::connection::ipdata_t * default_wrk_http2_ipdata (manapi::net::worker::connection *conn) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::connection::ipdata_t * default_wrk_http2_ipdata (manapi::net::worker::connection *conn) MANAPICORE_NOEXCEPT {
 //    auto s = conn->as<manapi::net::http::http_v2_stream_t>();
 //    return s->ctx->worker->ipdata(s->ctx->conn.get());
 //}

@@ -48,11 +48,11 @@ manapi::fs::fstream::fstream(manapi::ev::file path, bool own, manapi::ctoken can
     if (own) this->m_data->status |= FILE_OWN_FD;
 }
 
-manapi::fs::fstream::operator bool() const MANAPIHTTP_NOEXCEPT {
+manapi::fs::fstream::operator bool() const MANAPICORE_NOEXCEPT {
     return !!this->m_data;
 }
 
-manapi::status_or<std::shared_ptr<manapi::fs::fstream>> manapi::fs::fstream::create(std::string path, ctoken cancellation) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::shared_ptr<manapi::fs::fstream>> manapi::fs::fstream::create(std::string path, ctoken cancellation) MANAPICORE_NOEXCEPT {
     try {
         return std::shared_ptr<manapi::fs::fstream> (new manapi::fs::fstream(std::move(path), std::move(cancellation)));
     }
@@ -318,7 +318,7 @@ bool manapi::fs::fstream::eof() const {
 }
 
 manapi::status_or<std::shared_ptr<manapi::fs::fstream>>
-manapi::fs::fstream::create(manapi::ev::unique_file fd, manapi::ctoken cancellation) MANAPIHTTP_NOEXCEPT {
+manapi::fs::fstream::create(manapi::ev::unique_file fd, manapi::ctoken cancellation) MANAPICORE_NOEXCEPT {
     try {
         return std::shared_ptr<manapi::fs::fstream> (new manapi::fs::fstream(std::move(fd), std::move(cancellation)));
     }
@@ -328,7 +328,7 @@ manapi::fs::fstream::create(manapi::ev::unique_file fd, manapi::ctoken cancellat
 }
 
 manapi::status_or<std::shared_ptr<manapi::fs::fstream>>
-manapi::fs::fstream::create(manapi::ev::file fd, bool own, manapi::ctoken cancellation) MANAPIHTTP_NOEXCEPT {
+manapi::fs::fstream::create(manapi::ev::file fd, bool own, manapi::ctoken cancellation) MANAPICORE_NOEXCEPT {
     try {
         return std::shared_ptr<manapi::fs::fstream> (new manapi::fs::fstream(fd, own, std::move(cancellation)));
     }

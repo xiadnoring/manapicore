@@ -87,7 +87,7 @@ namespace manapi::net::http {
 //
 //    void request_data_clear (request_data_t &data);
 //
-    manapi::status_or<std::vector <header_value_t>> parse_header_value (std::string_view header_value) MANAPIHTTP_NOEXCEPT;
+    manapi::status_or<std::vector <header_value_t>> parse_header_value (std::string_view header_value) MANAPICORE_NOEXCEPT;
 
     manapi::status_or<std::pair<std::string_view, std::string_view>> parse_header (std::string_view header);
 
@@ -101,7 +101,7 @@ namespace manapi::net::http {
 //
 //    int version_ip_by_addr (const sockaddr *addr);
 //
-    bool header_has_more_fields (std::string_view name) MANAPIHTTP_NOEXCEPT;
+    bool header_has_more_fields (std::string_view name) MANAPICORE_NOEXCEPT;
 //
 //    status_or<std::pair<std::string, uint16_t>> strinfigy_ip (const sockaddr *addr);
 //

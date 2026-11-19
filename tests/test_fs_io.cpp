@@ -35,4 +35,4 @@ UTEST(fs, unique_file) {
     wait_ctx(ctx);
 }
 
-MANAPIHTTP_TESTS_MAIN
+MANAPICORE_TESTS_MAIN

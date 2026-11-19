@@ -33,11 +33,11 @@ manapi::ev::status manapi::cthread::start() {
     return ev::status_ok();
 }
 
-void manapi::cthread::send_stop(manapi::stoken token) MANAPIHTTP_NOEXCEPT {
+void manapi::cthread::send_stop(manapi::stoken token) MANAPICORE_NOEXCEPT {
     this->m_eventloop->send_stop(std::move(token));
 }
 
-const std::shared_ptr<manapi::event_loop> & manapi::cthread::eventloop() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::event_loop> & manapi::cthread::eventloop() MANAPICORE_NOEXCEPT {
     return this->m_eventloop;
 }
 
@@ -45,19 +45,19 @@ const manapi::async::shared_mthreadpool& manapi::cthread::threadpool() {
     return this->m_taskpool;
 }
 
-const std::shared_ptr<manapi::timer_pool> & manapi::cthread::timerpool() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::timer_pool> & manapi::cthread::timerpool() MANAPICORE_NOEXCEPT {
     return this->m_timerpool;
 }
 
-const manapi::async::shared_etaskpool & manapi::cthread::etaskpool() MANAPIHTTP_NOEXCEPT {
+const manapi::async::shared_etaskpool & manapi::cthread::etaskpool() MANAPICORE_NOEXCEPT {
     return this->m_eventloop->taskpool();
 }
 
-const std::shared_ptr<manapi::logger> & manapi::cthread::logger() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::logger> & manapi::cthread::logger() MANAPICORE_NOEXCEPT {
     return this->m_logger;
 }
 
-const manapi::async::shared_memory_fabric & manapi::cthread::memory_fabric() MANAPIHTTP_NOEXCEPT {
+const manapi::async::shared_memory_fabric & manapi::cthread::memory_fabric() MANAPICORE_NOEXCEPT {
     return this->m_memory_fabric;
 }
 
@@ -75,7 +75,7 @@ manapi::context::context(async::shared_eventloop eventloop, async::shared_mthrea
 
 }
 
-manapi::status_or<manapi::async::shared_ctx> manapi::context::create(std::size_t threadnum) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<manapi::async::shared_ctx> manapi::context::create(std::size_t threadnum) MANAPICORE_NOEXCEPT {
     try {
         auto logger = std::make_shared<manapi::logger>();
         auto taskpool = std::make_shared<manapi::mthread_pool>(threadnum);
@@ -96,7 +96,7 @@ manapi::status_or<manapi::async::shared_ctx> manapi::context::create(std::size_t
     }
 }
 
-manapi::status manapi::context::run(std::size_t loops, std::function<void(std::function<void()> bind)> callback) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::context::run(std::size_t loops, std::function<void(std::function<void()> bind)> callback) MANAPICORE_NOEXCEPT {
     auto ctx = this->shared_from_this();
     if (!ctx) return manapi::status_not_found("context:not found");
 
@@ -169,7 +169,7 @@ manapi::status manapi::context::run(std::size_t loops, std::function<void(std::f
                     }
 
                     thr->timerpool()->stop();
-#if MANAPIHTTP_GRPC_DEPENDENCY
+#if MANAPICORE_GRPC_DEPENDENCY
                     thr->eventloop()->wait_all(false);
                     clear_tools::grpc_thread_clear();
                     thr->eventloop()->wait_all(true);
@@ -240,7 +240,7 @@ manapi::status manapi::context::run(std::size_t loops, std::function<void(std::f
 
         ctx->m_timerpool->stop();
 
-#if MANAPIHTTP_GRPC_DEPENDENCY
+#if MANAPICORE_GRPC_DEPENDENCY
         ctx->eventloop()->wait_all(false);
         clear_tools::grpc_thread_clear();
         ctx->eventloop()->wait_all(true);
@@ -267,14 +267,14 @@ void manapi::context::run(std::function<void(std::function<void()> bind)> callba
     this->run(0, std::move(callback));
 }
 
-void manapi::context::threadpoolfs(std::size_t cnt) MANAPIHTTP_NOEXCEPT {
+void manapi::context::threadpoolfs(std::size_t cnt) MANAPICORE_NOEXCEPT {
     auto s = std::to_string(cnt);
     if (auto rhs = uv_os_setenv("UV_THREADPOOL_SIZE", s.data())) {
         manapi_log_trace("%s failed due to %s", "ctx:set UV_THREADPOOL_SIZE", ev::strerror(rhs));
     }
 }
 
-std::unique_ptr<manapi::sigset_t> manapi::context::blockedsignals() MANAPIHTTP_NOEXCEPT {
+std::unique_ptr<manapi::sigset_t> manapi::context::blockedsignals() MANAPICORE_NOEXCEPT {
     auto blocked_signals = std::make_unique<manapi::sigset_t>();
 #if defined (__unix__) || defined(__APPLE__)
     sigemptyset(blocked_signals.get());
@@ -284,50 +284,50 @@ std::unique_ptr<manapi::sigset_t> manapi::context::blockedsignals() MANAPIHTTP_N
     return std::move(blocked_signals);
 }
 
-manapi::sigset_t *manapi::context::gbs () MANAPIHTTP_NOEXCEPT {
+manapi::sigset_t *manapi::context::gbs () MANAPICORE_NOEXCEPT {
     return manapi::context::m_gbs.get();
 }
 
-void manapi::context::gbs(std::unique_ptr<manapi::sigset_t> n) MANAPIHTTP_NOEXCEPT {
+void manapi::context::gbs(std::unique_ptr<manapi::sigset_t> n) MANAPICORE_NOEXCEPT {
     manapi::context::m_gbs = std::move(n);
 }
 
-const manapi::async::shared_cthread &manapi::async::current() MANAPIHTTP_NOEXCEPT {
+const manapi::async::shared_cthread &manapi::async::current() MANAPICORE_NOEXCEPT {
     assert(manapi::async::context_exists() && "context doesn't exist in that thread");
     return manapi::async::try_current();
 }
 
-const std::shared_ptr<manapi::event_loop> & manapi::async::eventloop() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::event_loop> & manapi::async::eventloop() MANAPICORE_NOEXCEPT {
     return manapi::async::current()->eventloop();
 }
 
-const std::shared_ptr<manapi::timer_pool> & manapi::async::timerpool() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::timer_pool> & manapi::async::timerpool() MANAPICORE_NOEXCEPT {
     return manapi::async::current()->timerpool();
 }
 
-const std::shared_ptr<manapi::ethread_pool> & manapi::async::etaskpool() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::ethread_pool> & manapi::async::etaskpool() MANAPICORE_NOEXCEPT {
     return manapi::async::current()->etaskpool();
 }
 
-const manapi::async::shared_mthreadpool & manapi::async::mtaskpool() MANAPIHTTP_NOEXCEPT {
+const manapi::async::shared_mthreadpool & manapi::async::mtaskpool() MANAPICORE_NOEXCEPT {
     return manapi::async::current()->threadpool();
 }
 
-const std::shared_ptr<manapi::object_pool>& manapi::async::memory_fabric() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::object_pool>& manapi::async::memory_fabric() MANAPICORE_NOEXCEPT {
     return manapi::async::current()->memory_fabric();
 }
 
-const std::shared_ptr<manapi::logger> & manapi::async::log() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::logger> & manapi::async::log() MANAPICORE_NOEXCEPT {
     return manapi::async::current()->logger();
 }
 
 manapi::context::~context() = default;
 
-manapi::status_or<std::shared_ptr<manapi::context>> manapi::context::create() MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::shared_ptr<manapi::context>> manapi::context::create() MANAPICORE_NOEXCEPT {
     return context::create(std::thread::hardware_concurrency());
 }
 
-void manapi::async::internal::run_prepare_error_(std::exception_ptr err) MANAPIHTTP_NOEXCEPT {
+void manapi::async::internal::run_prepare_error_(std::exception_ptr err) MANAPICORE_NOEXCEPT {
     try {
         int errnum = manapi::ERR_OK;
         char errmsg[256];
@@ -342,12 +342,12 @@ void manapi::async::internal::run_prepare_error_(std::exception_ptr err) MANAPIH
 }
 
 
-void manapi::async::internal::run_prepare_std_exception_(std::exception const &e) MANAPIHTTP_NOEXCEPT {
+void manapi::async::internal::run_prepare_std_exception_(std::exception const &e) MANAPICORE_NOEXCEPT {
     manapi_log_error("ctx: unhandled exception: %d, %s", ERR_UNKNOWN, e.what());
 }
 
 
-void manapi::async::internal::run_prepare_manapi_exception_(manapi::exception &e) MANAPIHTTP_NOEXCEPT {
+void manapi::async::internal::run_prepare_manapi_exception_(manapi::exception &e) MANAPICORE_NOEXCEPT {
     manapi_log_error("ctx: unhandled exception: %d, %s", static_cast<int>(e.err_num()), e.what());
 }
 

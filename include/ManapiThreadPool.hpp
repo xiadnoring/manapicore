@@ -32,25 +32,25 @@ namespace manapi {
 
         void clear();
 
-        void join() MANAPIHTTP_NOEXCEPT;
+        void join() MANAPICORE_NOEXCEPT;
 
         void for_all_threads (std::move_only_function<void(tasks_by_thread_t *)> &&cb);
 
-        void stop () MANAPIHTTP_NOEXCEPT;
+        void stop () MANAPICORE_NOEXCEPT;
 
-        void notify_all () MANAPIHTTP_NOEXCEPT;
+        void notify_all () MANAPICORE_NOEXCEPT;
 
         void start ();
 
         void append_task (std::move_only_function<void()>&& cb);
 
-        MANAPIHTTP_NODISCARD std::size_t size() const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD std::size_t size() const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD std::size_t tasks_size() const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD std::size_t tasks_size() const MANAPICORE_NOEXCEPT;
 
         void reserve_tasks(manapi::task_types type, std::size_t sz);
 
-        void release_task (std::move_only_function<void()>&& cb) MANAPIHTTP_NOEXCEPT;
+        void release_task (std::move_only_function<void()>&& cb) MANAPICORE_NOEXCEPT;
 
         void task ();
     private:
@@ -65,19 +65,19 @@ namespace manapi {
 
         ~ethread_pool ();
 
-        MANAPIHTTP_NODISCARD std::size_t tasks_size() const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD std::size_t tasks_size() const MANAPICORE_NOEXCEPT;
 
         void reserve_tasks (manapi::task_types type, std::size_t sz);
 
-        void release_tasks(manapi::task_types type, std::size_t sz) MANAPIHTTP_NOEXCEPT;
+        void release_tasks(manapi::task_types type, std::size_t sz) MANAPICORE_NOEXCEPT;
 
         bool try_task ();
 
-        void set_notify () MANAPIHTTP_NOEXCEPT;
+        void set_notify () MANAPICORE_NOEXCEPT;
 
-        void set_notify_cb (std::move_only_function<void()> ontask) MANAPIHTTP_NOEXCEPT;
+        void set_notify_cb (std::move_only_function<void()> ontask) MANAPICORE_NOEXCEPT;
 
-        void stop () MANAPIHTTP_NOEXCEPT;
+        void stop () MANAPICORE_NOEXCEPT;
 
         void start ();
 
@@ -85,7 +85,7 @@ namespace manapi {
 
         void append_task(const std::coroutine_handle<>& handle);
 
-        void join () MANAPIHTTP_NOEXCEPT;
+        void join () MANAPICORE_NOEXCEPT;
     private:
         std::unique_ptr<data_t> m_data;
     };

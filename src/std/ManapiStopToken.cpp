@@ -16,7 +16,7 @@ struct manapi::stoken::data_t {
     int flags;
 };
 
-static int manapi__stoken_ref (manapi::stoken::data_t *a) MANAPIHTTP_NOEXCEPT {
+static int manapi__stoken_ref (manapi::stoken::data_t *a) MANAPICORE_NOEXCEPT {
     if (a) {
         a->deps++;
         return manapi::ERR_OK;
@@ -24,7 +24,7 @@ static int manapi__stoken_ref (manapi::stoken::data_t *a) MANAPIHTTP_NOEXCEPT {
     return manapi::ERR_NOT_FOUND;
 }
 
-static void manapi__stoken_unref (manapi::stoken::data_t *&a) MANAPIHTTP_NOEXCEPT {
+static void manapi__stoken_unref (manapi::stoken::data_t *&a) MANAPICORE_NOEXCEPT {
     if (a && !--a->deps) {
         if (!!a->fin_cb) {
             if (a->flags & manapi::STOKEN_FLAG_IMMEDIATELY_CALL) {
@@ -41,7 +41,7 @@ static void manapi__stoken_unref (manapi::stoken::data_t *&a) MANAPIHTTP_NOEXCEP
     }
 }
 
-static void manapi__stoken_reset (manapi::stoken::data_t *&a, manapi::stoken::data_t *b) MANAPIHTTP_NOEXCEPT {
+static void manapi__stoken_reset (manapi::stoken::data_t *&a, manapi::stoken::data_t *b) MANAPICORE_NOEXCEPT {
     manapi__stoken_ref(b);
     manapi__stoken_unref (a);
 
@@ -69,12 +69,12 @@ manapi::stoken::~stoken() {
     ::manapi__stoken_reset (this->m_data, nullptr);
 }
 
-manapi::stoken::stoken(manapi::stoken &&n) MANAPIHTTP_NOEXCEPT {
+manapi::stoken::stoken(manapi::stoken &&n) MANAPICORE_NOEXCEPT {
     this->m_data = n.m_data;
     n.m_data = nullptr;
 }
 
-manapi::stoken &manapi::stoken::operator=(manapi::stoken &&n) MANAPIHTTP_NOEXCEPT {
+manapi::stoken &manapi::stoken::operator=(manapi::stoken &&n) MANAPICORE_NOEXCEPT {
     if (this != &n) {
         ::manapi__stoken_reset (this->m_data, n.m_data);
         n.reset();
@@ -82,38 +82,38 @@ manapi::stoken &manapi::stoken::operator=(manapi::stoken &&n) MANAPIHTTP_NOEXCEP
     return *this;
 }
 
-manapi::stoken::stoken(const manapi::stoken &n) MANAPIHTTP_NOEXCEPT {
+manapi::stoken::stoken(const manapi::stoken &n) MANAPICORE_NOEXCEPT {
     this->m_data = n.m_data;
     manapi__stoken_ref (this->m_data);
 }
 
-manapi::stoken &manapi::stoken::operator=(const manapi::stoken &n) MANAPIHTTP_NOEXCEPT {
+manapi::stoken &manapi::stoken::operator=(const manapi::stoken &n) MANAPICORE_NOEXCEPT {
     if (this != &n) {
         ::manapi__stoken_reset (this->m_data, n.m_data);
     }
     return *this;
 }
 
-int manapi::stoken::ref() MANAPIHTTP_NOEXCEPT {
+int manapi::stoken::ref() MANAPICORE_NOEXCEPT {
     return manapi__stoken_ref (this->m_data);
 }
 
-void manapi::stoken::unref() MANAPIHTTP_NOEXCEPT {
+void manapi::stoken::unref() MANAPICORE_NOEXCEPT {
     manapi__stoken_unref(this->m_data);
 }
 
-void manapi::stoken::reset() MANAPIHTTP_NOEXCEPT {
+void manapi::stoken::reset() MANAPICORE_NOEXCEPT {
     ::manapi__stoken_reset (this->m_data, nullptr);
 }
 
-std::size_t manapi::stoken::count() const MANAPIHTTP_NOEXCEPT {
+std::size_t manapi::stoken::count() const MANAPICORE_NOEXCEPT {
     if (this->m_data)
         return this->m_data->deps;
 
     return 0;
 }
 
-manapi::stoken *manapi::stoken::next(const manapi::stoken &token) MANAPIHTTP_NOEXCEPT {
+manapi::stoken *manapi::stoken::next(const manapi::stoken &token) MANAPICORE_NOEXCEPT {
     if (this->m_data) {
         if (token.m_data) {
             assert(!this->m_data->next);
@@ -126,12 +126,12 @@ manapi::stoken *manapi::stoken::next(const manapi::stoken &token) MANAPIHTTP_NOE
     return nullptr;
 }
 
-void manapi::stoken::clear() MANAPIHTTP_NOEXCEPT {
+void manapi::stoken::clear() MANAPICORE_NOEXCEPT {
     if (this->m_data)
         this->m_data->fin_cb = nullptr;
 }
 
-manapi::stoken::operator bool() const MANAPIHTTP_NOEXCEPT {
+manapi::stoken::operator bool() const MANAPICORE_NOEXCEPT {
     return !!this->m_data;
 }
 

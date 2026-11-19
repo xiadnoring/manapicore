@@ -2,7 +2,7 @@
 //
 //#include "./ManapiUtils.hpp"
 //
-//#if MANAPIHTTP_GRPC_DEPENDENCY
+//#if MANAPICORE_GRPC_DEPENDENCY
 //
 //#include <grpcpp/ext/proto_server_reflection_plugin.h>
 //#include <grpcpp/grpcpp.h>
@@ -26,13 +26,13 @@
 //
 //        ~server_ctx();
 //
-//        static manapi::status_or<std::shared_ptr<server_ctx>> create () MANAPIHTTP_NOEXCEPT;
+//        static manapi::status_or<std::shared_ptr<server_ctx>> create () MANAPICORE_NOEXCEPT;
 //
 //        server_ctx::data_t &storage ();
 //
-//        manapi::status enable_threadpool (bool status) MANAPIHTTP_NOEXCEPT;
+//        manapi::status enable_threadpool (bool status) MANAPICORE_NOEXCEPT;
 //
-//        static void clean () MANAPIHTTP_NOEXCEPT;
+//        static void clean () MANAPICORE_NOEXCEPT;
 //    private:
 //        std::unique_ptr<data_t> m_data;
 //    };
@@ -43,7 +43,7 @@
 //
 //        server (std::shared_ptr<wgrpc::server_ctx> ctx);
 //
-//        static manapi::status_or<std::shared_ptr<server>> create (std::shared_ptr<wgrpc::server_ctx> ctx) MANAPIHTTP_NOEXCEPT;
+//        static manapi::status_or<std::shared_ptr<server>> create (std::shared_ptr<wgrpc::server_ctx> ctx) MANAPICORE_NOEXCEPT;
 //
 //        ~server();
 //

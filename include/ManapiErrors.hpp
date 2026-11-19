@@ -162,25 +162,25 @@ namespace manapi {
 
         ~messages();
 
-        messages (messages &&n) MANAPIHTTP_NOEXCEPT;
+        messages (messages &&n) MANAPICORE_NOEXCEPT;
 
-        messages& operator= (messages &&n) MANAPIHTTP_NOEXCEPT;
+        messages& operator= (messages &&n) MANAPICORE_NOEXCEPT;
 
         messages (const messages &n);
 
         messages& operator= (const messages &n);
 
-        void errnum (manapi::err_num code) MANAPIHTTP_NOEXCEPT;
+        void errnum (manapi::err_num code) MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD manapi::err_num errnum () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD manapi::err_num errnum () const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD std::string_view msg_view () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD std::string_view msg_view () const MANAPICORE_NOEXCEPT;
 
-        std::string msg () MANAPIHTTP_NOEXCEPT;
+        std::string msg () MANAPICORE_NOEXCEPT;
 
-        void msg_view (std::string_view msg) MANAPIHTTP_NOEXCEPT;
+        void msg_view (std::string_view msg) MANAPICORE_NOEXCEPT;
 
-        void msg (std::string msg) MANAPIHTTP_NOEXCEPT;
+        void msg (std::string msg) MANAPICORE_NOEXCEPT;
     private:
         messages_storage m_data;
         uint32_t m_errnum;
@@ -227,14 +227,14 @@ namespace manapi {
 
         ~exception() override;
 
-        MANAPIHTTP_NODISCARD const char * what() const MANAPIHTTP_NOEXCEPT override;
+        MANAPICORE_NODISCARD const char * what() const MANAPICORE_NOEXCEPT override;
 
         /**
          * Get the error code
          *
          * @return the error code
          */
-        MANAPIHTTP_NODISCARD manapi::err_num err_num () const;
+        MANAPICORE_NODISCARD manapi::err_num err_num () const;
     private:
         messages m_data;
     };
@@ -253,9 +253,9 @@ namespace manapi {
 
         status (err_num code, std::string msg);
 
-        status (status &&n) MANAPIHTTP_NOEXCEPT;
+        status (status &&n) MANAPICORE_NOEXCEPT;
 
-        status& operator= (status &&n) MANAPIHTTP_NOEXCEPT;
+        status& operator= (status &&n) MANAPICORE_NOEXCEPT;
 
         status (const status &n);
 
@@ -266,21 +266,21 @@ namespace manapi {
          *
          * @return the error message
          */
-        MANAPIHTTP_NODISCARD std::string_view msg () const;
+        MANAPICORE_NODISCARD std::string_view msg () const;
 
         /**
          * Get the error code from the status
          *
          * @return the error code
          */
-        MANAPIHTTP_NODISCARD err_num code () const;
+        MANAPICORE_NODISCARD err_num code () const;
 
         /**
          * Is there no error
          *
          * @return true if there's no error
          */
-        MANAPIHTTP_NODISCARD bool ok () const;
+        MANAPICORE_NODISCARD bool ok () const;
 
         /**
          * do log using the status
@@ -292,7 +292,7 @@ namespace manapi {
          *
          * @return the error code as a string
          */
-        MANAPIHTTP_NODISCARD std::string_view status_msg () const;
+        MANAPICORE_NODISCARD std::string_view status_msg () const;
 
         /**
          * If there is error it throws an exception
@@ -301,11 +301,11 @@ namespace manapi {
          */
         void unwrap () const;
 
-        MANAPIHTTP_NODISCARD virtual std::string fullmsg () const;
+        MANAPICORE_NODISCARD virtual std::string fullmsg () const;
 
-        void stacktrace () const MANAPIHTTP_NOEXCEPT;
+        void stacktrace () const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD operator bool () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD operator bool () const MANAPICORE_NOEXCEPT;
 
         void data (messages data);
 
@@ -328,16 +328,16 @@ namespace manapi {
 
         status_or (const E &st) : err_(st) {}
 
-        status_or(status_or &&n) MANAPIHTTP_NOEXCEPT = default;
+        status_or(status_or &&n) MANAPICORE_NOEXCEPT = default;
 
-        status_or&operator=(status_or &&n) MANAPIHTTP_NOEXCEPT = default;
+        status_or&operator=(status_or &&n) MANAPICORE_NOEXCEPT = default;
 
         /**
          * get the error code from the status
          *
          * @return the error code from the status
          */
-        MANAPIHTTP_NODISCARD manapi::err_num code () const {
+        MANAPICORE_NODISCARD manapi::err_num code () const {
             return this->err_.code();
         }
 
@@ -346,7 +346,7 @@ namespace manapi {
          *
          * @return the error code as a string
          */
-        MANAPIHTTP_NODISCARD std::string_view status_msg () const {
+        MANAPICORE_NODISCARD std::string_view status_msg () const {
             return this->err_.status_msg();
         }
 
@@ -355,7 +355,7 @@ namespace manapi {
          *
          * @return the error message
          */
-        MANAPIHTTP_NODISCARD std::string_view message () const {
+        MANAPICORE_NODISCARD std::string_view message () const {
             return this->err_.msg();
         }
 
@@ -376,7 +376,7 @@ namespace manapi {
          *
          * @return true if there's no error, otherwise it returns false
          */
-        MANAPIHTTP_NODISCARD bool ok () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD bool ok () const MANAPICORE_NOEXCEPT {
             return this->err_.code() == manapi::ERR_OK;
         }
 
@@ -385,11 +385,11 @@ namespace manapi {
          *
          * @return the error status
          */
-        E &&err () MANAPIHTTP_NOEXCEPT {
+        E &&err () MANAPICORE_NOEXCEPT {
             return std::move(this->err_);
         }
 
-        MANAPIHTTP_NODISCARD operator bool () MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD operator bool () MANAPICORE_NOEXCEPT {
             return this->err_.ok();
         }
     protected:

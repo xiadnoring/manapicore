@@ -1,13 +1,13 @@
 #include "./utest.h"
 
-#ifdef MANAPIHTTP_HTTP_AS_EXECUTABLE
+#ifdef MANAPICORE_HTTP_AS_EXECUTABLE
 #   include "ManapiInitTools.hpp"
 #   include "ManapiProcess.hpp"
 #   include "json/ManapiJson.hpp"
 #else
-#   include <manapihttp/ManapiInitTools.hpp>
-#   include <manapihttp/ManapiProcess.hpp>
-#   include <manapihttp/json/ManapiJson.hpp>
+#   include <manapicore/ManapiInitTools.hpp>
+#   include <manapicore/ManapiProcess.hpp>
+#   include <manapicore/json/ManapiJson.hpp>
 #endif
 
 UTEST(json, block_parse_string) {

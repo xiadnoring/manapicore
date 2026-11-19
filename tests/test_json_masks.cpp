@@ -1,12 +1,12 @@
-//#ifdef MANAPIHTTP_HTTP_AS_EXECUTABLE
+//#ifdef MANAPICORE_HTTP_AS_EXECUTABLE
 #   include "json/ManapiJson.hpp"
 #   include "json/ManapiJsonMask.hpp"
 #   include "json/ManapiJsonBuilder.hpp"
 #include "ManapiInitTools.hpp"
 // #else
-// #   include <manapihttp/json/ManapiJson.hpp>
-// #   include <manapihttp/json/ManapiJsonMask.hpp>
-// #   include <manapihttp/json/ManapiJsonBuilder.hpp>
+// #   include <manapicore/json/ManapiJson.hpp>
+// #   include <manapicore/json/ManapiJsonMask.hpp>
+// #   include <manapicore/json/ManapiJsonBuilder.hpp>
 // #endif
 
 #include "./utest.h"

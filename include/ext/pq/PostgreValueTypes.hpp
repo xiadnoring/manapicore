@@ -34,7 +34,7 @@ namespace manapi::ext::pq {
             }
         }
 
-        static constexpr size_t size(T const &) MANAPIHTTP_NOEXCEPT
+        static constexpr size_t size(T const &) MANAPICORE_NOEXCEPT
         {
             return sizeof (T);
         }
@@ -76,7 +76,7 @@ namespace manapi::ext::pq {
             }
         }
 
-        static constexpr size_t size(T const &) MANAPIHTTP_NOEXCEPT
+        static constexpr size_t size(T const &) MANAPICORE_NOEXCEPT
         {
             return sizeof (T);
         }
@@ -93,7 +93,7 @@ namespace manapi::ext::pq {
             if (value) { memset((void*)text.data(), '\001', 1); }
             else { memset((void*)text.data(), '\000', 1); }
         }
-        MANAPIHTTP_NODISCARD static size_t size (bool const &value) {
+        MANAPICORE_NODISCARD static size_t size (bool const &value) {
             return 1;
         }
     };
@@ -107,7 +107,7 @@ namespace manapi::ext::pq {
             assert(text.size() >= value.size());
             memcpy((void*)text.data(), value.data(), value.size());
         }
-        MANAPIHTTP_NODISCARD static size_t size (std::string const &value) {
+        MANAPICORE_NODISCARD static size_t size (std::string const &value) {
             return value.size();
         }
     };
@@ -120,57 +120,57 @@ namespace manapi::ext::pq {
         static constexpr void to_string (std::string_view text, const char *value) {
             memcpy((void*)text.data(), value, strlen(value));
         }
-        MANAPIHTTP_NODISCARD static size_t size (const char *value) {
+        MANAPICORE_NODISCARD static size_t size (const char *value) {
             return ::strlen(value);
         }
     };
 
-    template<> MANAPIHTTP_NODISCARD inline std::string_view from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline std::string_view from_string (std::string_view text) {
         return string_traits<std::string_view>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline unsigned int from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline unsigned int from_string (std::string_view text) {
         return integral_traits<unsigned int>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline short from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline short from_string (std::string_view text) {
         return integral_traits<short>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline std::string from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline std::string from_string (std::string_view text) {
         return string_traits <std::string>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline unsigned short from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline unsigned short from_string (std::string_view text) {
         return integral_traits<unsigned short>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline char from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline char from_string (std::string_view text) {
         return integral_traits<char>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline unsigned char from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline unsigned char from_string (std::string_view text) {
         return integral_traits<unsigned char>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline int from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline int from_string (std::string_view text) {
         return integral_traits<int>::from_string(text);
     }
 
 
-    template<> MANAPIHTTP_NODISCARD inline size_t from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline size_t from_string (std::string_view text) {
         return integral_traits<size_t>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline ssize_t from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline ssize_t from_string (std::string_view text) {
         return integral_traits<ssize_t>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline double from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline double from_string (std::string_view text) {
         return float_traits <double>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline float from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline float from_string (std::string_view text) {
         return float_traits <float>::from_string(text);
     }
 
@@ -179,51 +179,51 @@ namespace manapi::ext::pq {
         return std::move(m_uuid);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const unsigned int &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const unsigned int &v) {
         return integral_traits<unsigned int>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const int &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const int &v) {
         return integral_traits<int>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const short &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const short &v) {
         return integral_traits<short>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const unsigned short &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const unsigned short &v) {
         return integral_traits<unsigned short>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const unsigned char &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const unsigned char &v) {
         return integral_traits<unsigned char>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const char &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const char &v) {
         return integral_traits<char>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const ssize_t &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const ssize_t &v) {
         return integral_traits<ssize_t>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const size_t &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const size_t &v) {
         return integral_traits<size_t>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const std::string &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const std::string &v) {
         return string_traits<std::string>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const std::string_view &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const std::string_view &v) {
         return string_traits<std::string_view>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const pq::blob &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const pq::blob &v) {
         return string_traits<pq::blob>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const pq::text &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const pq::text &v) {
         return string_traits<pq::text>::size(v);
     }
 
@@ -231,19 +231,19 @@ namespace manapi::ext::pq {
         return 16;
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const bool &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const bool &v) {
         return string_traits<bool>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const float &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const float &v) {
         return float_traits<float>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const double &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const double &v) {
         return float_traits<double>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const char *v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const char *v) {
         return string_traits<const char *>::size(v);
     }
 
@@ -319,11 +319,11 @@ namespace manapi::ext::pq {
 
 #ifdef LLONG_MAX
 
-    template<> MANAPIHTTP_NODISCARD inline long double from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline long double from_string (std::string_view text) {
         return float_traits <long double>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const long double &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const long double &v) {
         return float_traits<long double>::size(v);
     }
 
@@ -331,19 +331,19 @@ namespace manapi::ext::pq {
         return float_traits <long double>::to_string(text, v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline long long from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline long long from_string (std::string_view text) {
         return integral_traits<long long>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline unsigned long long from_string (std::string_view text) {
+    template<> MANAPICORE_NODISCARD inline unsigned long long from_string (std::string_view text) {
         return integral_traits<unsigned long long>::from_string(text);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const long long &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const long long &v) {
         return integral_traits<long long>::size(v);
     }
 
-    template<> MANAPIHTTP_NODISCARD inline size_t size_of (const unsigned long long &v) {
+    template<> MANAPICORE_NODISCARD inline size_t size_of (const unsigned long long &v) {
         return integral_traits<unsigned long long>::size(v);
     }
 

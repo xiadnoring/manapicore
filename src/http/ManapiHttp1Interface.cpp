@@ -46,7 +46,7 @@
 //    HTTP1_BODY_CHUNKED = 1
 //};
 //
-//static int default_wrk_http_all_version (const manapi::net::worker::shared_conn & conn, manapi::net::worker::wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http_all_version (const manapi::net::worker::shared_conn & conn, manapi::net::worker::wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    auto httpctx = static_cast<manapi::net::worker::wrk_http_ctx_global_t *> (global->data);
 //    if (httpctx->http1) return manapi::net::http::versions::HTTP_v1_1;
 //    if (httpctx->http2) return manapi::net::http::versions::HTTP_v2;
@@ -54,42 +54,42 @@
 //    return 0;
 //}
 //
-//static int default_wrk_http_all_init_stream (const manapi::net::worker::shared_conn & conn, const manapi::net::worker::shared_conn & stream, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http_all_init_stream (const manapi::net::worker::shared_conn & conn, const manapi::net::worker::shared_conn & stream, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPICORE_NOEXCEPT {
 //    if (!conn->version) conn->version = default_wrk_http_all_version(conn, global);
 //    HTTP_ALL_SWITCH(init_stream_cb, conn, stream, httpctx, w);
 //}
 //
-//static int default_wrk_http_all_init (const manapi::net::worker::shared_conn & conn, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http_all_init (const manapi::net::worker::shared_conn & conn, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPICORE_NOEXCEPT {
 //    if (!conn->version) conn->version = default_wrk_http_all_version(conn, global);
 //    HTTP_ALL_SWITCH (init_cb, conn, httpctx, w);
 //}
 //
-//static int default_wrk_http_all_cleanup (manapi::net::worker::connection * conn, manapi::net::worker::wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http_all_cleanup (manapi::net::worker::connection * conn, manapi::net::worker::wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    if (!conn->version) return 0;
 //    HTTP_ALL_SWITCH (cleanup_cb, conn, httpctx);
 //}
 //
-//static void default_wrk_http_all_custom_read_cb(const manapi::net::worker::shared_conn &conn, manapi::slice_complex *sc, manapi::net::worker::wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//static void default_wrk_http_all_custom_read_cb(const manapi::net::worker::shared_conn &conn, manapi::slice_complex *sc, manapi::net::worker::wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    if (!conn->version) return;
 //    HTTP_ALL_SWITCH (custom_read_cb, conn, sc, httpctx);
 //}
 //
-//static void default_wrk_http_all_update_limit_rate_cb(const manapi::net::worker::shared_conn & conn, manapi::net::worker::wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//static void default_wrk_http_all_update_limit_rate_cb(const manapi::net::worker::shared_conn & conn, manapi::net::worker::wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    if (!conn->version) return;
 //    HTTP_ALL_SWITCH (update_limit_rate_cb, conn, httpctx);
 //}
 //
-//static int default_wrk_http_all_custom_cb (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, void *data) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http_all_custom_cb (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, void *data) MANAPICORE_NOEXCEPT {
 //    HTTP_ALL_SWITCH(custom_cb, conn, global, data);
 //}
 //
-//static int default_wrk_http_all_shutdown_conn(const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, bool force) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http_all_shutdown_conn(const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, bool force) MANAPICORE_NOEXCEPT {
 //    if (!conn->version) return 1;
 //    HTTP_ALL_SWITCH (shutdown_cb, conn, global, force);
 //}
 //
 //
-//static int default_wrk_http_all_cleanup_global_cb (manapi::net::worker::wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http_all_cleanup_global_cb (manapi::net::worker::wrk_interface_global_t *data) MANAPICORE_NOEXCEPT {
 //    auto wrk_global = static_cast<manapi::net::worker::wrk_http_ctx_global_t *>(data->data);
 //
 //    int rhs1=0,rhs2=0,rhs3=0;
@@ -110,7 +110,7 @@
 //        std::max(abs(rhs2), abs(rhs3)));
 //}
 //
-//static uint64_t default_wrk_http_all_global_flags (const manapi::net::worker::shared_conn & conn, manapi::net::worker::wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//static uint64_t default_wrk_http_all_global_flags (const manapi::net::worker::shared_conn & conn, manapi::net::worker::wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    auto const data = static_cast<manapi::net::worker::wrk_http_ctx_global_t *> (global->data);
 //    switch (conn->version) {
 //        case manapi::net::http::versions::HTTP_v0_9:
@@ -126,7 +126,7 @@
 //    }
 //}
 //
-//static int default_wrk_http_all_global_alpn (manapi::net::worker::wrk_interface_global_t *global, char const *alpn, std::size_t alpn_size) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http_all_global_alpn (manapi::net::worker::wrk_interface_global_t *global, char const *alpn, std::size_t alpn_size) MANAPICORE_NOEXCEPT {
 //    std::string_view s {alpn, alpn_size};
 //    if (s.starts_with("http/")) {
 //        s = s.substr(sizeof ("http/") - 1);
@@ -148,7 +148,7 @@
 //    return manapi::net::http::versions::HTTP_v1_1;
 //}
 //
-//manapi::status manapi::net::worker::default_wrk_http_all_global_init(wrk_interface_global_t *global, worker::interface_worker *w) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::worker::default_wrk_http_all_global_init(wrk_interface_global_t *global, worker::interface_worker *w) MANAPICORE_NOEXCEPT {
 //    if (global->data)
 //        return manapi::status_invalid_argument("global->data already exists");
 //
@@ -170,7 +170,7 @@
 //    return manapi::status_ok();
 //}
 //
-//manapi::status manapi::net::worker::default_wrk_http_all_global_add_version(wrk_interface_global_t *global, int version, std::unique_ptr<wrk_interface_global_t> http_t) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::worker::default_wrk_http_all_global_add_version(wrk_interface_global_t *global, int version, std::unique_ptr<wrk_interface_global_t> http_t) MANAPICORE_NOEXCEPT {
 //    if (!global)
 //        return manapi::status_invalid_argument("global is null");
 //
@@ -199,7 +199,7 @@
 //    return status_ok();
 //}
 //
-//static void default_wrk_http1_custom_read (const manapi::net::worker::shared_conn &conn, int flags, const char *buffer, std::size_t nsize, manapi::net::worker::ibuffpool_t *p, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPIHTTP_NOEXCEPT {
+//static void default_wrk_http1_custom_read (const manapi::net::worker::shared_conn &conn, int flags, const char *buffer, std::size_t nsize, manapi::net::worker::ibuffpool_t *p, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPICORE_NOEXCEPT {
 //    auto wrk_ctx = static_cast<manapi::net::worker::wrk_http1_ctx_t *> (conn->wrk.data);
 //
 //    if (wrk_ctx->flgs & HTTP1_BODY_CHUNKED) {
@@ -223,7 +223,7 @@
 //    }
 //}
 //
-//static int default_wrk_http1_cleanup (manapi::net::worker::connection* conn, manapi::net::worker::wrk_interface_global_t *global) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http1_cleanup (manapi::net::worker::connection* conn, manapi::net::worker::wrk_interface_global_t *global) MANAPICORE_NOEXCEPT {
 //    auto wrk_data = static_cast<manapi::net::worker::wrk_http1_ctx_t *>(conn->wrk.data);
 //    delete wrk_data;
 //    conn->wrk.data = nullptr;
@@ -231,14 +231,14 @@
 //    return manapi::ERR_OK;
 //}
 //
-//static int default_wrk_http1_global_cleanup (manapi::net::worker::wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http1_global_cleanup (manapi::net::worker::wrk_interface_global_t *data) MANAPICORE_NOEXCEPT {
 //    auto wrk_global = static_cast<manapi::net::worker::wrk_http1_ctx_global_t *>(data->data);
 //    delete wrk_global;
 //    data->data = nullptr;
 //    return manapi::ERR_OK;
 //}
 //
-//static int default_wrk_http1(const manapi::net::worker::shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http1(const manapi::net::worker::shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPICORE_NOEXCEPT {
 //    auto wrk_data = static_cast<manapi::net::worker::wrk_http1_ctx_t *>(conn->wrk.data);
 //    int status = manapi::net::http::BAD_REQUEST_400;
 //
@@ -521,7 +521,7 @@
 //}
 //
 //
-//static int default_wrk_http1_init (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPIHTTP_NOEXCEPT {
+//static int default_wrk_http1_init (const manapi::net::worker::shared_conn &conn, manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::base *w) MANAPICORE_NOEXCEPT {
 //    try {
 //        assert(!conn->wrk.data);
 //
@@ -591,7 +591,7 @@
 //    return default_wrk_http1_send_response ( conn, global,  );
 //}
 //
-//manapi::status manapi::net::worker::default_wrk_http1_global_init (manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::interface_worker *w) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::worker::default_wrk_http1_global_init (manapi::net::worker::wrk_interface_global_t *global, manapi::net::worker::interface_worker *w) MANAPICORE_NOEXCEPT {
 //    if (global->data)
 //        return manapi::status_invalid_argument("global->data already exists");
 //

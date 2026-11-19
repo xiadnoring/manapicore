@@ -32,7 +32,7 @@ namespace manapi::compress::hpack
 		public:
 			huffman_node_t(huffman_node_t* l = nullptr, huffman_node_t* r = nullptr, int16_t c = -1);
 			virtual ~huffman_node_t();
-			MANAPIHTTP_NODISCARD int16_t code() const;
+			MANAPICORE_NODISCARD int16_t code() const;
 			void code(int16_t c);
 			huffman_node_t* left();
 			void left(huffman_node_t* l);
@@ -72,11 +72,11 @@ namespace manapi::compress::hpack
 
 			void max(uint64_t m);
 
-			MANAPIHTTP_NODISCARD uint64_t max() const;
+			MANAPICORE_NODISCARD uint64_t max() const;
 
-			MANAPIHTTP_NODISCARD uint64_t entries_count() const;
+			MANAPICORE_NODISCARD uint64_t entries_count() const;
 
-			MANAPIHTTP_NODISCARD uint64_t length() const;
+			MANAPICORE_NODISCARD uint64_t length() const;
 
 			void add(const header_t&  h);
 
@@ -89,7 +89,7 @@ namespace manapi::compress::hpack
 			bool find(const header_t& h, int64_t& index) const;
 
 
-			MANAPIHTTP_NODISCARD manapi::status_or<const header_t *> get_header(std::size_t index) const;
+			MANAPICORE_NODISCARD manapi::status_or<const header_t *> get_header(std::size_t index) const;
 
 	};
 	
@@ -243,7 +243,7 @@ namespace manapi::compress::hpack
 
 			\return max the maximum size of the dynamic table; unbounded and allowed to exceed RFC sizes
 			*/
-			MANAPIHTTP_NODISCARD uint64_t max_table_size() const ;
+			MANAPICORE_NODISCARD uint64_t max_table_size() const ;
 
 			/*!
 			\fn void add(const std::string& n, const std::string& v, bool huffman = true, bool never_indexed = false)

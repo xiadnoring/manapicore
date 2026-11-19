@@ -3,7 +3,7 @@
 #include "std/ManapiBeforeDelete.hpp"
 #include "../include/ManapiUtils.hpp"
 
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
 # include <openssl/evp.h>
 # include <openssl/err.h>
 # include <openssl/crypto.h>
@@ -12,7 +12,7 @@
 
 manapi::status_or<std::string> manapi::crypto::aes_encrypt(std::string_view data, std::string_view key, std::string_view iv, ciphers algorithm) {
     try {
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
         const EVP_CIPHER *algorithm_cb;
         switch (algorithm) {
             case AES_128_CBC:
@@ -84,7 +84,7 @@ manapi::status_or<std::string> manapi::crypto::aes_encrypt(std::string_view data
 
 manapi::status_or<std::string> manapi::crypto::aes_decrypt(std::string_view data, std::string_view key, std::string_view iv, ciphers algorithm) {
     try {
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
         const EVP_CIPHER *algorithm_cb;
         switch (algorithm) {
             case AES_128_CBC:

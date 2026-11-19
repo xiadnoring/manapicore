@@ -28,27 +28,27 @@ namespace manapi::ext::pq {
 
         ~field () = default;
 
-        MANAPIHTTP_NODISCARD Oid oid () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD Oid oid () const MANAPICORE_NOEXCEPT {
             return PQftype(this->m_res, this->m_col);
         }
 
-        MANAPIHTTP_NODISCARD Oid type () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD Oid type () const MANAPICORE_NOEXCEPT {
             return PQftype(this->m_res, this->m_col);
         }
 
-        MANAPIHTTP_NODISCARD std::string_view name () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD std::string_view name () const MANAPICORE_NOEXCEPT {
             return std::string_view{PQfname(this->m_res, this->m_col)};
         }
 
-        MANAPIHTTP_NODISCARD bool is_null () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD bool is_null () const MANAPICORE_NOEXCEPT {
             return PQgetisnull(this->m_res, this->m_row, this->m_col);
         }
 
-        MANAPIHTTP_NODISCARD size_t size () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD size_t size () const MANAPICORE_NOEXCEPT {
             return static_cast<std::size_t>(PQgetlength(this->m_res, this->m_row, this->m_col));
         }
 
-        MANAPIHTTP_NODISCARD char *c_str () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD char *c_str () const MANAPICORE_NOEXCEPT {
             return PQgetvalue(this->m_res, this->m_row, this->m_col);
         }
 
@@ -63,7 +63,7 @@ namespace manapi::ext::pq {
             return pq::from_string<T>(std::string_view{this->c_str(), this->size()});
         }
 
-        MANAPIHTTP_NODISCARD std::string_view view () const {
+        MANAPICORE_NODISCARD std::string_view view () const {
             return std::string_view{this->c_str(), this->size()};
         }
 

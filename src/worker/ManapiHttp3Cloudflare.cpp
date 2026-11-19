@@ -1,7 +1,7 @@
 #include "worker/ManapiHttp3Cloudflare.hpp"
 #include "../include/ManapiUtils.hpp"
 
-#if MANAPIHTTP_QUICHE_DEPENDENCY && false
+#if MANAPICORE_QUICHE_DEPENDENCY && false
 
 #include <cstring>
 #include <unordered_map>
@@ -18,8 +18,8 @@
 #include "worker/ManapiBaseUtils.hpp"
 #include "../include/ManapiHttpInternal.hpp"
 
-#define MANAPIHTTP_QUICHE_MAX_DATAGRAM_SIZE 1350
-#define MANAPIHTTP_QUICHE_CONN_ID_SIZE 16
+#define MANAPICORE_QUICHE_MAX_DATAGRAM_SIZE 1350
+#define MANAPICORE_QUICHE_CONN_ID_SIZE 16
 
 static constexpr std::string_view manapi__many_connections_msg = "too many connections";
 static constexpr size_t manapi__quiche_token_max_len = sizeof ("quiche") - 1 + sizeof (struct sockaddr_storage) + QUICHE_MAX_CONN_ID_LEN;
@@ -63,28 +63,28 @@ struct manapi::net::worker::http_v3_cloudflare_quiche::connection_stream_t : con
 };
 
 template<typename T>
-requires(manapi::macros::version_is_greater_or_equal(MANAPIHTTP_QUICHE_VERSION, "0.23.0"))
-bool manapi_quiche_h3_event_headers_has_more_frames (T event) MANAPIHTTP_NOEXCEPT {
+requires(manapi::macros::version_is_greater_or_equal(MANAPICORE_QUICHE_VERSION, "0.23.0"))
+bool manapi_quiche_h3_event_headers_has_more_frames (T event) MANAPICORE_NOEXCEPT {
     return quiche_h3_event_headers_has_more_frames(static_cast<T>(event));
 }
 
 template<typename T>
-requires(manapi::macros::version_is_less(MANAPIHTTP_QUICHE_VERSION, "0.23.0"))
-bool manapi_quiche_h3_event_headers_has_more_frames (T event) MANAPIHTTP_NOEXCEPT {
+requires(manapi::macros::version_is_less(MANAPICORE_QUICHE_VERSION, "0.23.0"))
+bool manapi_quiche_h3_event_headers_has_more_frames (T event) MANAPICORE_NOEXCEPT {
     return quiche_h3_event_headers_has_body(static_cast<T>(event));
 }
 template<typename ...Args>
-requires(manapi::macros::version_is_greater_or_equal(MANAPIHTTP_QUICHE_VERSION, "0.23.0"))
-int manapi_quiche_h3_send_additional_headers(Args&&...args) MANAPIHTTP_NOEXCEPT {
+requires(manapi::macros::version_is_greater_or_equal(MANAPICORE_QUICHE_VERSION, "0.23.0"))
+int manapi_quiche_h3_send_additional_headers(Args&&...args) MANAPICORE_NOEXCEPT {
     return quiche_h3_send_additional_headers(args...);
 }
 
 template<typename ...Args>
-requires(manapi::macros::version_is_less(MANAPIHTTP_QUICHE_VERSION, "0.23.0"))
-ssize_t manapi_quiche_h3_send_additional_headers(Args&&...args) MANAPIHTTP_NOEXCEPT { /* skip */ return 0; }
+requires(manapi::macros::version_is_less(MANAPICORE_QUICHE_VERSION, "0.23.0"))
+ssize_t manapi_quiche_h3_send_additional_headers(Args&&...args) MANAPICORE_NOEXCEPT { /* skip */ return 0; }
 
 template<typename T>
-requires(manapi::macros::version_is_less(MANAPIHTTP_QUICHE_VERSION, "0.25.0"))
+requires(manapi::macros::version_is_less(MANAPICORE_QUICHE_VERSION, "0.25.0"))
 manapi::status_or<quiche_cc_algorithm> manapi_quiche_bbr_algo_check (const T &cc_algo) {
 #define QUICHE_CC_BBR 2
 #define QUICHE_CC_BBR2 3
@@ -100,7 +100,7 @@ manapi::status_or<quiche_cc_algorithm> manapi_quiche_bbr_algo_check (const T &cc
 }
 
 template<typename T>
-requires(manapi::macros::version_is_greater_or_equal(MANAPIHTTP_QUICHE_VERSION, "0.25.0"))
+requires(manapi::macros::version_is_greater_or_equal(MANAPICORE_QUICHE_VERSION, "0.25.0"))
 manapi::status_or<quiche_cc_algorithm> manapi_quiche_bbr_algo_check (const T &cc_algo) {
 #define QUICHE_CC_BBR2_GCONGESTION 4
     if (manapi::string::equals("bbr2", cc_algo, 0b10)) {
@@ -118,7 +118,7 @@ struct udp_send_buff_deleter {
 };
 
 struct quiche_h3_event_deleter {
-    void operator () (quiche_h3_event *n) MANAPIHTTP_NOEXCEPT {
+    void operator () (quiche_h3_event *n) MANAPICORE_NOEXCEPT {
         quiche_h3_event_free(n);
     }
 };
@@ -206,8 +206,8 @@ manapi::future<manapi::status> manapi::net::worker::http_v3_cloudflare_quiche::i
 
 
         quiche_config_set_max_idle_timeout(this->m_quiche_config, max_idle_timeout);
-        quiche_config_set_max_recv_udp_payload_size(this->m_quiche_config, MANAPIHTTP_QUICHE_MAX_DATAGRAM_SIZE);
-        quiche_config_set_max_send_udp_payload_size(this->m_quiche_config, MANAPIHTTP_QUICHE_MAX_DATAGRAM_SIZE);
+        quiche_config_set_max_recv_udp_payload_size(this->m_quiche_config, MANAPICORE_QUICHE_MAX_DATAGRAM_SIZE);
+        quiche_config_set_max_send_udp_payload_size(this->m_quiche_config, MANAPICORE_QUICHE_MAX_DATAGRAM_SIZE);
 
         quiche_config_set_initial_max_data(this->m_quiche_config, initial_max_data);
         quiche_config_set_initial_max_stream_data_bidi_local(this->m_quiche_config, initial_max_stream_data_bidi_local);
@@ -292,7 +292,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::stop(manapi::stoken token) 
     udp::stop(token);
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::close_connection(shared_conn conn, int flags) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::close_connection(shared_conn conn, int flags) MANAPICORE_NOEXCEPT {
     if (!conn)
         return;
 
@@ -348,18 +348,18 @@ void manapi::net::worker::http_v3_cloudflare_quiche::close_connection(shared_con
     conn->cancellation.cancel();
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::reset_all_streams(connection_t *conn_data) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::reset_all_streams(connection_t *conn_data) MANAPICORE_NOEXCEPT {
     for (const auto &s : conn_data->streams)
         this->close_connection(s.second, CLOSE_CONN_ERR);
 }
 
 manapi::net::worker::connection::ipdata_t * manapi::net::worker::http_v3_cloudflare_quiche::ipdata(
-    worker::connection *conn) MANAPIHTTP_NOEXCEPT {
+    worker::connection *conn) MANAPICORE_NOEXCEPT {
     auto const data = conn->as<connection_stream_t>();
     return data->conn->self->ipdata.get();
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::on_quiche_timeout(manapi::timer w, const shared_conn &connection) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::on_quiche_timeout(manapi::timer w, const shared_conn &connection) MANAPICORE_NOEXCEPT {
     auto conn_data = connection->as<connection_t>();
 
     quiche_conn_on_timeout(conn_data->conn);
@@ -369,7 +369,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::on_quiche_timeout(manapi::t
     http_v3_cloudflare_quiche::flush_connection_closed(connection, conn_data);
 }
 
-int manapi::net::worker::http_v3_cloudflare_quiche::grab_headers(uint8_t *name, size_t name_len, uint8_t *value, size_t value_len, void *argp) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::http_v3_cloudflare_quiche::grab_headers(uint8_t *name, size_t name_len, uint8_t *value, size_t value_len, void *argp) MANAPICORE_NOEXCEPT {
     try {
         auto req = static_cast<manapi__quiche_grab_headers_t *> (argp);
         auto const key = std::string_view{reinterpret_cast<const char *>(name), name_len};
@@ -402,7 +402,7 @@ int manapi::net::worker::http_v3_cloudflare_quiche::grab_headers(uint8_t *name, 
     return 1;
 }
 
-bool manapi::net::worker::http_v3_cloudflare_quiche::validate_token(char *token, size_t token_len, char *odcid, size_t *odcid_len, const sockaddr *sockaddr_src, const socklen_t &sockaddr_len) MANAPIHTTP_NOEXCEPT {
+bool manapi::net::worker::http_v3_cloudflare_quiche::validate_token(char *token, size_t token_len, char *odcid, size_t *odcid_len, const sockaddr *sockaddr_src, const socklen_t &sockaddr_len) MANAPICORE_NOEXCEPT {
     const auto hs = sizeof ("quiche") - 1 + sockaddr_len;
 
     if (token_len < hs) {
@@ -424,7 +424,7 @@ bool manapi::net::worker::http_v3_cloudflare_quiche::validate_token(char *token,
     return true;
 }
 
-int manapi::net::worker::http_v3_cloudflare_quiche::gen_mint_token(char *dcid, size_t dcid_len, char *token, size_t *token_len, const sockaddr *sockaddr_src, const socklen_t &sockaddr_len) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::http_v3_cloudflare_quiche::gen_mint_token(char *dcid, size_t dcid_len, char *token, size_t *token_len, const sockaddr *sockaddr_src, const socklen_t &sockaddr_len) MANAPICORE_NOEXCEPT {
     std::size_t const s = sizeof("quiche")-1 + sockaddr_len + dcid_len;
 
     if (*token_len < s) {
@@ -445,7 +445,7 @@ int manapi::net::worker::http_v3_cloudflare_quiche::gen_mint_token(char *dcid, s
     return 0;
 }
 
-manapi::status quiche_udp_send_data_ (manapi::ev::udp *udp, manapi::ev::buff_t *buff, sockaddr *send_addr, socklen_t send_len) MANAPIHTTP_NOEXCEPT {
+manapi::status quiche_udp_send_data_ (manapi::ev::udp *udp, manapi::ev::buff_t *buff, sockaddr *send_addr, socklen_t send_len) MANAPICORE_NOEXCEPT {
     try {
         ssize_t const sent = udp->try_send(buff, 1, send_addr);
         if (sent != static_cast<ssize_t>(buff->len)) {
@@ -492,7 +492,7 @@ manapi::status quiche_udp_send_data_ (manapi::ev::udp *udp, manapi::ev::buff_t *
     return manapi::status_internal("quiche_udp_send_data_ failed");
 }
 
-int manapi::net::worker::http_v3_cloudflare_quiche::quiche_flush_egress(connection_t *data) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::http_v3_cloudflare_quiche::quiche_flush_egress(connection_t *data) MANAPICORE_NOEXCEPT {
     if (data->flags & CONN_CLOSED)
         return -1;
 
@@ -586,11 +586,11 @@ int manapi::net::worker::http_v3_cloudflare_quiche::quiche_flush_egress(connecti
     return 0;
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::waiting(const shared_conn &conn, bool state) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::waiting(const shared_conn &conn, bool state) MANAPICORE_NOEXCEPT {
     prepared::waiting(conn, state);
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::quiche_timeout_again(connection_t *connection) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::quiche_timeout_again(connection_t *connection) MANAPICORE_NOEXCEPT {
     auto const repeat = static_cast<std::size_t> (quiche_conn_timeout_as_millis(connection->conn));
 
     auto rhs = connection->timeout.again(repeat > 0 ? repeat : 200);
@@ -599,20 +599,20 @@ void manapi::net::worker::http_v3_cloudflare_quiche::quiche_timeout_again(connec
     }
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::connection_interface_eraser(connection *ptr) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::connection_interface_eraser(connection *ptr) MANAPICORE_NOEXCEPT {
     auto const p = ptr->as<connection_t>();
     prepared::timer_clear(std::move(p->timeout));
     manapi_log_trace(debug::LOG_TRACE_MEDIUM, "quiche: close %p conn", p);
     delete p;
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::stream_interface_eraser(worker::connection *ptr) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::stream_interface_eraser(worker::connection *ptr) MANAPICORE_NOEXCEPT {
     auto const p = ptr->as<connection_stream_t>();
     manapi_log_trace(debug::LOG_TRACE_MEDIUM, "quiche: close %p stream on %p conn", p, p->conn);
     delete ptr->as<connection_stream_t>();
 }
 
-void quiche_set_header_(quiche_h3_header *header, std::string_view key, std::string_view value) MANAPIHTTP_NOEXCEPT {
+void quiche_set_header_(quiche_h3_header *header, std::string_view key, std::string_view value) MANAPICORE_NOEXCEPT {
     *header = {
         .name = reinterpret_cast<const uint8_t *> (key.data()),
         .name_len = key.size(),
@@ -622,7 +622,7 @@ void quiche_set_header_(quiche_h3_header *header, std::string_view key, std::str
 }
 
 static void wrk_close_conn1 ( manapi::net::worker::shared_conn conn, manapi::net::worker::shared_conn stream_conn, manapi::net::worker::base *w, bool ok) {
-    MANAPIHTTP_MUST_ALLOC_START
+    MANAPICORE_MUST_ALLOC_START
     manapi::async::current()->etaskpool()->append_task(
         [w, ok, stream_conn, conn] () -> void {
         auto const s = stream_conn->as<manapi::net::worker::http_v3_cloudflare_quiche::connection_stream_t>();
@@ -636,10 +636,10 @@ static void wrk_close_conn1 ( manapi::net::worker::shared_conn conn, manapi::net
         }
         manapi::net::worker::http_v3_cloudflare_quiche::flush_connection_closed(conn, conndata);
     });
-    MANAPIHTTP_MUST_ALLOC_END
+    MANAPICORE_MUST_ALLOC_END
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::onrecv(const std::shared_ptr<ev::udp> &watcher, char *buff, ssize_t size, const sockaddr *addr, unsigned flags) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::onrecv(const std::shared_ptr<ev::udp> &watcher, char *buff, ssize_t size, const sockaddr *addr, unsigned flags) MANAPICORE_NOEXCEPT {
     std::array<char, 17> iparr{};
     shared_conn connection{nullptr};
 
@@ -647,7 +647,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::onrecv(const std::shared_pt
     http::ip_by_addr(addr, iparr.data() + 1);
 
     socklen_t sockaddr_len = 0;
-    uint8_t out[MANAPIHTTP_QUICHE_MAX_DATAGRAM_SIZE];
+    uint8_t out[MANAPICORE_QUICHE_MAX_DATAGRAM_SIZE];
 
     auto sockaddr_src = (sockaddr *)addr;
     sockaddr_len = async::socklen (sockaddr_src);
@@ -669,7 +669,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::onrecv(const std::shared_pt
     char token[manapi__quiche_token_max_len];
     uint64_t token_len = sizeof (token);
 
-    if(0 != quiche_header_info (reinterpret_cast<const uint8_t *> (buff), static_cast<std::size_t>(size), MANAPIHTTP_QUICHE_CONN_ID_SIZE,
+    if(0 != quiche_header_info (reinterpret_cast<const uint8_t *> (buff), static_cast<std::size_t>(size), MANAPICORE_QUICHE_CONN_ID_SIZE,
         &version, &type, reinterpret_cast<uint8_t *> (scid), &scid_len, reinterpret_cast<uint8_t *> (dcid), &dcid_len,
     reinterpret_cast<uint8_t *> (token), &token_len)) {
 
@@ -714,7 +714,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::onrecv(const std::shared_pt
                 return;
             }
 
-            auto res = manapi::crypto::random_string(MANAPIHTTP_QUICHE_CONN_ID_SIZE);
+            auto res = manapi::crypto::random_string(MANAPICORE_QUICHE_CONN_ID_SIZE);
             if (!res.ok())
                 return;
 
@@ -742,7 +742,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::onrecv(const std::shared_pt
             return;
         }
 
-        if (dcid_len != MANAPIHTTP_QUICHE_CONN_ID_SIZE) {
+        if (dcid_len != MANAPICORE_QUICHE_CONN_ID_SIZE) {
             return;
         }
 
@@ -1061,7 +1061,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::onrecv(const std::shared_pt
     }
 }
 
-ssize_t manapi::net::worker::http_v3_cloudflare_quiche::sync_write(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPIHTTP_NOEXCEPT {
+ssize_t manapi::net::worker::http_v3_cloudflare_quiche::sync_write(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPICORE_NOEXCEPT {
     auto data = conn->as<connection_stream_t>();
 
     if (this->m_config->speed_limit_rate < data->transfered)
@@ -1076,7 +1076,7 @@ ssize_t manapi::net::worker::http_v3_cloudflare_quiche::sync_write(const shared_
     return sync_write_ex (conn, buff, nbuff, static_cast<std::size_t>(size), finish, this->m_config->max_buffer_stack);
 }
 
-ssize_t manapi::net::worker::http_v3_cloudflare_quiche::sync_write_ex(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, std::size_t size, bool finish, std::size_t maxcnt) MANAPIHTTP_NOEXCEPT {
+ssize_t manapi::net::worker::http_v3_cloudflare_quiche::sync_write_ex(const shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, std::size_t size, bool finish, std::size_t maxcnt) MANAPICORE_NOEXCEPT {
     auto s = conn->as<connection_stream_t>();
 
     if (s->flags & ev::DISCONNECT)
@@ -1092,7 +1092,7 @@ ssize_t manapi::net::worker::http_v3_cloudflare_quiche::sync_write_ex(const shar
         assert(buff[i].len > 0 && buff[i].len < (std::size_t)1e6);
         auto rhs = quiche_h3_send_body(s->conn->http3_conn, s->conn->conn, static_cast<uint64_t>(s->id),
             reinterpret_cast <const uint8_t *> (buff[i].base), buff[i].len, fin);
-#ifndef MANAPIHTTP_DISABLE_TRACE
+#ifndef MANAPICORE_DISABLE_TRACE
         if (fin) {
             manapi_log_trace(manapi::debug::LOG_TRACE_LOW, "send finish frame stream=%zu", s->id);
         }
@@ -1135,14 +1135,14 @@ ssize_t manapi::net::worker::http_v3_cloudflare_quiche::sync_write_ex(const shar
     return static_cast<ssize_t>(res);
 }
 
-int manapi::net::worker::http_v3_cloudflare_quiche::event_flags(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::http_v3_cloudflare_quiche::event_flags(const shared_conn &conn) MANAPICORE_NOEXCEPT {
     return prepared::event_flags(conn);
 }
 
-int manapi::net::worker::http_v3_cloudflare_quiche::event_flags(const shared_conn &conn, int flags) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::http_v3_cloudflare_quiche::event_flags(const shared_conn &conn, int flags) MANAPICORE_NOEXCEPT {
     auto const data = conn->as<connection_stream_t>();
 
-    MANAPIHTTP_WORKER_EVENT_LOOP(data) {
+    MANAPICORE_WORKER_EVENT_LOOP(data) {
         if (data->flags & ev::DISCONNECT) {
             manapi::net::worker::http_v3_cloudflare_quiche::notify_cb(data->ev_cb, conn, CONN_CLOSED, nullptr, 0, nullptr);
         }
@@ -1163,17 +1163,17 @@ int manapi::net::worker::http_v3_cloudflare_quiche::event_flags(const shared_con
             }
         }
 
-        MANAPIHTTP_WORKER_EVENT_BREAK(data);
+        MANAPICORE_WORKER_EVENT_BREAK(data);
     }
 
     return prev;
 }
 
-manapi::net::worker::worker_watcher_cb manapi::net::worker::http_v3_cloudflare_quiche::event_on( const shared_conn &conn, worker_watcher_cb callback) MANAPIHTTP_NOEXCEPT {
+manapi::net::worker::worker_watcher_cb manapi::net::worker::http_v3_cloudflare_quiche::event_on( const shared_conn &conn, worker_watcher_cb callback) MANAPICORE_NOEXCEPT {
     return prepared::event_on(conn, std::move(callback));
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::feed_event(const shared_conn &conn, int flags, const char *buff, std::size_t size, ibuffpool_t *p) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::feed_event(const shared_conn &conn, int flags, const char *buff, std::size_t size, ibuffpool_t *p) MANAPICORE_NOEXCEPT {
     prepared::feed_event(this, conn, flags, buff, size, p);
 }
 
@@ -1182,16 +1182,16 @@ void manapi::net::worker::http_v3_cloudflare_quiche::feed_event(const shared_con
 //     return data->top->send_size != data->top->cur_send_size;
 // }
 
-bool manapi::net::worker::http_v3_cloudflare_quiche::is_writable(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+bool manapi::net::worker::http_v3_cloudflare_quiche::is_writable(const shared_conn &conn) MANAPICORE_NOEXCEPT {
     auto const data = conn->as<connection_stream_t>();
     return prepared::is_writable(this->m_config.get(), conn, data);
 }
 
-std::size_t manapi::net::worker::http_v3_cloudflare_quiche::recv_count(const shared_conn &conn) const MANAPIHTTP_NOEXCEPT {
+std::size_t manapi::net::worker::http_v3_cloudflare_quiche::recv_count(const shared_conn &conn) const MANAPICORE_NOEXCEPT {
     return prepared::recv_count(conn);
 }
 
-manapi::bytebuffer manapi::net::worker::http_v3_cloudflare_quiche::recv_first_buffer(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+manapi::bytebuffer manapi::net::worker::http_v3_cloudflare_quiche::recv_first_buffer(const shared_conn &conn) MANAPICORE_NOEXCEPT {
     return prepared::recv_first_buffer(conn);
 }
 
@@ -1199,7 +1199,7 @@ manapi::bytebuffer manapi::net::worker::http_v3_cloudflare_quiche::recv_first_bu
 // void manapi::net::worker::http_v3_cloudflare_quiche::recv_buffer_alloc(ssize_t nread, ev::buff_t *buff) {
 //     if (this->flags & HTTP_V3_QUICHE_WORKER_BUFFER_WAS_FREED) {
 //         buff->base = this->recv_buffer.get();
-//         buff->len = MANAPIHTTP_QUICHE_MAX_DATAGRAM_SIZE;
+//         buff->len = MANAPICORE_QUICHE_MAX_DATAGRAM_SIZE;
 //         this->flags ^= HTTP_V3_QUICHE_WORKER_BUFFER_WAS_FREED;
 //     }
 // }
@@ -1209,7 +1209,7 @@ manapi::bytebuffer manapi::net::worker::http_v3_cloudflare_quiche::recv_first_bu
 // }
 
 
-void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate() MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate() MANAPICORE_NOEXCEPT {
     /* in the event loop */
     for (auto nit = this->m_connections.begin(); nit != this->m_connections.end(); ) {
         if (nit->second.empty()) {
@@ -1225,7 +1225,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate() MANAPIH
     }
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate_connection(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate_connection(const shared_conn &conn) MANAPICORE_NOEXCEPT {
     auto const conn_data = conn->as<connection_t>();
 
     for (const auto &s : conn_data->streams) {
@@ -1235,7 +1235,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate_connectio
     quiche_flush_egress(conn_data);
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate_stream(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate_stream(const shared_conn &conn) MANAPICORE_NOEXCEPT {
     auto const conn_data = conn->as<connection_stream_t>();
 
     if (conn_data->transfered >= this->m_config->speed_limit_rate
@@ -1278,12 +1278,12 @@ void manapi::net::worker::http_v3_cloudflare_quiche::update_limit_rate_stream(co
     }
 }
 
-int manapi::net::worker::http_v3_cloudflare_quiche::flush_read_buffers(const shared_conn &conn, connection_stream_t *s) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::http_v3_cloudflare_quiche::flush_read_buffers(const shared_conn &conn, connection_stream_t *s) MANAPICORE_NOEXCEPT {
     prepared::flush_read(this, conn, s);
     return ERR_OK;
 }
 
-int manapi::net::worker::http_v3_cloudflare_quiche::flush_read(const shared_conn &stream) MANAPIHTTP_NOEXCEPT {
+int manapi::net::worker::http_v3_cloudflare_quiche::flush_read(const shared_conn &stream) MANAPICORE_NOEXCEPT {
     auto const s = stream->as<connection_stream_t>();
     auto top = &s->top->recv;
 
@@ -1345,7 +1345,7 @@ finish:
     return res;
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::force_close(shared_conn conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::force_close(shared_conn conn, connection_t *conn_data) MANAPICORE_NOEXCEPT {
     if (!conn)
         return;
 
@@ -1406,13 +1406,13 @@ void manapi::net::worker::http_v3_cloudflare_quiche::force_close(shared_conn con
     }
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::wrk_global(wrk_interface_global_t *data) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::wrk_global(wrk_interface_global_t *data) MANAPICORE_NOEXCEPT {
     udp::wrk_global(data);
     /* wrk global not working with cloudflare http3 */
     this->m_global.send_response = cloudflare_wrk_http3_send_response;
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::flush_connection_closed(const shared_conn &conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::flush_connection_closed(const shared_conn &conn, connection_t *conn_data) MANAPICORE_NOEXCEPT {
     // if (!(conn_data->status & CONN_CLOSED) && (conn_data->status & CONN_HALF_CLOSED) && conn_data->streams.empty()) {
     //     conn_data->status.fetch_xor(CONN_HALF_CLOSED);
     // }
@@ -1436,7 +1436,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::flush_connection_closed(con
     }
 }
 
-void manapi::net::worker::http_v3_cloudflare_quiche::flush_write(const shared_conn &conn, connection_t *conn_data) MANAPIHTTP_NOEXCEPT {
+void manapi::net::worker::http_v3_cloudflare_quiche::flush_write(const shared_conn &conn, connection_t *conn_data) MANAPICORE_NOEXCEPT {
     if (conn_data->worker->quiche_flush_egress(conn_data)) {
         return;
     }
@@ -1446,7 +1446,7 @@ void manapi::net::worker::http_v3_cloudflare_quiche::flush_write(const shared_co
     quiche_stream_iter *stream = quiche_conn_writable(conn_data->conn);
     while (quiche_stream_iter_next(stream, reinterpret_cast<uint64_t *>(&stream_id))) {
         auto stream_it = conn_data->streams.find(stream_id);
-        //MANAPIHTTP_LOG("WRITE STREAM:{}", stream_id);
+        //MANAPICORE_LOG("WRITE STREAM:{}", stream_id);
         if (stream_it != conn_data->streams.end()) {
             auto const s = stream_it->second->as<connection_stream_t>();
             if ((s->flags & ev::WRITE) && s->ev_cb) {
@@ -1537,7 +1537,7 @@ manapi::future<int> manapi::net::worker::http_v3_cloudflare_quiche::cloudflare_w
                             int rhs;
                             auto cheaders = q_headers.get() + header_cursor;
                             if (header_cursor != 0) {
-                                if constexpr (macros::version_is_greater_or_equal(MANAPIHTTP_QUICHE_VERSION, "0.23.0")) {
+                                if constexpr (macros::version_is_greater_or_equal(MANAPICORE_QUICHE_VERSION, "0.23.0")) {
                                     rhs = manapi_quiche_h3_send_additional_headers(s->conn->http3_conn, s->conn->conn, static_cast<uint64_t>(s->id), cheaders, i - header_cursor, false, finish && i == headers_size);
                                 }
                                 else {

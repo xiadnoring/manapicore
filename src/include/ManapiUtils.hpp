@@ -22,23 +22,23 @@
 #ifdef _WIN32
 #   define NOMINMAX
 #   define WIN32_LEAN_AND_MEAN
-#   define MANAPIHTTP_NONUNIX true
+#   define MANAPICORE_NONUNIX true
 #else
-#   define MANAPIHTTP_NONUNIX false
+#   define MANAPICORE_NONUNIX false
 #endif
 
 namespace manapi {
-    void print_stacktrace () MANAPIHTTP_NOEXCEPT;
+    void print_stacktrace () MANAPICORE_NOEXCEPT;
 }
 
-#ifdef MANAPIHTTP_DISABLE_TRACE
+#ifdef MANAPICORE_DISABLE_TRACE
 #   ifdef manapi_log_trace
 #       undef manapi_log_trace
 #       define manapi_log_trace(...)
 #   endif
 #endif
 
-#ifdef MANAPIHTTP_DISABLE_TRACE_HARD
+#ifdef MANAPICORE_DISABLE_TRACE_HARD
 #   ifdef manapi_log_trace_hard
 #       undef manapi_log_trace_hard
 #       define manapi_log_trace_hard(...)

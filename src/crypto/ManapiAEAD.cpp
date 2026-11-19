@@ -10,26 +10,26 @@
  * 2 - WOLFSSL & OPENSSL_EXTRA
  * 3 - BORINGSSL
  */
-#define MANAPIHTTP_CRYPTO_LIBRARY 0
+#define MANAPICORE_CRYPTO_LIBRARY 0
 
-#if MANAPIHTTP_OPENSSL_DEPENDENCY
+#if MANAPICORE_OPENSSL_DEPENDENCY
 #   include <openssl/evp.h>
 #   include <openssl/err.h>
 #   include <openssl/crypto.h>
-#   undef MANAPIHTTP_CRYPTO_LIBRARY
-#   define MANAPIHTTP_CRYPTO_LIBRARY 1 /* openssl */
-#elif MANAPIHTTP_WOLFSSL_DEPENDENCY && OPENSSL_EXTRA
+#   undef MANAPICORE_CRYPTO_LIBRARY
+#   define MANAPICORE_CRYPTO_LIBRARY 1 /* openssl */
+#elif MANAPICORE_WOLFSSL_DEPENDENCY && OPENSSL_EXTRA
 #   include <wolfssl/openssl/evp.h>
 #   include <wolfssl/openssl/err.h>
 #   include <wolfssl/openssl/crypto.h>
-#   undef MANAPIHTTP_CRYPTO_LIBRARY
-#   define MANAPIHTTP_CRYPTO_LIBRARY 2 /* wolfssl */
+#   undef MANAPICORE_CRYPTO_LIBRARY
+#   define MANAPICORE_CRYPTO_LIBRARY 2 /* wolfssl */
 #endif
 
 
 manapi::status_or<std::string> manapi::crypto::aead_decrypt(std::string_view cipher_password, std::string_view aad, std::string_view key, std::string_view iv, std::string_view tag, ciphers algorithm) {
     std::string plaintext;
-#if MANAPIHTTP_CRYPTO_LIBRARY == 1
+#if MANAPICORE_CRYPTO_LIBRARY == 1
 
     plaintext.resize(cipher_password.size());
 
@@ -93,7 +93,7 @@ manapi::status_or<std::string> manapi::crypto::aead_decrypt(std::string_view cip
     plaintext.resize(static_cast<std::size_t>(outlen));
 
     plaintext += last;
-#elif MANAPIHTTP_CRYPTO_LIBRARY == 2 /*wolfssl*/
+#elif MANAPICORE_CRYPTO_LIBRARY == 2 /*wolfssl*/
     plaintext.resize(cipher_password.size());
 
     const WOLFSSL_EVP_CIPHER *cipher;
@@ -165,7 +165,7 @@ manapi::status_or<std::string> manapi::crypto::aead_decrypt(std::string_view cip
 
 manapi::status_or<std::string> manapi::crypto::aead_encrypt(std::string_view data, std::string_view aad, std::string_view key, std::string_view iv, std::string &tag, ciphers algorithm) {
     std::string plaintext;
-#if MANAPIHTTP_CRYPTO_LIBRARY == 1
+#if MANAPICORE_CRYPTO_LIBRARY == 1
 
     plaintext.resize(data.size());
 
@@ -229,7 +229,7 @@ manapi::status_or<std::string> manapi::crypto::aead_encrypt(std::string_view dat
         return status_invalid_argument("EVP_CIPHER_CTX_ctrl() failure");
 
     plaintext += last;
-#elif MANAPIHTTP_CRYPTO_LIBRARY == 2
+#elif MANAPICORE_CRYPTO_LIBRARY == 2
     plaintext.resize(data.size());
 
     const WOLFSSL_EVP_CIPHER *cipher;

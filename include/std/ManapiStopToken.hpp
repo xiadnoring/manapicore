@@ -18,27 +18,27 @@ namespace manapi {
 
         ~stoken ();
 
-        stoken (stoken &&n) MANAPIHTTP_NOEXCEPT;
+        stoken (stoken &&n) MANAPICORE_NOEXCEPT;
 
-        stoken &operator= (stoken &&n) MANAPIHTTP_NOEXCEPT;
+        stoken &operator= (stoken &&n) MANAPICORE_NOEXCEPT;
 
-        stoken (const stoken &n) MANAPIHTTP_NOEXCEPT;
+        stoken (const stoken &n) MANAPICORE_NOEXCEPT;
 
-        stoken &operator= (const stoken &n) MANAPIHTTP_NOEXCEPT;
+        stoken &operator= (const stoken &n) MANAPICORE_NOEXCEPT;
 
-        stoken* next ( const manapi::stoken &token ) MANAPIHTTP_NOEXCEPT;
+        stoken* next ( const manapi::stoken &token ) MANAPICORE_NOEXCEPT;
 
-        int ref () MANAPIHTTP_NOEXCEPT;
+        int ref () MANAPICORE_NOEXCEPT;
 
-        void unref () MANAPIHTTP_NOEXCEPT;
+        void unref () MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD std::size_t count () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD std::size_t count () const MANAPICORE_NOEXCEPT;
 
-        void reset () MANAPIHTTP_NOEXCEPT;
+        void reset () MANAPICORE_NOEXCEPT;
 
-        void clear () MANAPIHTTP_NOEXCEPT;
+        void clear () MANAPICORE_NOEXCEPT;
 
-        operator bool () const MANAPIHTTP_NOEXCEPT;
+        operator bool () const MANAPICORE_NOEXCEPT;
     private:
         data_t *m_data;
     };

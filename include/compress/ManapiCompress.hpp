@@ -31,7 +31,7 @@ namespace manapi::compress {
     manapi::status_or<manapi::slice> compress_string (compress::compress_base *inst, manapi::slice_view original);
     manapi::status_or<manapi::slice> decompress_string (compress::decompress_base *inst, manapi::slice_view compressed);
 
-#if MANAPIHTTP_ZLIB_DEPENDENCY
+#if MANAPICORE_ZLIB_DEPENDENCY
 
     class deflate_compress : public compress_base {
     protected:
@@ -77,7 +77,7 @@ namespace manapi::compress {
     };
 #endif
 
-#ifdef MANAPIHTTP_BROTLI_DEPENDENCY
+#ifdef MANAPICORE_BROTLI_DEPENDENCY
     class brotli_compress : public compress_base {
         struct data_t;
     public:
@@ -105,7 +105,7 @@ namespace manapi::compress {
     };
 #endif
 
-#ifdef MANAPIHTTP_ZSTD_DEPENDENCY
+#ifdef MANAPICORE_ZSTD_DEPENDENCY
     class zstd_compress : public compress_base {
         struct data_t;
     public:

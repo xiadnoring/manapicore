@@ -24,7 +24,7 @@ namespace jwt {
                 using jwt::json::type;
                 if (val.is_bool()) return type::boolean;
                 if (val.is_integer()) return type::integer;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
                 if (val.is_bigint()) return type::number; /** bigint can be decimal */
 #endif
                 if (val.is_decimal()) return type::number;

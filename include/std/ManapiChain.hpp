@@ -62,11 +62,11 @@ namespace manapi {
                 return false == this->operator==(_n);
             }
 
-            friend void swap (chain_iterator &lhs, chain_iterator &rhs) MANAPIHTTP_NOEXCEPT {
+            friend void swap (chain_iterator &lhs, chain_iterator &rhs) MANAPICORE_NOEXCEPT {
                 std::swap(lhs.m_src, rhs.m_src);
             }
 
-            operator bool () MANAPIHTTP_NOEXCEPT {
+            operator bool () MANAPICORE_NOEXCEPT {
                 return this->m_src != nullptr;
             }
 
@@ -106,11 +106,11 @@ namespace manapi {
                 return false == this->operator==(_n);
             }
 
-            friend void swap (chain_const_iterator &lhs, chain_const_iterator &rhs) MANAPIHTTP_NOEXCEPT {
+            friend void swap (chain_const_iterator &lhs, chain_const_iterator &rhs) MANAPICORE_NOEXCEPT {
                 std::swap(lhs.m_src, rhs.m_src);
             }
 
-            operator bool () MANAPIHTTP_NOEXCEPT {
+            operator bool () MANAPICORE_NOEXCEPT {
                 return this->m_src != nullptr;
             }
 
@@ -130,13 +130,13 @@ namespace manapi {
             this->clear();
         }
 
-        chain (chain &&n) MANAPIHTTP_NOEXCEPT {
+        chain (chain &&n) MANAPICORE_NOEXCEPT {
             this->m_src = std::move(n.m_src);
             this->m_last = std::exchange(n.m_last, nullptr);
             this->m_s = std::exchange(n.m_s, 0);
         }
 
-        chain &operator=(chain &&n) MANAPIHTTP_NOEXCEPT {
+        chain &operator=(chain &&n) MANAPICORE_NOEXCEPT {
             if (this != &n) {
                 this->m_src = std::move(n.m_src);
                 this->m_last = std::exchange(n.m_last, nullptr);
@@ -290,7 +290,7 @@ namespace manapi {
             --this->m_s;
         }
 
-        MANAPIHTTP_NODISCARD bool empty () const {
+        MANAPICORE_NODISCARD bool empty () const {
             return this->size() == 0;
         }
 
@@ -338,7 +338,7 @@ namespace manapi {
             return iterator{nullptr};
         }
 
-        MANAPIHTTP_NODISCARD size_t size () const {
+        MANAPICORE_NODISCARD size_t size () const {
             return this->m_s;
         }
 

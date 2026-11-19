@@ -10,8 +10,8 @@
 
 #include "./ManapiUtils.hpp"
 
-#if MANAPIHTTP_GMP_DEPENDENCY
-#define MANAPIHTTP_BIGINT_SUPPORT
+#if MANAPICORE_GMP_DEPENDENCY
+#define MANAPICORE_BIGINT_SUPPORT
 
 #include <string>
 #include <memory>
@@ -30,7 +30,7 @@ namespace manapi {
         struct data_t;
 
         struct data_t_deleter {
-            void operator()(data_t *n) MANAPIHTTP_NOEXCEPT;
+            void operator()(data_t *n) MANAPICORE_NOEXCEPT;
         };
 
         bigint(uint32_t precision = MANAPI_BIGINT_DEFAULT_PRECISION);
@@ -55,9 +55,9 @@ namespace manapi {
         requires(std::is_floating_point_v<T>)
         bigint (const T &num, uint32_t precision = MANAPI_BIGINT_DEFAULT_PRECISION) : bigint(static_cast<long double>(num), precision) {}
 
-        bigint(bigint &&other) MANAPIHTTP_NOEXCEPT;
+        bigint(bigint &&other) MANAPICORE_NOEXCEPT;
 
-        bigint &operator=(bigint&&other) MANAPIHTTP_NOEXCEPT;
+        bigint &operator=(bigint&&other) MANAPICORE_NOEXCEPT;
 
         bigint (const bigint &other);
 
@@ -65,19 +65,19 @@ namespace manapi {
          * Stringify the bigint and return it
          * @return the stringified bigint
          */
-        MANAPIHTTP_NODISCARD std::string stringify () const;
+        MANAPICORE_NODISCARD std::string stringify () const;
 
         /**
          * Integerify the bigint and return it with data loss
          * @return the integerified bigint
          */
-        MANAPIHTTP_NODISCARD int64_t integerify () const;
+        MANAPICORE_NODISCARD int64_t integerify () const;
 
         /**
          * Decimalify the bigint and return it with data loss
          * @return the decimalify bigint
          */
-        MANAPIHTTP_NODISCARD double decimalify () const;
+        MANAPICORE_NODISCARD double decimalify () const;
 
         /**
          * Get a bigint from the source string
@@ -114,7 +114,7 @@ namespace manapi {
          * Get the precision
          * @return the precision
          */
-        MANAPIHTTP_NODISCARD uint32_t precision () const;
+        MANAPICORE_NODISCARD uint32_t precision () const;
 
         bigint operator/ (const bigint &oth) const;
 
@@ -143,14 +143,14 @@ namespace manapi {
          * @param oth the power
          * @return the result
          */
-        MANAPIHTTP_NODISCARD bigint root (uint32_t oth) const;
+        MANAPICORE_NODISCARD bigint root (uint32_t oth) const;
 
         /**
          * Do sqrt operation with bigint
          * @param oth the power
          * @return the result
          */
-        MANAPIHTTP_NODISCARD bigint sqrt (uint32_t oth) const;
+        MANAPICORE_NODISCARD bigint sqrt (uint32_t oth) const;
 
         bigint operator+ (int64_t oth) const;
 

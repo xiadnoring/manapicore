@@ -24,18 +24,18 @@ In release mode, messages with the ```LOG_TRACE_HARD``` level are removed.
 // define the application logging name
 #define LOGNAME "app"
 
-#include <manapihttp/ManapiInitTools.hpp> // manapi::init_tools::log_trace_init
-#include <manapihttp/ManapiDebug.hpp> // manapi_log_trace
+#include <manapicore/ManapiInitTools.hpp> // manapi::init_tools::log_trace_init
+#include <manapicore/ManapiDebug.hpp> // manapi_log_trace
 
 int main(int argc, char *argv[]) {
     // System log initialization (not thread-safe)
     manapi::init_tools::log_trace_init(manapi::debug::LOG_TRACE_HIGH);
     // Enable logs by ManapiHttp (not thread-safe)
-    manapi::init_tools::log_name_enable("manapihttp", true);
-    manapi::init_tools::log_name_enable("manapihttp::fs", true);
-    manapi::init_tools::log_name_enable("manapihttp::http", true);
-    manapi::init_tools::log_name_enable("manapihttp::fetch", true);
-    manapi::init_tools::log_name_enable("manapihttp::bigint", true);
+    manapi::init_tools::log_name_enable("manapicore", true);
+    manapi::init_tools::log_name_enable("manapicore::fs", true);
+    manapi::init_tools::log_name_enable("manapicore::http", true);
+    manapi::init_tools::log_name_enable("manapicore::fetch", true);
+    manapi::init_tools::log_name_enable("manapicore::bigint", true);
     // Print message (method is blocking and thread-safe)
     manapi_log_trace(manapi::debug::LOG_TRACE_HIGH, "Application has started!");
     // Print message with a custom label

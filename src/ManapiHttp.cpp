@@ -129,7 +129,7 @@
 //    if (cache_path_z.second) {
 //
 //        cache_path_z.first->second.as_string() = manapi::unwrap(co_await manapi::fs::async_mkdtemp(
-//                manapi::fs::path::join(std::filesystem::temp_directory_path().string(), "manapihttp-cache-XXXXXX"), ctokens::timeout(5000)));
+//                manapi::fs::path::join(std::filesystem::temp_directory_path().string(), "manapicore-cache-XXXXXX"), ctokens::timeout(5000)));
 //
 //
 //    }
@@ -146,7 +146,7 @@
 //        cache_it->second = manapi::json::parse(text).unwrap();
 //    }
 //    catch (std::exception const &e) {
-//        manapi_log_trace2 ( "manapihttp::http", "%s failed due to %s", "http:Cache load", e.what());
+//        manapi_log_trace2 ( "manapicore::http", "%s failed due to %s", "http:Cache load", e.what());
 //    }
 //}
 //
@@ -362,37 +362,37 @@
 //    this->m_data->http_protocol_workers = std::make_unique<decltype(this->m_data->http_protocol_workers)::element_type>();
 //
 //
-//    #if MANAPIHTTP_ZLIB_DEPENDENCY
+//    #if MANAPICORE_ZLIB_DEPENDENCY
 //    this->compressor ("deflate", +[] ()
 //         { return std::make_unique<manapi::compress::deflate_compress>( 9 ); });
 //    this->compressor ("gzip", +[] ()
 //         { return std::make_unique<manapi::compress::gzip_compress>( 9 ); });
 //#endif
 //
-//#if MANAPIHTTP_BROTLI_DEPENDENCY
+//#if MANAPICORE_BROTLI_DEPENDENCY
 //    this->compressor ("br", +[] ()
 //        { return std::make_unique<manapi::compress::brotli_compress>( 11, 22, 0 ); });
 //#endif
 //
-//#if MANAPIHTTP_ZSTD_DEPENDENCY
+//#if MANAPICORE_ZSTD_DEPENDENCY
 //    this->compressor ("zstd", +[] ()
 //        { return std::make_unique<manapi::compress::zstd_compress>( 1, 0 ); });
 //#endif
 //
 //    this->transport_protocol_worker("tcp", "default", worker::TCP::create);
-//#if MANAPIHTTP_OPENSSL_DEPENDENCY
+//#if MANAPICORE_OPENSSL_DEPENDENCY
 //    this->transport_protocol_worker("tls", "openssl", worker::OpenSSL_TLS::create);
 //#endif
 //
-//#if MANAPIHTTP_WOLFSSL_DEPENDENCY
+//#if MANAPICORE_WOLFSSL_DEPENDENCY
 //    this->transport_protocol_worker("tls", "wolfssl", worker::WolfSSL_TLS::create);
 //#endif
 //
-//#if MANAPIHTTP_QUICHE_DEPENDENCY
+//#if MANAPICORE_QUICHE_DEPENDENCY
 //    this->transport_protocol_worker("quic", "quiche", worker::http_v3_cloudflare_quiche::create);
 //#endif
 //
-//#ifdef MANAPIHTTP_OPENSSL_QUIC_SUPPORT
+//#ifdef MANAPICORE_OPENSSL_QUIC_SUPPORT
 //    this->transport_protocol_worker("quic", "openssl", worker::openssl_quic::create);
 //#endif
 //
@@ -401,18 +401,18 @@
 //    this->http_protocol_worker(http::versions::HTTP_v2, "default", [] (worker::interface_worker *w)
 //        { return manapi__create_protocol_worker (w, worker::default_wrk_http2_global_init); });
 //
-//#if MANAPIHTTP_NGHTTP2_DEPENDENCY
+//#if MANAPICORE_NGHTTP2_DEPENDENCY
 //    this->http_protocol_worker(http::versions::HTTP_v2, "nghttp", [] (worker::interface_worker *w)
 //        { return manapi__create_protocol_worker (w, worker::ng_wrk_http2_global_init); });
 //#endif
 //
-//#if MANAPIHTTP_NGHTTP3_DEPENDENCY
+//#if MANAPICORE_NGHTTP3_DEPENDENCY
 //    this->http_protocol_worker(http::versions::HTTP_v3, "nghttp", [] (worker::interface_worker *w)
 //        { return manapi__create_protocol_worker (w, worker::ng_wrk_http3_global_init); });
 //#endif
 //}
 //
-//manapi::status_or<std::shared_ptr<manapi::net::http::server>> manapi::net::http::server::create(std::shared_ptr<server_ctx> sctx) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<std::shared_ptr<manapi::net::http::server>> manapi::net::http::server::create(std::shared_ptr<server_ctx> sctx) MANAPICORE_NOEXCEPT {
 //    try {
 //        return std::shared_ptr<server> (new http::server(std::move(sctx)));
 //    }
@@ -574,27 +574,27 @@
 //    co_return std::move(res);
 //}
 //
-//manapi::status manapi::net::http::server::GET(std::string uri, handler_template_t handler, manapi::json params) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::http::server::GET(std::string uri, handler_template_t handler, manapi::json params) MANAPICORE_NOEXCEPT {
 //    return this->handler("GET", std::move(uri), std::move(handler), std::move(params)).err();
 //}
 //
-//manapi::status manapi::net::http::server::POST(std::string uri, handler_template_t handler, manapi::json params) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::http::server::POST(std::string uri, handler_template_t handler, manapi::json params) MANAPICORE_NOEXCEPT {
 //    return this->handler("POST", std::move(uri), std::move(handler),  std::move(params)).err();
 //}
 //
-//manapi::status manapi::net::http::server::OPTIONS(std::string uri, handler_template_t handler, manapi::json params) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::http::server::OPTIONS(std::string uri, handler_template_t handler, manapi::json params) MANAPICORE_NOEXCEPT {
 //    return this->handler("OPTIONS", std::move(uri), std::move(handler), std::move(params)).err();
 //}
 //
-//manapi::status manapi::net::http::server::PUT(std::string uri, handler_template_t handler, manapi::json params) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::http::server::PUT(std::string uri, handler_template_t handler, manapi::json params) MANAPICORE_NOEXCEPT {
 //    return this->handler("PUT", std::move(uri), std::move(handler), std::move(params)).err();
 //}
 //
-//manapi::status manapi::net::http::server::PATCH(std::string uri, handler_template_t handler, manapi::json params) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::http::server::PATCH(std::string uri, handler_template_t handler, manapi::json params) MANAPICORE_NOEXCEPT {
 //    return this->handler("PATCH", std::move(uri), std::move(handler), std::move(params)).err();
 //}
 //
-//manapi::status manapi::net::http::server::GET(std::string uri, std::string folder, handler_template_t handler) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::http::server::GET(std::string uri, std::string folder, handler_template_t handler) MANAPICORE_NOEXCEPT {
 //    return this->handler ("GET", std::move(uri), std::move(folder), std::move(handler)).err();
 //}
 //
@@ -650,7 +650,7 @@
 //    this->m_data = nullptr;
 //}
 //
-//manapi::net::http::handler_template_t::handler_template_t(handler_template_t &&n) MANAPIHTTP_NOEXCEPT {
+//manapi::net::http::handler_template_t::handler_template_t(handler_template_t &&n) MANAPICORE_NOEXCEPT {
 //    this->m_type = n.m_type;
 //    this->m_data = n.m_data;
 //
@@ -658,7 +658,7 @@
 //    n.m_type = HANDLER_TEMPLATE_NONE_TYPE;
 //}
 //
-//manapi::net::http::handler_template_t & manapi::net::http::handler_template_t::operator=( handler_template_t &&n) MANAPIHTTP_NOEXCEPT {
+//manapi::net::http::handler_template_t & manapi::net::http::handler_template_t::operator=( handler_template_t &&n) MANAPICORE_NOEXCEPT {
 //    this->m_type = n.m_type;
 //    this->m_data = n.m_data;
 //
@@ -693,27 +693,27 @@
 //    }
 //}
 //
-//bool manapi::net::http::handler_template_t::is_async_cb() const MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::http::handler_template_t::is_async_cb() const MANAPICORE_NOEXCEPT {
 //    return this->m_type == HANDLER_TEMPLATE_ASYNC_CB_TYPE;
 //}
 //
-//bool manapi::net::http::handler_template_t::is_sync_cb() const MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::http::handler_template_t::is_sync_cb() const MANAPICORE_NOEXCEPT {
 //    return this->m_type == HANDLER_TEMPLATE_SYNC_CB_TYPE;
 //}
 //
-//manapi::status_or<manapi::net::http::async_handler_t *> manapi::net::http::handler_template_t::async_cb() MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<manapi::net::http::async_handler_t *> manapi::net::http::handler_template_t::async_cb() MANAPICORE_NOEXCEPT {
 //    if (this->m_type == HANDLER_TEMPLATE_ASYNC_CB_TYPE)
 //        return static_cast<async_handler_t *>(this->m_data);
 //    return status_not_found("async cb not found");
 //}
 //
-//manapi::status_or<manapi::net::http::sync_handler_t *> manapi::net::http::handler_template_t::sync_cb() MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<manapi::net::http::sync_handler_t *> manapi::net::http::handler_template_t::sync_cb() MANAPICORE_NOEXCEPT {
 //    if (this->m_type == HANDLER_TEMPLATE_SYNC_CB_TYPE)
 //        return static_cast<sync_handler_t *>(this->m_data);
 //    return status_not_found("sync cb not found");
 //}
 //
-//manapi::net::http::handler_template_t::operator bool() const MANAPIHTTP_NOEXCEPT {
+//manapi::net::http::handler_template_t::operator bool() const MANAPICORE_NOEXCEPT {
 //    return this->m_type != HANDLER_TEMPLATE_NONE_TYPE && this->m_data;
 //}
 //
@@ -871,7 +871,7 @@
 //}
 //
 //
-//void manapi::net::http::server::unlock_cache_file(std::string_view file, std::string_view algorithm) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::http::server::unlock_cache_file(std::string_view file, std::string_view algorithm) MANAPICORE_NOEXCEPT {
 //    std::lock_guard<std::mutex> lk (::manapi__locked_cache_mx);
 //    auto it = ::manapi__locked_cache.find(std::make_pair (file, algorithm));
 //    if (it != ::manapi__locked_cache.end())
@@ -1021,7 +1021,7 @@
 //}
 //
 //
-//manapi::status_or<manapi::net::http::http_uri_part *> manapi::net::http::server::handler(std::string method, std::string uri, handler_template_t handler, manapi::json params) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<manapi::net::http::http_uri_part *> manapi::net::http::server::handler(std::string method, std::string uri, handler_template_t handler, manapi::json params) MANAPICORE_NOEXCEPT {
 //    manapi::status status;
 //    try {
 //        size_t type = URI_PAGE_DEFAULT;
@@ -1133,7 +1133,7 @@
 //    return std::move(status);
 //}
 //
-//manapi::status_or<manapi::net::http::http_uri_part *> manapi::net::http::server::handler(std::string method, std::string uri, std::string folder, handler_template_t handler) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<manapi::net::http::http_uri_part *> manapi::net::http::server::handler(std::string method, std::string uri, std::string folder, handler_template_t handler) MANAPICORE_NOEXCEPT {
 //    manapi::status status;
 //    try {
 //        size_t type = URI_PAGE_DEFAULT;

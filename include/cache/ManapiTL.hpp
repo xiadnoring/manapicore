@@ -13,11 +13,11 @@ namespace manapi {
     public:
         tl_cache () = default;
 
-        MANAPIHTTP_NODISCARD std::size_t size () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD std::size_t size () const MANAPICORE_NOEXCEPT {
             return this->m_data.size();
         }
 
-        MANAPIHTTP_NODISCARD bool contains (const K &key) const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD bool contains (const K &key) const MANAPICORE_NOEXCEPT {
             return this->m_data.contains(key);
         }
 
@@ -46,7 +46,7 @@ namespace manapi {
             }
         }
 
-        MANAPIHTTP_NODISCARD manapi::status_or<V*> get (const K &key) MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD manapi::status_or<V*> get (const K &key) MANAPICORE_NOEXCEPT {
             this->cleanup();
 
             auto it = this->m_data.find(key);
@@ -55,7 +55,7 @@ namespace manapi {
             return &it->second.second;
         }
 
-        void remove (const K &key) MANAPIHTTP_NOEXCEPT {
+        void remove (const K &key) MANAPICORE_NOEXCEPT {
             auto it = this->m_data.find(key);
             if (it != this->m_data.end()) {
                 this->m_sorted.erase(std::make_pair(it->second.first, it->first));
@@ -65,12 +65,12 @@ namespace manapi {
             this->cleanup();
         }
 
-        void clear () MANAPIHTTP_NOEXCEPT {
+        void clear () MANAPICORE_NOEXCEPT {
             this->m_data.clear();
             this->m_sorted.clear();
         }
 
-        void cleanup () MANAPIHTTP_NOEXCEPT {
+        void cleanup () MANAPICORE_NOEXCEPT {
             auto now = std::chrono::steady_clock::now();
             while (!this->m_sorted.empty()) {
                 auto it = this->m_sorted.begin();

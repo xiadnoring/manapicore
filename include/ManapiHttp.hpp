@@ -33,9 +33,9 @@
 //
 //        handler_template_t (const std::nullptr_t &n);
 //
-//        handler_template_t (handler_template_t &&n) MANAPIHTTP_NOEXCEPT;
+//        handler_template_t (handler_template_t &&n) MANAPICORE_NOEXCEPT;
 //
-//        handler_template_t&operator=(handler_template_t &&n) MANAPIHTTP_NOEXCEPT;
+//        handler_template_t&operator=(handler_template_t &&n) MANAPICORE_NOEXCEPT;
 //
 //        template<typename func>
 //        requires(!std::is_function_v<func> && std::is_convertible_v<func, async_handler_t>)
@@ -51,15 +51,15 @@
 //
 //        ~handler_template_t();
 //
-//        MANAPIHTTP_NODISCARD bool is_async_cb () const MANAPIHTTP_NOEXCEPT;
+//        MANAPICORE_NODISCARD bool is_async_cb () const MANAPICORE_NOEXCEPT;
 //
-//        MANAPIHTTP_NODISCARD bool is_sync_cb () const MANAPIHTTP_NOEXCEPT;
+//        MANAPICORE_NODISCARD bool is_sync_cb () const MANAPICORE_NOEXCEPT;
 //
-//        manapi::status_or<http::async_handler_t*> async_cb () MANAPIHTTP_NOEXCEPT;
+//        manapi::status_or<http::async_handler_t*> async_cb () MANAPICORE_NOEXCEPT;
 //
-//        manapi::status_or<http::sync_handler_t*> sync_cb () MANAPIHTTP_NOEXCEPT;
+//        manapi::status_or<http::sync_handler_t*> sync_cb () MANAPICORE_NOEXCEPT;
 //
-//        MANAPIHTTP_NODISCARD operator bool () const MANAPIHTTP_NOEXCEPT;
+//        MANAPICORE_NODISCARD operator bool () const MANAPICORE_NOEXCEPT;
 //    private:
 //        int m_type;
 //
@@ -92,7 +92,7 @@
 //         * initialize the server with the server ctx
 //         * @param sctx the HTTP server context
 //         */
-//        static manapi::status_or<std::shared_ptr<server>> create (std::shared_ptr<server_ctx> sctx) MANAPIHTTP_NOEXCEPT;
+//        static manapi::status_or<std::shared_ptr<server>> create (std::shared_ptr<server_ctx> sctx) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * Casts |worker::base_http| to |http::server|
@@ -113,7 +113,7 @@
 //         * @param handler handler
 //         * @return
 //         */
-//        manapi::status_or<http_uri_part *> handler (std::string method, std::string uri, handler_template_t handler, manapi::json params) MANAPIHTTP_NOEXCEPT;
+//        manapi::status_or<http_uri_part *> handler (std::string method, std::string uri, handler_template_t handler, manapi::json params) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * Set a folder sharing handler by its method and URI
@@ -123,7 +123,7 @@
 //         * @param handler callback
 //         * @return
 //         */
-//        manapi::status_or<http_uri_part *> handler (std::string method, std::string uri, std::string folder, handler_template_t handler = nullptr) MANAPIHTTP_NOEXCEPT;
+//        manapi::status_or<http_uri_part *> handler (std::string method, std::string uri, std::string folder, handler_template_t handler = nullptr) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * Get the handler by its method and URI
@@ -151,7 +151,7 @@
 //         * @param name Compressor callback name
 //         * @return true if it exists, otherwise, returns false
 //         */
-//        MANAPIHTTP_NODISCARD bool contains_compressor (std::string_view name) const;
+//        MANAPICORE_NODISCARD bool contains_compressor (std::string_view name) const;
 //
 //        /**
 //         * Add a transport protocol worker
@@ -197,35 +197,35 @@
 //         * @param uri URI path
 //         * @param handler callback
 //         */
-//        manapi::status GET (std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPIHTTP_NOEXCEPT;
+//        manapi::status GET (std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * set the POST method for a path
 //         * @param uri URI path
 //         * @param handler callback
 //         */
-//        manapi::status POST (std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPIHTTP_NOEXCEPT;
+//        manapi::status POST (std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * set the OPTIONS method for a path
 //         * @param uri URI path
 //         * @param handler callback
 //         */
-//        manapi::status OPTIONS(std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPIHTTP_NOEXCEPT;
+//        manapi::status OPTIONS(std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * set the PUT method for a path
 //         * @param uri URI path
 //         * @param handler callback
 //         */
-//        manapi::status PUT (std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPIHTTP_NOEXCEPT;
+//        manapi::status PUT (std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * set the PATCH method for a path
 //         * @param uri URI path
 //         * @param handler callback
 //         */
-//        manapi::status PATCH (std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPIHTTP_NOEXCEPT;
+//        manapi::status PATCH (std::string uri, handler_template_t handler, manapi::json params = nullptr) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * share the folder for the GET method
@@ -233,7 +233,7 @@
 //         * @param folder folder
 //         * @param handler callback
 //         */
-//        manapi::status GET (std::string uri, std::string folder, handler_template_t handler = nullptr) MANAPIHTTP_NOEXCEPT;
+//        manapi::status GET (std::string uri, std::string folder, handler_template_t handler = nullptr) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //            * Get compressed file by its file path
@@ -262,7 +262,7 @@
 //         */
 //        manapi::status lock_cache_file (std::string&& file, std::string &&algorithm);
 //
-//        void unlock_cache_file (std::string_view file, std::string_view algorithm) MANAPIHTTP_NOEXCEPT;
+//        void unlock_cache_file (std::string_view file, std::string_view algorithm) MANAPICORE_NOEXCEPT;
 //
 //
 //        /**

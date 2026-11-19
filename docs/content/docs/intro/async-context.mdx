@@ -15,8 +15,8 @@ The context that executes the ```manapi::async::context::run``` method can creat
 ```cpp
 #include <thread>
 
-#include <manapihttp/ManapiEventLoop.hpp>
-#include <manapihttp/std/ManapiContext.hpp>
+#include <manapicore/ManapiEventLoop.hpp>
+#include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
     manapi::async::context::threadpoolfs(4);
@@ -49,9 +49,9 @@ DEBUG main.cpp:12: Async Context #4 has started. threadid=17555092437611076153
 ```TaskPool``` is unique to each ```EventLoop```. You can add tasks to the ```EventLoop``` that will be executed in the next iteration.
 
 ```cpp
-#include <manapihttp/ManapiEventLoop.hpp>
-#include <manapihttp/ManapiThreadPool.hpp>
-#include <manapihttp/std/ManapiContext.hpp>
+#include <manapicore/ManapiEventLoop.hpp>
+#include <manapicore/ManapiThreadPool.hpp>
+#include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
     manapi::async::context::threadpoolfs(4);
@@ -87,10 +87,10 @@ TimerPool manages timeouts and intervals. Each timer has a priority level:
 - **```TIMER_IMPORTANT```** - The Async Context will continue running until no important timers remain.
 
 ```cpp
-#include <manapihttp/ManapiEventLoop.hpp>
-#include <manapihttp/ManapiTimerPool.hpp>
-#include <manapihttp/ManapiThreadPool.hpp>
-#include <manapihttp/std/ManapiContext.hpp>
+#include <manapicore/ManapiEventLoop.hpp>
+#include <manapicore/ManapiTimerPool.hpp>
+#include <manapicore/ManapiThreadPool.hpp>
+#include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
     manapi::async::context::threadpoolfs(4);
@@ -116,10 +116,10 @@ This code will print ```5000ms timeout reached``` and then terminate.
 - **```TIMER_DEFAULT```** - The Async Context does not wait for these timers to complete.
 
 ```cpp
-#include <manapihttp/ManapiEventLoop.hpp>
-#include <manapihttp/ManapiTimerPool.hpp>
-#include <manapihttp/ManapiThreadPool.hpp>
-#include <manapihttp/std/ManapiContext.hpp>
+#include <manapicore/ManapiEventLoop.hpp>
+#include <manapicore/ManapiTimerPool.hpp>
+#include <manapicore/ManapiThreadPool.hpp>
+#include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
     manapi::async::context::threadpoolfs(4);
@@ -219,11 +219,11 @@ DEBUG main.cpp:16: 200ms interval reached
 To execute ```manapi::future<>``` tasks, use the ```manapi::async::run``` method:
 
 ```cpp
-#include <manapihttp/ManapiEventLoop.hpp>
-#include <manapihttp/ManapiTimerPool.hpp>
-#include <manapihttp/ManapiFetch2.hpp>
-#include <manapihttp/ManapiThreadPool.hpp>
-#include <manapihttp/std/ManapiContext.hpp>
+#include <manapicore/ManapiEventLoop.hpp>
+#include <manapicore/ManapiTimerPool.hpp>
+#include <manapicore/ManapiFetch2.hpp>
+#include <manapicore/ManapiThreadPool.hpp>
+#include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
     manapi::async::context::threadpoolfs(4);

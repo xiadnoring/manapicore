@@ -65,7 +65,7 @@ static manapi::status slice_shift_add (manapi::slice_data_t *data, std::size_t s
     return manapi::status_ok();
 }
 
-static manapi::status slice_rshift_add( manapi::slice_data_t *data, std::size_t s, int flags) MANAPIHTTP_NOEXCEPT {
+static manapi::status slice_rshift_add( manapi::slice_data_t *data, std::size_t s, int flags) MANAPICORE_NOEXCEPT {
     if (s > ::slice_size(data))
         return manapi::status_out_of_range("s is too large");
 
@@ -437,15 +437,15 @@ void manapi::slice_base::slice_part_deleter::operator()(slice_part_t *ptr) {
 
 manapi::slice_base::~slice_base() = default;
 
-manapi::slice_base::slice_base(slice_base &&n) MANAPIHTTP_NOEXCEPT = default;
+manapi::slice_base::slice_base(slice_base &&n) MANAPICORE_NOEXCEPT = default;
 
-manapi::slice_base & manapi::slice_base::operator=(slice_base &&n) MANAPIHTTP_NOEXCEPT = default;
+manapi::slice_base & manapi::slice_base::operator=(slice_base &&n) MANAPICORE_NOEXCEPT = default;
 
 manapi::slice_base::slice_base(const slice_base &n) = default;
 
 manapi::slice_base & manapi::slice_base::operator=(const slice_base &n) = default;
 
-manapi::status manapi::slice_base::shift_add(std::size_t shift) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice_base::shift_add(std::size_t shift) MANAPICORE_NOEXCEPT {
     if (this->size() < shift)
         return status_out_of_range("slice: shift is too large");
 
@@ -473,7 +473,7 @@ manapi::status manapi::slice_base::shift_add(std::size_t shift) MANAPIHTTP_NOEXC
     return status_ok();
 }
 
-manapi::status manapi::slice_base::copy_from(const void *buffer, std::size_t shift, std::size_t size) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice_base::copy_from(const void *buffer, std::size_t shift, std::size_t size) MANAPICORE_NOEXCEPT {
     if (!size)
         return manapi::status_ok();
 
@@ -494,7 +494,7 @@ manapi::status manapi::slice_base::copy_from(const void *buffer, std::size_t shi
     return this->copy_from(buffer, current, shift, size);
 }
 
-manapi::status manapi::slice_base::copy_from(const void *buffer, const slice_part_t *current, std::size_t shift, std::size_t size) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice_base::copy_from(const void *buffer, const slice_part_t *current, std::size_t shift, std::size_t size) MANAPICORE_NOEXCEPT {
     if (!current || current->buff.len < shift)
         return status_invalid_argument("copy_from:current is invalid");
 
@@ -521,7 +521,7 @@ manapi::status manapi::slice_base::copy_from(const void *buffer, const slice_par
     return manapi::status_ok();
 }
 
-manapi::status manapi::slice_base::copy_to(void *buffer, std::size_t shift, std::size_t size) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice_base::copy_to(void *buffer, std::size_t shift, std::size_t size) MANAPICORE_NOEXCEPT {
     auto buffer_casted = static_cast<char *>(buffer);
 
     if (size) {
@@ -556,7 +556,7 @@ manapi::status manapi::slice_base::copy_to(void *buffer, std::size_t shift, std:
     return status_ok();
 }
 
-manapi::status manapi::slice_base::copy_from(const slice_base &n, std::size_t shift, std::size_t shift_n, std::size_t size) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice_base::copy_from(const slice_base &n, std::size_t shift, std::size_t shift_n, std::size_t size) MANAPICORE_NOEXCEPT {
     if (!size)
         return status_ok();
 
@@ -621,11 +621,11 @@ manapi::status manapi::slice_base::copy_from(const slice_base &n, std::size_t sh
     return manapi::status_ok();
 }
 
-manapi::status_or<manapi::slice_base> manapi::slice_base::subslice(std::size_t pos, std::size_t size) const MANAPIHTTP_NOEXCEPT {
+manapi::status_or<manapi::slice_base> manapi::slice_base::subslice(std::size_t pos, std::size_t size) const MANAPICORE_NOEXCEPT {
     return ::slice_subslice (this, pos, size, nullptr);
 }
 
-manapi::status_or<manapi::slice_base> manapi::slice_base::subslice(std::size_t pos) const MANAPIHTTP_NOEXCEPT {
+manapi::status_or<manapi::slice_base> manapi::slice_base::subslice(std::size_t pos) const MANAPICORE_NOEXCEPT {
     if (this->size() == pos)
         return manapi::slice_base(nullptr, nullptr, 0, 0, 0, 0);
 
@@ -663,7 +663,7 @@ manapi::slice_const_iterator manapi::slice_base::end() const {
     return slice_const_iterator{(this->m_last) ? (this->m_last->next) : nullptr, this};
 }
 
-int manapi::slice_base::cmp(const manapi::slice_base &n) const MANAPIHTTP_NOEXCEPT {
+int manapi::slice_base::cmp(const manapi::slice_base &n) const MANAPICORE_NOEXCEPT {
     auto size = n.size();
 
     auto buffptr1 = this->m_first;
@@ -729,7 +729,7 @@ int manapi::slice_base::cmp(const manapi::slice_base &n) const MANAPIHTTP_NOEXCE
     return this->size() > size ? 1 : -1;
 }
 
-int manapi::slice_base::cmp(const void *data, std::size_t size) const MANAPIHTTP_NOEXCEPT {
+int manapi::slice_base::cmp(const void *data, std::size_t size) const MANAPICORE_NOEXCEPT {
     int rhs;
     size_t ss;
 
@@ -889,9 +889,9 @@ manapi::slice_ref & manapi::slice_ref::operator=(const slice_ref &n) {
     return *this;
 }
 
-manapi::slice_ref::slice_ref(slice_ref &&n) MANAPIHTTP_NOEXCEPT = default;
+manapi::slice_ref::slice_ref(slice_ref &&n) MANAPICORE_NOEXCEPT = default;
 
-manapi::slice_ref & manapi::slice_ref::operator=(slice_ref &&n) MANAPIHTTP_NOEXCEPT = default;
+manapi::slice_ref & manapi::slice_ref::operator=(slice_ref &&n) MANAPICORE_NOEXCEPT = default;
 
 manapi::slice_ref::~slice_ref() {
     this->clear();
@@ -916,11 +916,11 @@ manapi::status manapi::slice_ref::push_back(const void *buffer, std::size_t size
     return status_ok();
 }
 
-manapi::status manapi::slice_ref::shift_add(std::size_t shift) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice_ref::shift_add(std::size_t shift) MANAPICORE_NOEXCEPT {
     return ::slice_shift_add(this, shift, SLICE__FLAG_CAN_FREE_ONLY_DIV);
 }
 
-void manapi::slice_ref::clear() MANAPIHTTP_NOEXCEPT {
+void manapi::slice_ref::clear() MANAPICORE_NOEXCEPT {
     auto cur = this->m_first;
     if (this->m_last) {
         while (cur && cur != this->m_last->next) {
@@ -939,7 +939,7 @@ void manapi::slice_ref::clear() MANAPIHTTP_NOEXCEPT {
 manapi::slice::slice() : slice_base(nullptr, nullptr, 0, 0, 0, 0) {
 }
 
-manapi::status_or<manapi::slice> manapi::slice::create(std::size_t n) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<manapi::slice> manapi::slice::create(std::size_t n) MANAPICORE_NOEXCEPT {
     return manapi::async::current()->memory_fabric()->slice(n);
 }
 
@@ -976,7 +976,7 @@ manapi::slice::slice(const char *buffer, std::size_t sz) : slice() {
 //
 // }
 
-manapi::slice::slice(slice &&n) MANAPIHTTP_NOEXCEPT : slice() {
+manapi::slice::slice(slice &&n) MANAPICORE_NOEXCEPT : slice() {
     this->m_first = n.m_first;
     this->m_last = n.m_last;
     this->m_count = n.m_count;
@@ -992,7 +992,7 @@ manapi::slice::slice(slice &&n) MANAPIHTTP_NOEXCEPT : slice() {
     n.m_last = nullptr;
 }
 
-manapi::slice & manapi::slice::operator=(slice &&n) MANAPIHTTP_NOEXCEPT {
+manapi::slice & manapi::slice::operator=(slice &&n) MANAPICORE_NOEXCEPT {
     this->clear();
 
     this->m_first = n.m_first;
@@ -1015,7 +1015,7 @@ manapi::slice::~slice() {
     this->clear();
 }
 
-manapi::status manapi::slice::resize(std::size_t size) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice::resize(std::size_t size) MANAPICORE_NOEXCEPT {
     auto const cur = this->size();
 
     if (size == cur)
@@ -1076,7 +1076,7 @@ manapi::status manapi::slice::resize(std::size_t size) MANAPIHTTP_NOEXCEPT {
     return status_ok();
 }
 
-manapi::status manapi::slice::push_back(bytebuffer buffer) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice::push_back(bytebuffer buffer) MANAPICORE_NOEXCEPT {
     if (buffer.empty()) return status_ok();
 
     std::unique_ptr<slice_part_t> t (new (std::nothrow) slice_part_t{});
@@ -1109,7 +1109,7 @@ manapi::status manapi::slice::push_back(bytebuffer buffer) MANAPIHTTP_NOEXCEPT {
     return status_ok();
 }
 
-manapi::status manapi::slice::push_back(slice &&s) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice::push_back(slice &&s) MANAPICORE_NOEXCEPT {
     // WARNING: split(...) uses this function
     if (!s.empty()) {
         ::slice_remove_shift(&s);
@@ -1143,7 +1143,7 @@ manapi::status manapi::slice::push_back(slice &&s) MANAPIHTTP_NOEXCEPT {
     return status_ok();
 }
 
-manapi::status manapi::slice::push_back(const ev::buff_t *buff) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice::push_back(const ev::buff_t *buff) MANAPICORE_NOEXCEPT {
     try {
         if (!buff->len) return status_ok();
 
@@ -1180,7 +1180,7 @@ manapi::status manapi::slice::push_back(const ev::buff_t *buff) MANAPIHTTP_NOEXC
     return status_resource_exhausted();
 }
 
-manapi::status manapi::slice::push_back(const void *buffer, std::size_t size) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice::push_back(const void *buffer, std::size_t size) MANAPICORE_NOEXCEPT {
     try {
         if (!size) return status_ok();
         auto last = this->m_last;
@@ -1201,15 +1201,15 @@ manapi::status manapi::slice::push_back(const void *buffer, std::size_t size) MA
     return status_resource_exhausted();
 }
 
-manapi::status manapi::slice::push_back(std::string_view buffer) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice::push_back(std::string_view buffer) MANAPICORE_NOEXCEPT {
     return this->push_back(buffer.data(), buffer.size());
 }
 
-manapi::status manapi::slice::shift_add(std::size_t shift) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::slice::shift_add(std::size_t shift) MANAPICORE_NOEXCEPT {
     return ::slice_shift_add (this, shift, SLICE__FLAG_CAN_FREE);
 }
 
-manapi::status_or<manapi::slice> manapi::slice::split(std::size_t start, std::size_t size) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<manapi::slice> manapi::slice::split(std::size_t start, std::size_t size) MANAPICORE_NOEXCEPT {
     try {
         slice_part_t *lastfirst = nullptr;
         auto z = ::slice_subslice(this, start, size, &lastfirst);
@@ -1319,7 +1319,7 @@ manapi::status_or<manapi::slice> manapi::slice::split(std::size_t start, std::si
     }
 }
 
-void manapi::slice::clear() MANAPIHTTP_NOEXCEPT {
+void manapi::slice::clear() MANAPICORE_NOEXCEPT {
     auto cur = this->m_first;
 
     while (cur&&cur != this->m_last->next) {
@@ -1384,7 +1384,7 @@ manapi::slice_complex::slice_complex(manapi::slice_view &&n) {
     this->m_flags = 0;
 }
 
-manapi::slice_complex::slice_complex(manapi::slice_complex &&n) MANAPIHTTP_NOEXCEPT {
+manapi::slice_complex::slice_complex(manapi::slice_complex &&n) MANAPICORE_NOEXCEPT {
     this->m_flags = n.m_flags;
     if (n.m_flags & SLICE_COMPLEX_IS_SLICE) {
         new (&this->m_st) manapi::slice ( std::move (n.m_st.s) );
@@ -1393,7 +1393,7 @@ manapi::slice_complex::slice_complex(manapi::slice_complex &&n) MANAPIHTTP_NOEXC
     }
 }
 
-manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice &&n) MANAPIHTTP_NOEXCEPT {
+manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice &&n) MANAPICORE_NOEXCEPT {
     if (&this->m_st.s != &n) {
         manapi__slice_complex_reset(this->m_flags, &this->m_st);
         this->m_flags = SLICE_COMPLEX_IS_SLICE;
@@ -1402,7 +1402,7 @@ manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice &&n) MANAP
     return *this;
 }
 
-manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice_view &&n) MANAPIHTTP_NOEXCEPT {
+manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice_view &&n) MANAPICORE_NOEXCEPT {
     if (&this->m_st.sv != &n) {
         manapi__slice_complex_reset(this->m_flags, &this->m_st);
         this->m_flags = 0;
@@ -1411,7 +1411,7 @@ manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice_view &&n) 
     return *this;
 }
 
-manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice_complex &&n) MANAPIHTTP_NOEXCEPT {
+manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice_complex &&n) MANAPICORE_NOEXCEPT {
     if (this != &n) {
         manapi__slice_complex_reset (this->m_flags, &this->m_st);
         this->m_flags = n.m_flags;
@@ -1424,37 +1424,37 @@ manapi::slice_complex &manapi::slice_complex::operator=(manapi::slice_complex &&
     return *this;
 }
 
-manapi::slice_base *manapi::slice_complex::base() MANAPIHTTP_NOEXCEPT {
+manapi::slice_base *manapi::slice_complex::base() MANAPICORE_NOEXCEPT {
     if (this->m_flags & SLICE_COMPLEX_IS_SLICE) return &this->m_st.s;
     return &this->m_st.sv;
 }
 
-const manapi::slice_base *manapi::slice_complex::base() const MANAPIHTTP_NOEXCEPT {
+const manapi::slice_base *manapi::slice_complex::base() const MANAPICORE_NOEXCEPT {
     if (this->m_flags & SLICE_COMPLEX_IS_SLICE) return &this->m_st.s;
     return &this->m_st.sv;
 }
 
-bool manapi::slice_complex::is_slice() const MANAPIHTTP_NOEXCEPT {
+bool manapi::slice_complex::is_slice() const MANAPICORE_NOEXCEPT {
     return this->m_flags & SLICE_COMPLEX_IS_SLICE;
 }
 
-bool manapi::slice_complex::is_slice_view() const MANAPIHTTP_NOEXCEPT {
+bool manapi::slice_complex::is_slice_view() const MANAPICORE_NOEXCEPT {
     return !(this->m_flags & SLICE_COMPLEX_IS_SLICE);
 }
 
-manapi::slice *manapi::slice_complex::get_slice() MANAPIHTTP_NOEXCEPT {
+manapi::slice *manapi::slice_complex::get_slice() MANAPICORE_NOEXCEPT {
     return &this->m_st.s;
 }
 
-const manapi::slice *manapi::slice_complex::get_slice() const MANAPIHTTP_NOEXCEPT {
+const manapi::slice *manapi::slice_complex::get_slice() const MANAPICORE_NOEXCEPT {
     return &this->m_st.s;
 }
 
-manapi::slice_view *manapi::slice_complex::get_slice_view() MANAPIHTTP_NOEXCEPT {
+manapi::slice_view *manapi::slice_complex::get_slice_view() MANAPICORE_NOEXCEPT {
     return &this->m_st.sv;
 }
 
-const manapi::slice_view *manapi::slice_complex::get_slice_view() const MANAPIHTTP_NOEXCEPT {
+const manapi::slice_view *manapi::slice_complex::get_slice_view() const MANAPICORE_NOEXCEPT {
     return &this->m_st.sv;
 }
 

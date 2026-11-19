@@ -1722,8 +1722,8 @@ cleanup:
 #define UTEST_MAIN()                                                           \
   UTEST_STATE();                                                               \
   int main(int argc, const char *const argv[]) {                               \
-    manapi::init_tools::log_name_enable("manapihttp", true);                   \
-    manapi::init_tools::log_name_enable("manapihttp::fs", true);               \
+    manapi::init_tools::log_name_enable("manapicore", true);                   \
+    manapi::init_tools::log_name_enable("manapicore::fs", true);               \
     return utest_main(argc, argv);                                             \
   }
 

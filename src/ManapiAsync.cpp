@@ -27,35 +27,35 @@ __attribute__((visibility("default")))
     return ctxasync;
 }
 
-void manapi::init_tools::max_coro_stack(std::size_t sz) MANAPIHTTP_NOEXCEPT {
+void manapi::init_tools::max_coro_stack(std::size_t sz) MANAPICORE_NOEXCEPT {
     current_ctxasync().st_max = sz;
 }
 
-void manapi::cthread::current(std::shared_ptr<cthread> ctx) MANAPIHTTP_NOEXCEPT {
+void manapi::cthread::current(std::shared_ptr<cthread> ctx) MANAPICORE_NOEXCEPT {
     current_ctxasync().cthread = std::move(ctx);
 }
 
-const std::shared_ptr<manapi::cthread> & manapi::async::try_current() MANAPIHTTP_NOEXCEPT {
+const std::shared_ptr<manapi::cthread> & manapi::async::try_current() MANAPICORE_NOEXCEPT {
     return current_ctxasync().cthread;
 }
 
-bool manapi::async::context_exists() MANAPIHTTP_NOEXCEPT {
+bool manapi::async::context_exists() MANAPICORE_NOEXCEPT {
     return !!current_ctxasync().cthread;
 }
 
-std::size_t manapi::async::internal::current_stack_cnt_crt () MANAPIHTTP_NOEXCEPT {
+std::size_t manapi::async::internal::current_stack_cnt_crt () MANAPICORE_NOEXCEPT {
     return current_ctxasync().st_cnt;
 }
 
-void manapi::async::internal::current_stack_cnt_set (std::size_t cnt) MANAPIHTTP_NOEXCEPT {
+void manapi::async::internal::current_stack_cnt_set (std::size_t cnt) MANAPICORE_NOEXCEPT {
     current_ctxasync().st_cnt = cnt;
 }
 
-std::size_t manapi::async::internal::max_stack_depth_crt () MANAPIHTTP_NOEXCEPT {
+std::size_t manapi::async::internal::max_stack_depth_crt () MANAPICORE_NOEXCEPT {
     return current_ctxasync().st_max;
 }
 
-bool manapi::async::internal::future_final_awaiter_ready() MANAPIHTTP_NOEXCEPT {
+bool manapi::async::internal::future_final_awaiter_ready() MANAPICORE_NOEXCEPT {
     return false;
 }
 
@@ -83,7 +83,7 @@ void manapi::async::internal::promise_base_future::unhandled_exception() {
     this->m_exception = std::current_exception();
 }
 
-std::coroutine_handle<> manapi::async::internal::promise_base_future::final_awaiter_suspend() MANAPIHTTP_NOEXCEPT {
+std::coroutine_handle<> manapi::async::internal::promise_base_future::final_awaiter_suspend() MANAPICORE_NOEXCEPT {
     auto waiting = std::exchange(this->m_waiting, nullptr);
     if (!waiting)
         waiting = std::noop_coroutine();
@@ -99,7 +99,7 @@ manapi::async::internal::promise<void>::promise() : manapi::async::internal::pro
 
 }
 
-manapi::async::internal::promise<void>::promise(promise &&n) MANAPIHTTP_NOEXCEPT : promise_base_future(std::forward<decltype(n)>(n)) {
+manapi::async::internal::promise<void>::promise(promise &&n) MANAPICORE_NOEXCEPT : promise_base_future(std::forward<decltype(n)>(n)) {
 
 }
 
@@ -109,13 +109,13 @@ void manapi::async::internal::promise<void>::return_void() {
 
 }
 
-void manapi::async::internal::promise<void>::run_finish_cb() MANAPIHTTP_NOEXCEPT {
+void manapi::async::internal::promise<void>::run_finish_cb() MANAPICORE_NOEXCEPT {
     if (this->m_finish_cb) {
         this->m_finish_cb (std::move(this->m_exception));
     }
 }
 
-manapi::async::internal::final_awaiter<void> manapi::async::internal::promise<void>::promise::final_suspend() MANAPIHTTP_NOEXCEPT {
+manapi::async::internal::final_awaiter<void> manapi::async::internal::promise<void>::promise::final_suspend() MANAPICORE_NOEXCEPT {
     return {};
 }
 
@@ -149,7 +149,7 @@ void manapi::async::coro_resume(std::coroutine_handle<> handle) {
     }
 }
 
-void manapi::async::coro_finish(std::coroutine_handle<> handle) MANAPIHTTP_NOEXCEPT {
+void manapi::async::coro_finish(std::coroutine_handle<> handle) MANAPICORE_NOEXCEPT {
     assert(!current_ctxasync().root);
     current_ctxasync().root = handle;
 }

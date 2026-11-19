@@ -95,11 +95,11 @@ namespace manapi {
 #if defined (__unix__) || defined(__APPLE__)
     struct sigset_t : public ::sigset_t {};
 #else
-#   define MANAPIHTTP_SIGSET_NWORDS (1024 / (8 * sizeof (unsigned long int)))
+#   define MANAPICORE_SIGSET_NWORDS (1024 / (8 * sizeof (unsigned long int)))
     struct sigset_t {
-        unsigned long int payload[MANAPIHTTP_SIGSET_NWORDS];
+        unsigned long int payload[MANAPICORE_SIGSET_NWORDS];
     };
-#   undef MANAPIHTTP_SIGSET_NWORDS
+#   undef MANAPICORE_SIGSET_NWORDS
 #endif
     class object_pool;
 
@@ -146,7 +146,7 @@ namespace manapi {
          * set as the default context in the thread
          * @param thr the context
          */
-        static void current (std::shared_ptr<cthread> thr) MANAPIHTTP_NOEXCEPT;
+        static void current (std::shared_ptr<cthread> thr) MANAPICORE_NOEXCEPT;
 
         /**
          * deconstructor
@@ -157,33 +157,33 @@ namespace manapi {
          * get the event loop
          * @return the event loop
          */
-        MANAPIHTTP_NODISCARD const async::shared_eventloop& eventloop() MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const async::shared_eventloop& eventloop() MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const async::shared_mthreadpool &threadpool();
+        MANAPICORE_NODISCARD const async::shared_mthreadpool &threadpool();
 
         /**
          * get the timer pool
          * @return the timer pool
          */
-        MANAPIHTTP_NODISCARD const async::shared_timerpool &timerpool() MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const async::shared_timerpool &timerpool() MANAPICORE_NOEXCEPT;
 
         /**
          * get the event task pool
          * @return the event task pool
          */
-        MANAPIHTTP_NODISCARD const async::shared_etaskpool &etaskpool () MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const async::shared_etaskpool &etaskpool () MANAPICORE_NOEXCEPT;
 
         /**
          * get the logger
          * @return the logger
          */
-        MANAPIHTTP_NODISCARD const async::shared_logger &logger() MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const async::shared_logger &logger() MANAPICORE_NOEXCEPT;
 
         /**
          * get the memory fabric
          * @return the memory fabric
          */
-        MANAPIHTTP_NODISCARD const async::shared_memory_fabric &memory_fabric () MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const async::shared_memory_fabric &memory_fabric () MANAPICORE_NOEXCEPT;
 
         /**
          * start working synchronously
@@ -194,7 +194,7 @@ namespace manapi {
          * stop working
          * @return
          */
-        virtual void send_stop ( manapi::stoken token ) MANAPIHTTP_NOEXCEPT;
+        virtual void send_stop ( manapi::stoken token ) MANAPICORE_NOEXCEPT;
 
         manapi::future<> stop ();
     protected:
@@ -233,21 +233,21 @@ namespace manapi {
          * create a context and return it
          * @return
          */
-        static manapi::status_or<std::shared_ptr<context>> create () MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<context>> create () MANAPICORE_NOEXCEPT;
 
         /**
          * create a context and return it
          * @param threadnum the additional threads
          * @return
          */
-        static manapi::status_or<std::shared_ptr<context>> create (std::size_t threadnum) MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<context>> create (std::size_t threadnum) MANAPICORE_NOEXCEPT;
 
         /**
          * run the callback in all contexts
          * @param loops the count of copies of the context
          * @param callback the callback
          */
-        manapi::status run (std::size_t loops, std::function<void(std::function<void()> bind)> callback) MANAPIHTTP_NOEXCEPT;
+        manapi::status run (std::size_t loops, std::function<void(std::function<void()> bind)> callback) MANAPICORE_NOEXCEPT;
 
         /**
          * run the callback in the context
@@ -259,17 +259,17 @@ namespace manapi {
          * set the thread pool size for filesystem operations
          * @param cnt
          */
-        static void threadpoolfs (std::size_t cnt = 4) MANAPIHTTP_NOEXCEPT;
+        static void threadpoolfs (std::size_t cnt = 4) MANAPICORE_NOEXCEPT;
 
         /**
          * create a blocked signals context
          * @return the blocked signals context
          */
-        static std::unique_ptr<manapi::sigset_t> blockedsignals () MANAPIHTTP_NOEXCEPT;
+        static std::unique_ptr<manapi::sigset_t> blockedsignals () MANAPICORE_NOEXCEPT;
 
-        static manapi::sigset_t *gbs () MANAPIHTTP_NOEXCEPT;
+        static manapi::sigset_t *gbs () MANAPICORE_NOEXCEPT;
 
-        static void gbs (std::unique_ptr<manapi::sigset_t> n) MANAPIHTTP_NOEXCEPT;
+        static void gbs (std::unique_ptr<manapi::sigset_t> n) MANAPICORE_NOEXCEPT;
     private:
         /**
          * global blocked signals storage
@@ -304,11 +304,11 @@ namespace manapi::async::internal {
         ASYNC_TASK_FLAG_EXECUTED = 1
     };
 
-    void run_prepare_error_ (std::exception_ptr err) MANAPIHTTP_NOEXCEPT;
+    void run_prepare_error_ (std::exception_ptr err) MANAPICORE_NOEXCEPT;
 
-    void run_prepare_std_exception_ (std::exception const &e) MANAPIHTTP_NOEXCEPT;
+    void run_prepare_std_exception_ (std::exception const &e) MANAPICORE_NOEXCEPT;
 
-    void run_prepare_manapi_exception_ (manapi::exception &e) MANAPIHTTP_NOEXCEPT;
+    void run_prepare_manapi_exception_ (manapi::exception &e) MANAPICORE_NOEXCEPT;
 
     /**
      * FOR INTERNAL USE ONLY

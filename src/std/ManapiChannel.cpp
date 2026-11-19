@@ -49,11 +49,11 @@ manapi::future<manapi::status> manapi::channel_send::send(manapi::slice &&z, boo
     co_return manapi::status_ok();
 }
 
-bool manapi::channel_send::is_finished() const MANAPIHTTP_NOEXCEPT {
+bool manapi::channel_send::is_finished() const MANAPICORE_NOEXCEPT {
     return this->m_data->flags & CHANNEL__FLAG_FINISHED;
 }
 
-void manapi::channel_send::finish() MANAPIHTTP_NOEXCEPT {
+void manapi::channel_send::finish() MANAPICORE_NOEXCEPT {
     this->m_data->flags |= CHANNEL__FLAG_SEND_FINISHED;
 
     if (this->m_data->resolve_cb) {
@@ -107,11 +107,11 @@ manapi::future<manapi::status_or<manapi::slice>> manapi::channel_recv::recv(ssiz
     co_return sv.unwrap();
 }
 
-bool manapi::channel_recv::is_finished() const MANAPIHTTP_NOEXCEPT {
+bool manapi::channel_recv::is_finished() const MANAPICORE_NOEXCEPT {
     return this->m_data->flags & CHANNEL__FLAG_FINISHED;
 }
 
-void manapi::channel_recv::finish() MANAPIHTTP_NOEXCEPT {
+void manapi::channel_recv::finish() MANAPICORE_NOEXCEPT {
     this->m_data->flags |= CHANNEL__FLAG_RECV_FINISHED;
 
     if (this->m_data->resolve_cb) {

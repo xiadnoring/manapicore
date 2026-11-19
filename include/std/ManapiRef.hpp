@@ -41,12 +41,12 @@ namespace manapi {
             this->reset();
         }
 
-        reference (reference &&n) MANAPIHTTP_NOEXCEPT {
+        reference (reference &&n) MANAPICORE_NOEXCEPT {
             this->src = n.src;
             n.src = nullptr;
         }
 
-        reference& operator= (reference &&n) MANAPIHTTP_NOEXCEPT {
+        reference& operator= (reference &&n) MANAPICORE_NOEXCEPT {
             if (this != &n) {
                 if (n.src) {
                     if constexpr (is_atomic::value) {
@@ -76,7 +76,7 @@ namespace manapi {
             return *this;
         }
 
-        void reset () MANAPIHTTP_NOEXCEPT {
+        void reset () MANAPICORE_NOEXCEPT {
             if (this->src) {
                 if constexpr (is_atomic::value) {
                     if (this->src->refcnt.fetch_sub(1) == 1) {
@@ -91,7 +91,7 @@ namespace manapi {
             }
         }
 
-        void reset (T *n) MANAPIHTTP_NOEXCEPT {
+        void reset (T *n) MANAPICORE_NOEXCEPT {
             if (n) {
                 if constexpr (is_atomic::value) {
                     n->refcnt.fetch_add(1);
@@ -106,35 +106,35 @@ namespace manapi {
             }
         }
 
-        T *operator-> () MANAPIHTTP_NOEXCEPT {
+        T *operator-> () MANAPICORE_NOEXCEPT {
             return this->src;
         }
 
-        T *get () MANAPIHTTP_NOEXCEPT {
+        T *get () MANAPICORE_NOEXCEPT {
             return this->src;
         }
 
-        MANAPIHTTP_NODISCARD T *get () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD T *get () const MANAPICORE_NOEXCEPT {
             return this->src;
         }
 
-        MANAPIHTTP_NODISCARD T *operator->() const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD T *operator->() const MANAPICORE_NOEXCEPT {
             return this->src;
         }
 
-        T &operator *() MANAPIHTTP_NOEXCEPT {
+        T &operator *() MANAPICORE_NOEXCEPT {
             return *this->src;
         }
 
-        MANAPIHTTP_NODISCARD const T &operator*() const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD const T &operator*() const MANAPICORE_NOEXCEPT {
             return *this->src;
         }
 
-        MANAPIHTTP_NODISCARD operator bool () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD operator bool () const MANAPICORE_NOEXCEPT {
             return !!this->src;
         }
 
-        manapi::status ref () const MANAPIHTTP_NOEXCEPT {
+        manapi::status ref () const MANAPICORE_NOEXCEPT {
             if (this->src) {
                 if constexpr (is_atomic::value) {
                     this->src->refcnt.fetch_add(1);
@@ -146,7 +146,7 @@ namespace manapi {
             return manapi::status_internal("ref:Object doesn't exist");
         }
 
-        void unref () const MANAPIHTTP_NOEXCEPT {
+        void unref () const MANAPICORE_NOEXCEPT {
             if (this->src) {
                 if constexpr (is_atomic::value) {
                     if (this->src->refcnt.fetch_sub(1) == 1) {

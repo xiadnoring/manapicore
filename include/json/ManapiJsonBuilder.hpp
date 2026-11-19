@@ -33,9 +33,9 @@ namespace manapi {
 
         manapi::json_error::status_or<json> get ();
 
-        MANAPIHTTP_NODISCARD bool is_ready () const;
+        MANAPICORE_NODISCARD bool is_ready () const;
 
-        MANAPIHTTP_NODISCARD bool is_empty () const;
+        MANAPICORE_NODISCARD bool is_empty () const;
 
         void set (json_mask &mask);
 

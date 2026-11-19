@@ -17,14 +17,14 @@
 //
 //manapi::net::worker::base::~base() = default;
 //
-//ssize_t manapi::net::worker::base::sync_write_ex(const shared_conn &conn, const void *buff, std::size_t size, bool finish, std::size_t maxsize) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::base::sync_write_ex(const shared_conn &conn, const void *buff, std::size_t size, bool finish, std::size_t maxsize) MANAPICORE_NOEXCEPT {
 //    ev::buff_t buffs;
 //    buffs.base = (char*)(buff);
 //    buffs.len = static_cast<decltype(buffs.len)>(size);
 //    return this->sync_write_ex(conn, &buffs, 1, finish, maxsize);
 //}
 //
-//ssize_t manapi::net::worker::base::sync_write(const shared_conn &conn, slice_view buffs, bool finish) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::base::sync_write(const shared_conn &conn, slice_view buffs, bool finish) MANAPICORE_NOEXCEPT {
 //    uint32_t const count = std::min<uint32_t>(buffs.slices_size(), 128);
 //#ifdef _MSC_VER
 //    ev::buff_t *slices = static_cast<ev::buff_t*>(alloca(sizeof (ev::buff_t) * count));
@@ -35,7 +35,7 @@
 //    return this->sync_write(conn, slices, count, finish && buffs.slices_size() == count);
 //}
 //
-//ssize_t manapi::net::worker::base::sync_write(const shared_conn &conn, const void *buff, std::size_t size, bool finish) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::base::sync_write(const shared_conn &conn, const void *buff, std::size_t size, bool finish) MANAPICORE_NOEXCEPT {
 //    ev::buff_t buffs;
 //    buffs.base = (char*)(buff);
 //    buffs.len = static_cast<decltype(buffs.len)>(size);
@@ -276,7 +276,7 @@
 //    co_return static_cast<ssize_t>(total);
 //}
 //
-//void manapi::net::worker::base::event_toggle(const shared_conn & conn, bool state, int flag) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::base::event_toggle(const shared_conn & conn, bool state, int flag) MANAPICORE_NOEXCEPT {
 //    auto flags = this->event_flags(conn);
 //    if (state) {
 //        if (!(flags & flag)) {
@@ -288,27 +288,27 @@
 //    }
 //}
 //
-//manapi::net::worker::connection::ipdata_t * manapi::net::worker::base::ipdata(worker::connection *conn) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::connection::ipdata_t * manapi::net::worker::base::ipdata(worker::connection *conn) MANAPICORE_NOEXCEPT {
 //    return conn->ipdata.get();
 //}
 //
-//int64_t manapi::net::worker::base::stream_id(const shared_conn & s) MANAPIHTTP_NOEXCEPT {
+//int64_t manapi::net::worker::base::stream_id(const shared_conn & s) MANAPICORE_NOEXCEPT {
 //    return 0;
 //}
 //
-//manapi::net::worker::shared_conn manapi::net::worker::base::stream_id(const shared_conn &conn, int64_t id) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::shared_conn manapi::net::worker::base::stream_id(const shared_conn &conn, int64_t id) MANAPICORE_NOEXCEPT {
 //    return nullptr;
 //}
 //
-//std::size_t manapi::net::worker::base::streams_size(const shared_conn &conn) const MANAPIHTTP_NOEXCEPT {
+//std::size_t manapi::net::worker::base::streams_size(const shared_conn &conn) const MANAPICORE_NOEXCEPT {
 //    return 0;
 //}
 //
-//manapi::status_or<manapi::reference<manapi::net::worker::connection>> manapi::net::worker::base::new_stream(const shared_conn & conn, int flags) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<manapi::reference<manapi::net::worker::connection>> manapi::net::worker::base::new_stream(const shared_conn & conn, int flags) MANAPICORE_NOEXCEPT {
 //    return status_unimplemented("worker:Streams are not supported");
 //}
 //
-//int manapi::net::worker::base::notify_cb(manapi::net::worker::worker_watcher_cb &cb, const manapi::net::worker::shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::base::notify_cb(manapi::net::worker::worker_watcher_cb &cb, const manapi::net::worker::shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPICORE_NOEXCEPT {
 //    this->m_removed_cbs_deps++;
 //    int rhs;
 //

@@ -1,7 +1,7 @@
 #include "./include/ManapiUtils.hpp"
 #include "ManapiBigint.hpp"
 
-#if MANAPIHTTP_GMP_DEPENDENCY
+#if MANAPICORE_GMP_DEPENDENCY
 
 #include <cmath>
 #include <algorithm>
@@ -59,7 +59,7 @@ static manapi::bigint::data_t * bigint__new ( uint32_t precision ) {
     return x;
 }
 
-void manapi::bigint::data_t_deleter::operator()(data_t *n) MANAPIHTTP_NOEXCEPT {
+void manapi::bigint::data_t_deleter::operator()(data_t *n) MANAPICORE_NOEXCEPT {
     if (n) {
         mpf_clear(n->m);
         delete n;
@@ -101,11 +101,11 @@ manapi::bigint::bigint(std::string_view num, uint32_t precision) {
 //     precision(precision);
 // }
 
-manapi::bigint::bigint(bigint &&other) MANAPIHTTP_NOEXCEPT {
+manapi::bigint::bigint(bigint &&other) MANAPICORE_NOEXCEPT {
     this->x = std::move(other.x);
 }
 
-manapi::bigint &manapi::bigint::operator=(bigint &&other) MANAPIHTTP_NOEXCEPT {
+manapi::bigint &manapi::bigint::operator=(bigint &&other) MANAPICORE_NOEXCEPT {
     this->x = std::move(other.x);
     return *this;
 }

@@ -4,7 +4,7 @@
 //#include "ManapiUtils.hpp"
 //#include "utils/ManapiConfig.hpp"
 //
-//#if MANAPIHTTP_GRPC_DEPENDENCY
+//#if MANAPICORE_GRPC_DEPENDENCY
 //
 //#include <grpcpp/ext/proto_server_reflection_plugin.h>
 //#include <grpcpp/grpcpp.h>
@@ -15,10 +15,10 @@
 //
 //#include "std/ManapiContext.hpp"
 //
-//#define MANAPIHTTP_GRPC_SINCE_AT(major, minor, patch) MANAPIHTTP_SINCE_AT_CUSTOM(GRPC_CPP_VERSION_MAJOR, GRPC_CPP_VERSION_MINOR, GRPC_CPP_VERSION_PATCH, major, minor, patch)
+//#define MANAPICORE_GRPC_SINCE_AT(major, minor, patch) MANAPICORE_SINCE_AT_CUSTOM(GRPC_CPP_VERSION_MAJOR, GRPC_CPP_VERSION_MINOR, GRPC_CPP_VERSION_PATCH, major, minor, patch)
 //
 //namespace manapi::net::wgrpc {
-//#if MANAPIHTTP_GRPC_SINCE_AT(1, 49, 0)
+//#if MANAPICORE_GRPC_SINCE_AT(1, 49, 0)
 //    template<typename ...Args>
 //    using resolve_callback_t = absl::AnyInvocable<void(Args...)>;
 //#else
@@ -46,7 +46,7 @@
 //
 //        absl::Status Start() override;
 //
-//        static void shutdown (net_listener *id, manapi::ev::shared_tcp conn, resolve_callback_t<absl::Status> on_shutdown_cb, async::shared_cthread ev) MANAPIHTTP_NOEXCEPT;
+//        static void shutdown (net_listener *id, manapi::ev::shared_tcp conn, resolve_callback_t<absl::Status> on_shutdown_cb, async::shared_cthread ev) MANAPICORE_NOEXCEPT;
 //
 //        manapi::status set (ev::shared_tcp connection);
 //
@@ -61,7 +61,7 @@
 //        event_engine_wrapper *engine;
 //    public:
 //        dns_resolved (event_engine_wrapper *engine);
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //        void LookupHostname(LookupHostnameCallback on_resolve, absl::string_view name, absl::string_view default_port) override;
 //
 //        void LookupSRV(LookupSRVCallback on_resolve, absl::string_view name) override;
@@ -77,7 +77,7 @@
 //        bool CancelLookup(LookupTaskHandle handle) override;
 //#endif
 //
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //        void *QueryExtension(absl::string_view key) override;
 //#endif
 //    };
@@ -97,7 +97,7 @@
 //        std::size_t on_read_hints_bytes;
 //
 //        grpc_event_engine::experimental::SliceBuffer buffer;
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //        std::shared_ptr<TelemetryInfo> metric;
 //#endif
 //
@@ -109,8 +109,8 @@
 //            grpc_event_engine::experimental::MemoryAllocator memory_allocator);
 //
 //        ~net_endpoint() override;
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
-//#   if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,54,0)
+//#   if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //        bool Read(resolve_callback_t<absl::Status> on_read, grpc_event_engine::experimental::SliceBuffer *buffer, ReadArgs args) override;
 //
 //        bool Write(resolve_callback_t<absl::Status> on_writable, grpc_event_engine::experimental::SliceBuffer *data, WriteArgs args) override;
@@ -128,11 +128,11 @@
 //
 //        void Write(resolve_callback_t<absl::Status> on_writable, grpc_event_engine::experimental::SliceBuffer *data, const WriteArgs *args) override;
 //#endif
-//        MANAPIHTTP_NODISCARD const grpc_event_engine::experimental::EventEngine::ResolvedAddress &GetLocalAddress() const override;
+//        MANAPICORE_NODISCARD const grpc_event_engine::experimental::EventEngine::ResolvedAddress &GetLocalAddress() const override;
 //
-//        MANAPIHTTP_NODISCARD const grpc_event_engine::experimental::EventEngine::ResolvedAddress &GetPeerAddress() const override;
+//        MANAPICORE_NODISCARD const grpc_event_engine::experimental::EventEngine::ResolvedAddress &GetPeerAddress() const override;
 //
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //        std::shared_ptr<TelemetryInfo> GetTelemetryInfo() const override;
 //#endif
 //    private:
@@ -154,13 +154,13 @@
 //
 //        static void init_instance ();
 //
-//        void magic (std::string_view m) MANAPIHTTP_NOEXCEPT;
+//        void magic (std::string_view m) MANAPICORE_NOEXCEPT;
 //
-//        MANAPIHTTP_NODISCARD std::string_view magic () const MANAPIHTTP_NOEXCEPT;
+//        MANAPICORE_NODISCARD std::string_view magic () const MANAPICORE_NOEXCEPT;
 //
 //        bool Cancel(TaskHandle handle) override;
 //
-//        void enable_threadpool (bool status) MANAPIHTTP_NOEXCEPT;
+//        void enable_threadpool (bool status) MANAPICORE_NOEXCEPT;
 //
 //        ConnectionHandle Connect(OnConnectCallback on_connect,
 //            const ResolvedAddress &addr,
@@ -184,7 +184,7 @@
 //        TaskHandle RunAfter(Duration when, resolve_callback_t<> closure) override;
 //
 //        bool IsWorkerThread() override;
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //        absl::StatusOr<std::unique_ptr<DNSResolver>> GetDNSResolver(const DNSResolver::ResolverOptions &options) override;
 //#else
 //        std::unique_ptr<DNSResolver> GetDNSResolver(const DNSResolver::ResolverOptions &options) override;

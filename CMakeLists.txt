@@ -1,10 +1,10 @@
-# cmake_minimum_required(VERSION 3.28.2) # CXX Modules Support
-cmake_minimum_required(VERSION 3.10)
-project(manapihttp LANGUAGES CXX VERSION 1.1.1 DESCRIPTION "Fast HTTP Server/Client Library for easy develop API-Services and Web Applications")
+cmake_minimum_required(VERSION 3.28) # CXX Modules Support
+# cmake_minimum_required(VERSION 3.10)
+project(manapicore LANGUAGES CXX VERSION 1.1.1 DESCRIPTION "Fast HTTP Server/Client Library for easy develop API-Services and Web Applications")
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS ON)
 #set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 #set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 
@@ -29,61 +29,61 @@ else ()
 endif ()
 
 OPTION(BUILD_SHARED_LIBS "Build shared libs" OFF)
-OPTION(MANAPIHTTP_GMP_DEPENDENCY "BigInt support by GMP" ON)
-OPTION(MANAPIHTTP_CURL_DEPENDENCY "Fetch support by CURL" ON)
-OPTION(MANAPIHTTP_ZLIB_DEPENDENCY "Compress support by zlib" ON)
-OPTION(MANAPIHTTP_JSON_DEBUG "JSON debug variables" ON)
-OPTION(MANAPIHTTP_QUICHE_DEPENDENCY "The QUIC Implementation by Cloudflare" ON)
-OPTION(MANAPIHTTP_TQUIC_DEPENDENCY "The QUIC Implementation by Tencent" ON)
-OPTION(MANAPIHTTP_MSQUIC_DEPENDENCY "The QUIC Implementation by Microsoft" ON)
-OPTION(MANAPIHTTP_OPENSSL_DEPENDENCY "TLS, QUIC and etc implementations by OpenSSL" ON)
-OPTION(MANAPIHTTP_WOLFSSL_DEPENDENCY "TLS, QUIC and etc implementations by WolfSSL" ON)
-OPTION(MANAPIHTTP_GRPC_DEPENDENCY "gPRC implementations by Google" ON)
-OPTION(MANAPIHTTP_BROTLI_DEPENDENCY "Brotli Enabled" ON)
-OPTION(MANAPIHTTP_ZSTD_DEPENDENCY "ZSTD Enabled" ON)
-OPTION(MANAPIHTTP_BUILD_METHOD "Build method" "default")
-OPTION(MANAPIHTTP_WOLFSSL_WITH_ALPN "WolfSSL with ALPN" ON)
-OPTION(MANAPIHTTP_NGHTTP2_DEPENDENCY "libnghttp2 by nghttp2" ON)
-OPTION(MANAPIHTTP_NGHTTP3_DEPENDENCY "libnghttp3 by nghttp3" ON)
-OPTION(MANAPIHTTP_CPPTRACE_DEPENDENCY "Stack Tracing c++" OFF)
-OPTION(MANAPIHTTP_DEPENDENCY_FETCH_SHARED "Build Shared Dependency" ON)
-OPTION(MANAPIHTTP_STD_BACKTRACE_DEPENDENCY "backtrace utils by std" ON)
-OPTION(MANAPIHTTP_OPENSSL_SYSTEM_DISABLE "Disable default OpenSSL" OFF)
-OPTION(MANAPIHTTP_CURL_SYSTEM_DISABLE "Disable default cURL" OFF)
-OPTION(MANAPIHTTP_NGHTTP2_SYSTEM_DISABLE "Disable default nghttp2" OFF)
-OPTION(MANAPIHTTP_NGHTTP3_SYSTEM_DISABLE "Disable default nghttp3" OFF)
-OPTION(MANAPIHTTP_DISABLE_TRACE "Disable Trace Debug" OFF)
-OPTION(MANAPIHTTP_DISABLE_TRACE_HARD "Disable Trace Hard Debug" OFF)
-OPTION(MANAPIHTTP_NGHTTP3_SYSTEM_DISABLE "Disable default nghttp3" OFF)
-OPTION(MANAPIHTTP_QT_DEPENDENCY "Qt dependency" OFF)
-OPTION(MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT "Output Directory For Libraries" OFF)
-OPTION(MANAPIHTTP_BUILD_TYPE "Build result: binary or library" "lib")
-OPTION(MANAPIHTTP_INSTALL_ARCH "/x86_64-linux-gnu for example" "")
-OPTION(MANAPIHTTP_ENABLE_TESTS "Enable Tests" OFF)
-OPTION(MANAPIHTTP_STRICT_BUILD "Strict Build" OFF)
-OPTION(MANAPIHTTP_UNITY_BUILD "Unity Build" OFF)
+OPTION(MANAPICORE_GMP_DEPENDENCY "BigInt support by GMP" ON)
+OPTION(MANAPICORE_CURL_DEPENDENCY "Fetch support by CURL" ON)
+OPTION(MANAPICORE_ZLIB_DEPENDENCY "Compress support by zlib" ON)
+OPTION(MANAPICORE_JSON_DEBUG "JSON debug variables" ON)
+OPTION(MANAPICORE_QUICHE_DEPENDENCY "The QUIC Implementation by Cloudflare" ON)
+OPTION(MANAPICORE_TQUIC_DEPENDENCY "The QUIC Implementation by Tencent" ON)
+OPTION(MANAPICORE_MSQUIC_DEPENDENCY "The QUIC Implementation by Microsoft" ON)
+OPTION(MANAPICORE_OPENSSL_DEPENDENCY "TLS, QUIC and etc implementations by OpenSSL" ON)
+OPTION(MANAPICORE_WOLFSSL_DEPENDENCY "TLS, QUIC and etc implementations by WolfSSL" ON)
+OPTION(MANAPICORE_GRPC_DEPENDENCY "gPRC implementations by Google" ON)
+OPTION(MANAPICORE_BROTLI_DEPENDENCY "Brotli Enabled" ON)
+OPTION(MANAPICORE_ZSTD_DEPENDENCY "ZSTD Enabled" ON)
+OPTION(MANAPICORE_BUILD_METHOD "Build method" "default")
+OPTION(MANAPICORE_WOLFSSL_WITH_ALPN "WolfSSL with ALPN" ON)
+OPTION(MANAPICORE_NGHTTP2_DEPENDENCY "libnghttp2 by nghttp2" ON)
+OPTION(MANAPICORE_NGHTTP3_DEPENDENCY "libnghttp3 by nghttp3" ON)
+OPTION(MANAPICORE_CPPTRACE_DEPENDENCY "Stack Tracing c++" OFF)
+OPTION(MANAPICORE_DEPENDENCY_FETCH_SHARED "Build Shared Dependency" ON)
+OPTION(MANAPICORE_STD_BACKTRACE_DEPENDENCY "backtrace utils by std" ON)
+OPTION(MANAPICORE_OPENSSL_SYSTEM_DISABLE "Disable default OpenSSL" OFF)
+OPTION(MANAPICORE_CURL_SYSTEM_DISABLE "Disable default cURL" OFF)
+OPTION(MANAPICORE_NGHTTP2_SYSTEM_DISABLE "Disable default nghttp2" OFF)
+OPTION(MANAPICORE_NGHTTP3_SYSTEM_DISABLE "Disable default nghttp3" OFF)
+OPTION(MANAPICORE_DISABLE_TRACE "Disable Trace Debug" OFF)
+OPTION(MANAPICORE_DISABLE_TRACE_HARD "Disable Trace Hard Debug" OFF)
+OPTION(MANAPICORE_NGHTTP3_SYSTEM_DISABLE "Disable default nghttp3" OFF)
+OPTION(MANAPICORE_QT_DEPENDENCY "Qt dependency" OFF)
+OPTION(MANAPICORE_DEPENDENCY_FETCH_OUTPUT "Output Directory For Libraries" OFF)
+OPTION(MANAPICORE_BUILD_TYPE "Build result: binary or library" "lib")
+OPTION(MANAPICORE_INSTALL_ARCH "/x86_64-linux-gnu for example" "")
+OPTION(MANAPICORE_ENABLE_TESTS "Enable Tests" OFF)
+OPTION(MANAPICORE_STRICT_BUILD "Strict Build" OFF)
+OPTION(MANAPICORE_UNITY_BUILD "Unity Build" OFF)
 
 OPTION(CMAKE_BUILD_TYPE "Library build type" "Release")
-message(STATUS "C++ Stack Tracing: ${MANAPIHTTP_CPPTRACE_DEPENDENCY}")
-message(STATUS "MANAPIHTTP_BUILD_METHOD: ${MANAPIHTTP_BUILD_METHOD}")
-message(STATUS "gPRC implementations by Google: ${MANAPIHTTP_GRPC_DEPENDENCY}")
-message(STATUS "The QUIC Implementation by Cloudflare: ${MANAPIHTTP_QUICHE_DEPENDENCY}")
-message(STATUS "The QUIC Implementation by Tencent: ${MANAPIHTTP_TQUIC_DEPENDENCY}")
-message(STATUS "The QUIC Implementation by Microsoft: ${MANAPIHTTP_MSQUIC_DEPENDENCY}")
-message(STATUS "TLS, QUIC and etc implementations by OpenSSL: ${MANAPIHTTP_OPENSSL_DEPENDENCY}")
-message(STATUS "TLS, QUIC and etc implementations by WolfSSL: ${MANAPIHTTP_WOLFSSL_DEPENDENCY}")
-message(STATUS "BigInt support by GMP: ${MANAPIHTTP_GMP_DEPENDENCY}")
-message(STATUS "Fetch support by CURL: ${MANAPIHTTP_CURL_DEPENDENCY}")
-message(STATUS "Some compresses support by zlib: ${MANAPIHTTP_ZLIB_DEPENDENCY}")
-message(STATUS "libnghttp2 by nghttp2: ${MANAPIHTTP_NGHTTP2_DEPENDENCY}")
-message(STATUS "libnghttp3 by nghttp3: ${MANAPIHTTP_NGHTTP3_DEPENDENCY}")
-message(STATUS "qt dependency: ${MANAPIHTTP_QT_DEPENDENCY}")
+message(STATUS "C++ Stack Tracing: ${MANAPICORE_CPPTRACE_DEPENDENCY}")
+message(STATUS "MANAPICORE_BUILD_METHOD: ${MANAPICORE_BUILD_METHOD}")
+message(STATUS "gPRC implementations by Google: ${MANAPICORE_GRPC_DEPENDENCY}")
+message(STATUS "The QUIC Implementation by Cloudflare: ${MANAPICORE_QUICHE_DEPENDENCY}")
+message(STATUS "The QUIC Implementation by Tencent: ${MANAPICORE_TQUIC_DEPENDENCY}")
+message(STATUS "The QUIC Implementation by Microsoft: ${MANAPICORE_MSQUIC_DEPENDENCY}")
+message(STATUS "TLS, QUIC and etc implementations by OpenSSL: ${MANAPICORE_OPENSSL_DEPENDENCY}")
+message(STATUS "TLS, QUIC and etc implementations by WolfSSL: ${MANAPICORE_WOLFSSL_DEPENDENCY}")
+message(STATUS "BigInt support by GMP: ${MANAPICORE_GMP_DEPENDENCY}")
+message(STATUS "Fetch support by CURL: ${MANAPICORE_CURL_DEPENDENCY}")
+message(STATUS "Some compresses support by zlib: ${MANAPICORE_ZLIB_DEPENDENCY}")
+message(STATUS "libnghttp2 by nghttp2: ${MANAPICORE_NGHTTP2_DEPENDENCY}")
+message(STATUS "libnghttp3 by nghttp3: ${MANAPICORE_NGHTTP3_DEPENDENCY}")
+message(STATUS "qt dependency: ${MANAPICORE_QT_DEPENDENCY}")
 
-set(MANAPIHTTP_GMP_DEPENDENCY_OBJ OFF)
+set(MANAPICORE_GMP_DEPENDENCY_OBJ OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 
-if(MANAPIHTTP_STRICT_BUILD)
+if(MANAPICORE_STRICT_BUILD)
     if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(
                 -Werror
@@ -98,7 +98,7 @@ if(MANAPIHTTP_STRICT_BUILD)
     endif()
 endif()
 
-if (MANAPIHTTP_STRICT_MEM)
+if (MANAPICORE_STRICT_MEM)
     if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(
                 -fsanitize=address
@@ -117,65 +117,65 @@ else()
     endif()
 endif()
 
-if (MANAPIHTTP_BUILD_METHOD STREQUAL "conan")
+if (MANAPICORE_BUILD_METHOD STREQUAL "conan")
     message(STATUS "Build method: conan")
 
     find_package(libuv REQUIRED)
 
-    if (MANAPIHTTP_GMP_DEPENDENCY)
+    if (MANAPICORE_GMP_DEPENDENCY)
         find_package(gmp REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_ZLIB_DEPENDENCY)
+    if (MANAPICORE_ZLIB_DEPENDENCY)
         find_package(ZLIB REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_CURL_DEPENDENCY)
+    if (MANAPICORE_CURL_DEPENDENCY)
         find_package(CURL REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_QUICHE_DEPENDENCY)
+    if (MANAPICORE_QUICHE_DEPENDENCY)
         find_package(quiche REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_TQUIC_DEPENDENCY)
+    if (MANAPICORE_TQUIC_DEPENDENCY)
         find_package(tquic REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_WOLFSSL_DEPENDENCY)
+    if (MANAPICORE_WOLFSSL_DEPENDENCY)
         find_package(wolfssl REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_OPENSSL_DEPENDENCY)
+    if (MANAPICORE_OPENSSL_DEPENDENCY)
         find_package(OpenSSL REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_BROTLI_DEPENDENCY)
+    if (MANAPICORE_BROTLI_DEPENDENCY)
         find_package(brotli REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_ZSTD_DEPENDENCY)
+    if (MANAPICORE_ZSTD_DEPENDENCY)
         find_package(zstd REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_GRPC_DEPENDENCY)
+    if (MANAPICORE_GRPC_DEPENDENCY)
         find_package(protobuf REQUIRED)
         find_package(gRPC REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_NGHTTP2_DEPENDENCY)
+    if (MANAPICORE_NGHTTP2_DEPENDENCY)
         find_package(libnghttp2 REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_NGHTTP3_DEPENDENCY)
+    if (MANAPICORE_NGHTTP3_DEPENDENCY)
         find_package(nghttp3 REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_CPPTRACE_DEPENDENCY)
+    if (MANAPICORE_CPPTRACE_DEPENDENCY)
         find_package(cpptrace REQUIRED)
     endif ()
 
-    if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe")
+    if (MANAPICORE_BUILD_TYPE STREQUAL "exe")
         # For Testing
         find_package(PostgreSQL)
     endif ()
@@ -183,15 +183,15 @@ else ()
     include(FetchContent)
     include(ExternalProject)
 
-    set(MANAPIHTTP_DEPS_PREFIX "${CMAKE_BINARY_DIR}/deps")
-    set(MANAPIHTTP_PATCHES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/patches")
+    set(MANAPICORE_DEPS_PREFIX "${CMAKE_BINARY_DIR}/deps")
+    set(MANAPICORE_PATCHES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cmake/patches")
 
-    message(STATUS "Build method: ${MANAPIHTTP_BUILD_METHOD}")
+    message(STATUS "Build method: ${MANAPICORE_BUILD_METHOD}")
 
-    set(MANAPIHTTP_DEPENDENCY_FETCH OFF)
+    set(MANAPICORE_DEPENDENCY_FETCH OFF)
 
-    if (MANAPIHTTP_BUILD_METHOD STREQUAL "fetch")
-        set(MANAPIHTTP_DEPENDENCY_FETCH ON)
+    if (MANAPICORE_BUILD_METHOD STREQUAL "fetch")
+        set(MANAPICORE_DEPENDENCY_FETCH ON)
     endif ()
 
     find_package(PkgConfig)
@@ -199,285 +199,285 @@ else ()
     # include finders
     # include(./cmake/FindLibev.cmake)
 
-    if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe")
+    if (MANAPICORE_BUILD_TYPE STREQUAL "exe")
         find_package(PostgreSQL)
     endif()
 
-    if (MANAPIHTTP_DEPENDENCY_FETCH)
+    if (MANAPICORE_DEPENDENCY_FETCH)
         pkg_check_modules(LIBUV REQUIRED IMPORTED_TARGET libuv)
     else ()
         pkg_check_modules(LIBUV IMPORTED_TARGET libuv)
     endif ()
     # set (LIBUV_FOUND OFF)
     if (NOT LIBUV_FOUND)
-        if (MANAPIHTTP_DEPENDENCY_FETCH)
-            set(MANAPIHTTP_LIBUV_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libuv)
-            if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
-                set(MANAPIHTTP_LIBUV_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}uv${CMAKE_SHARED_LIBRARY_SUFFIX}")
+        if (MANAPICORE_DEPENDENCY_FETCH)
+            set(MANAPICORE_LIBUV_INSTALL_DIR ${MANAPICORE_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libuv)
+            if (MANAPICORE_DEPENDENCY_FETCH_SHARED)
+                set(MANAPICORE_LIBUV_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}uv${CMAKE_SHARED_LIBRARY_SUFFIX}")
             else ()
-                set(MANAPIHTTP_LIBUV_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}uv${CMAKE_STATIC_LIBRARY_SUFFIX}")
+                set(MANAPICORE_LIBUV_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}uv${CMAKE_STATIC_LIBRARY_SUFFIX}")
             endif ()
 
-            if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
-                set(LIBUV_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/uv/${MANAPIHTTP_LIBUV_LIBNAME}")
+            if (MANAPICORE_DEPENDENCY_FETCH_OUTPUT)
+                set(LIBUV_LIBRARIES "${MANAPICORE_DEPENDENCY_FETCH_OUTPUT}/uv/${MANAPICORE_LIBUV_LIBNAME}")
             else ()
-                set(LIBUV_LIBRARIES "${MANAPIHTTP_LIBUV_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_LIBUV_LIBNAME}")
+                set(LIBUV_LIBRARIES "${MANAPICORE_LIBUV_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPICORE_LIBUV_LIBNAME}")
             endif ()
 
-            set(LIBUV_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_LIBUV_INSTALL_DIR}/include>)
+            set(LIBUV_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPICORE_LIBUV_INSTALL_DIR}/include>)
 
             ExternalProject_Add(
                     libuv
-                    PREFIX "${MANAPIHTTP_DEPS_PREFIX}"
+                    PREFIX "${MANAPICORE_DEPS_PREFIX}"
                     DOWNLOAD_NAME libuv.tar.gz
                     GIT_REPOSITORY https://github.com/libuv/libuv
                     GIT_TAG v1.51.0
                     CMAKE_ARGS
-                    -DCMAKE_INSTALL_PREFIX:PATH=${MANAPIHTTP_LIBUV_INSTALL_DIR}
-                    -DBUILD_SHARED_LIBS=${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}
+                    -DCMAKE_INSTALL_PREFIX:PATH=${MANAPICORE_LIBUV_INSTALL_DIR}
+                    -DBUILD_SHARED_LIBS=${MANAPICORE_DEPENDENCY_FETCH_SHARED}
                     BUILD_BYPRODUCTS "${LIBUV_LIBRARIES}"
             )
-            set(MANAPIHTTP_LIBUV_DEPENDENCY_FETCH ON)
+            set(MANAPICORE_LIBUV_DEPENDENCY_FETCH ON)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_QT_DEPENDENCY)
+    if (MANAPICORE_QT_DEPENDENCY)
         find_package(Qt6 COMPONENTS Core Widgets Quick)
         if (Qt6_FOUND)
             set(CMAKE_AUTOMOC ON)
         else ()
             message(STATUS "qt6 not found")
-            set(MANAPIHTTP_QT_DEPENDENCY OFF)
+            set(MANAPICORE_QT_DEPENDENCY OFF)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_GMP_DEPENDENCY)
+    if (MANAPICORE_GMP_DEPENDENCY)
         pkg_check_modules(GMP gmp)
         # set(GMP_FOUND OFF)
 
         if (NOT GMP_FOUND)
-            if (MANAPIHTTP_DEPENDENCY_FETCH)
-                set(MANAPIHTTP_GMP_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/gmp)
-                if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
-                    set(MANAPIHTTP_GMP_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}gmp${CMAKE_SHARED_LIBRARY_SUFFIX}")
+            if (MANAPICORE_DEPENDENCY_FETCH)
+                set(MANAPICORE_GMP_INSTALL_DIR ${MANAPICORE_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/gmp)
+                if (MANAPICORE_DEPENDENCY_FETCH_SHARED)
+                    set(MANAPICORE_GMP_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}gmp${CMAKE_SHARED_LIBRARY_SUFFIX}")
                 else ()
-                    set(MANAPIHTTP_GMP_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}gmp${CMAKE_STATIC_LIBRARY_SUFFIX}")
+                    set(MANAPICORE_GMP_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}gmp${CMAKE_STATIC_LIBRARY_SUFFIX}")
                 endif ()
 
-                if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
-                    set(GMP_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/gmp/${MANAPIHTTP_GMP_LIBNAME}")
+                if (MANAPICORE_DEPENDENCY_FETCH_OUTPUT)
+                    set(GMP_LIBRARIES "${MANAPICORE_DEPENDENCY_FETCH_OUTPUT}/gmp/${MANAPICORE_GMP_LIBNAME}")
                 else ()
-                    set(GMP_LIBRARIES "${MANAPIHTTP_GMP_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_GMP_LIBNAME}")
+                    set(GMP_LIBRARIES "${MANAPICORE_GMP_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPICORE_GMP_LIBNAME}")
                 endif ()
 
-                set(GMP_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_GMP_INSTALL_DIR}/include>)
+                set(GMP_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPICORE_GMP_INSTALL_DIR}/include>)
 
                 ExternalProject_Add(
                         gmp
-                        PREFIX "${MANAPIHTTP_DEPS_PREFIX}"
+                        PREFIX "${MANAPICORE_DEPS_PREFIX}"
                         DOWNLOAD_NAME gmp.tar.gz
                         URL https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.bz2 https://gmplib.org/download/gmp/gmp-6.3.0.tar.bz2
                         URL_HASH SHA256=ac28211a7cfb609bae2e2c8d6058d66c8fe96434f740cf6fe2e47b000d1c20cb
                         USES_TERMINAL_DOWNLOAD TRUE
-                        PATCH_COMMAND patch -p1 --directory "${MANAPIHTTP_DEPS_PREFIX}/src/gmp" < "${MANAPIHTTP_PATCHES_DIR}/gmp-3.5.0-0001-configure.patch"
-                        CONFIGURE_COMMAND sh ./../gmp/configure --prefix=${MANAPIHTTP_GMP_INSTALL_DIR}
-                        $<$<BOOL:${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}>:--enable-shared=True>
-                        $<$<BOOL:${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}>:--enable-static=False>
-                        $<$<NOT:$<BOOL:${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}>>:--enable-shared=False>
-                        $<$<NOT:$<BOOL:${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}>>:--enable-static=True>
+                        PATCH_COMMAND patch -p1 --directory "${MANAPICORE_DEPS_PREFIX}/src/gmp" < "${MANAPICORE_PATCHES_DIR}/gmp-3.5.0-0001-configure.patch"
+                        CONFIGURE_COMMAND sh ./../gmp/configure --prefix=${MANAPICORE_GMP_INSTALL_DIR}
+                        $<$<BOOL:${MANAPICORE_DEPENDENCY_FETCH_SHARED}>:--enable-shared=True>
+                        $<$<BOOL:${MANAPICORE_DEPENDENCY_FETCH_SHARED}>:--enable-static=False>
+                        $<$<NOT:$<BOOL:${MANAPICORE_DEPENDENCY_FETCH_SHARED}>>:--enable-shared=False>
+                        $<$<NOT:$<BOOL:${MANAPICORE_DEPENDENCY_FETCH_SHARED}>>:--enable-static=True>
                         BUILD_COMMAND make
                         TEST_COMMAND ""
                         INSTALL_COMMAND make install
-                        INSTALL_DIR "${MANAPIHTTP_GMP_INSTALL_DIR}"
+                        INSTALL_DIR "${MANAPICORE_GMP_INSTALL_DIR}"
                         BUILD_BYPRODUCTS "${GMP_LIBRARIES}"
                 )
-                set(MANAPIHTTP_GMP_DEPENDENCY_FETCH ON)
+                set(MANAPICORE_GMP_DEPENDENCY_FETCH ON)
             else ()
-                set(MANAPIHTTP_GMP_DEPENDENCY_FETCH OFF)
-                set(MANAPIHTTP_GMP_DEPENDENCY OFF)
+                set(MANAPICORE_GMP_DEPENDENCY_FETCH OFF)
+                set(MANAPICORE_GMP_DEPENDENCY OFF)
             endif ()
         endif ()
     endif ()
 
-    if (MANAPIHTTP_ZLIB_DEPENDENCY)
+    if (MANAPICORE_ZLIB_DEPENDENCY)
         pkg_check_modules(ZLIB zlib)
         #set(ZLIB_FOUND OFF)
         if (NOT ZLIB_FOUND)
-            if (MANAPIHTTP_DEPENDENCY_FETCH)
-                set(MANAPIHTTP_ZLIB_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/zlib)
-                if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
-                    set(MANAPIHTTP_ZLIB_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}z${CMAKE_SHARED_LIBRARY_SUFFIX}")
+            if (MANAPICORE_DEPENDENCY_FETCH)
+                set(MANAPICORE_ZLIB_INSTALL_DIR ${MANAPICORE_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/zlib)
+                if (MANAPICORE_DEPENDENCY_FETCH_SHARED)
+                    set(MANAPICORE_ZLIB_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}z${CMAKE_SHARED_LIBRARY_SUFFIX}")
                 else ()
-                    set(MANAPIHTTP_ZLIB_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}z${CMAKE_STATIC_LIBRARY_SUFFIX}")
+                    set(MANAPICORE_ZLIB_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}z${CMAKE_STATIC_LIBRARY_SUFFIX}")
                 endif ()
 
-                if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
-                    set(ZLIB_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/z/${MANAPIHTTP_ZLIB_LIBNAME}")
+                if (MANAPICORE_DEPENDENCY_FETCH_OUTPUT)
+                    set(ZLIB_LIBRARIES "${MANAPICORE_DEPENDENCY_FETCH_OUTPUT}/z/${MANAPICORE_ZLIB_LIBNAME}")
                 else ()
-                    set(ZLIB_LIBRARIES "${MANAPIHTTP_ZLIB_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_ZLIB_LIBNAME}")
+                    set(ZLIB_LIBRARIES "${MANAPICORE_ZLIB_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPICORE_ZLIB_LIBNAME}")
                 endif ()
 
-                set(ZLIB_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_ZLIB_INSTALL_DIR}/include>)
+                set(ZLIB_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPICORE_ZLIB_INSTALL_DIR}/include>)
 
                 ExternalProject_Add(
                         zlib
-                        PREFIX "${MANAPIHTTP_DEPS_PREFIX}"
+                        PREFIX "${MANAPICORE_DEPS_PREFIX}"
                         DOWNLOAD_NAME zlib.tar.gz
                         URL https://zlib.net/fossils/zlib-1.3.1.tar.gz https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz
                         URL_HASH SHA256=9a93b2b7dfdac77ceba5a558a580e74667dd6fede4585b91eefb60f03b72df23
                         CMAKE_ARGS
-                        -DCMAKE_INSTALL_PREFIX:PATH=${MANAPIHTTP_ZLIB_INSTALL_DIR}
+                        -DCMAKE_INSTALL_PREFIX:PATH=${MANAPICORE_ZLIB_INSTALL_DIR}
                         -DZLIB_BUILD_EXAMPLES=OFF
                         -DSKIP_INSTALL_ALL=OFF
                         -DSKIP_INSTALL_LIBRARIES=OFF
                         -DSKIP_INSTALL_HEADERS=OFF
                         -DSKIP_INSTALL_FILES=ON
-                        -DBUILD_SHARED_LIBS=${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}
+                        -DBUILD_SHARED_LIBS=${MANAPICORE_DEPENDENCY_FETCH_SHARED}
                         BUILD_BYPRODUCTS "${ZLIB_LIBRARIES}"
                 )
-                set(MANAPIHTTP_ZLIB_DEPENDENCY_FETCH ON)
+                set(MANAPICORE_ZLIB_DEPENDENCY_FETCH ON)
             else ()
-                set(MANAPIHTTP_ZLIB_DEPENDENCY_FETCH OFF)
-                set(MANAPIHTTP_ZLIB_DEPENDENCY OFF)
+                set(MANAPICORE_ZLIB_DEPENDENCY_FETCH OFF)
+                set(MANAPICORE_ZLIB_DEPENDENCY OFF)
             endif ()
         endif ()
     endif ()
 
-    if (MANAPIHTTP_OPENSSL_DEPENDENCY)
-        if (MANAPIHTTP_OPENSSL_SYSTEM_DISABLE)
+    if (MANAPICORE_OPENSSL_DEPENDENCY)
+        if (MANAPICORE_OPENSSL_SYSTEM_DISABLE)
             set(OPENSSL_FOUND OFF)
         else ()
             pkg_check_modules(OPENSSL openssl)
         endif ()
         if (NOT OPENSSL_FOUND)
-            if (MANAPIHTTP_DEPENDENCY_FETCH)
-                set(MANAPIHTTP_OPENSSL_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/openssl)
+            if (MANAPICORE_DEPENDENCY_FETCH)
+                set(MANAPICORE_OPENSSL_INSTALL_DIR ${MANAPICORE_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/openssl)
 
 
-                if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
-                    set(MANAPIHTTP_OPENSSL_LIBNAME1 "${CMAKE_SHARED_LIBRARY_PREFIX}crypto${CMAKE_SHARED_LIBRARY_SUFFIX}")
-                    set(MANAPIHTTP_OPENSSL_LIBNAME2 "${CMAKE_SHARED_LIBRARY_PREFIX}ssl${CMAKE_SHARED_LIBRARY_SUFFIX}")
+                if (MANAPICORE_DEPENDENCY_FETCH_SHARED)
+                    set(MANAPICORE_OPENSSL_LIBNAME1 "${CMAKE_SHARED_LIBRARY_PREFIX}crypto${CMAKE_SHARED_LIBRARY_SUFFIX}")
+                    set(MANAPICORE_OPENSSL_LIBNAME2 "${CMAKE_SHARED_LIBRARY_PREFIX}ssl${CMAKE_SHARED_LIBRARY_SUFFIX}")
                 else ()
-                    set(MANAPIHTTP_OPENSSL_LIBNAME1 "${CMAKE_STATIC_LIBRARY_PREFIX}crypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
-                    set(MANAPIHTTP_OPENSSL_LIBNAME2 "${CMAKE_STATIC_LIBRARY_PREFIX}ssl${CMAKE_STATIC_LIBRARY_SUFFIX}")
+                    set(MANAPICORE_OPENSSL_LIBNAME1 "${CMAKE_STATIC_LIBRARY_PREFIX}crypto${CMAKE_STATIC_LIBRARY_SUFFIX}")
+                    set(MANAPICORE_OPENSSL_LIBNAME2 "${CMAKE_STATIC_LIBRARY_PREFIX}ssl${CMAKE_STATIC_LIBRARY_SUFFIX}")
                 endif ()
 
-                if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
-                    set(OPENSSL_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/openssl/${MANAPIHTTP_OPENSSL_LIBNAME1};${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/openssl/${MANAPIHTTP_OPENSSL_LIBNAME2}")
+                if (MANAPICORE_DEPENDENCY_FETCH_OUTPUT)
+                    set(OPENSSL_LIBRARIES "${MANAPICORE_DEPENDENCY_FETCH_OUTPUT}/openssl/${MANAPICORE_OPENSSL_LIBNAME1};${MANAPICORE_DEPENDENCY_FETCH_OUTPUT}/openssl/${MANAPICORE_OPENSSL_LIBNAME2}")
                 else ()
-                    set(OPENSSL_LIBRARIES "${MANAPIHTTP_OPENSSL_INSTALL_DIR}/lib64/${MANAPIHTTP_OPENSSL_LIBNAME1};${MANAPIHTTP_OPENSSL_INSTALL_DIR}/lib64/${MANAPIHTTP_OPENSSL_LIBNAME2}")
+                    set(OPENSSL_LIBRARIES "${MANAPICORE_OPENSSL_INSTALL_DIR}/lib64/${MANAPICORE_OPENSSL_LIBNAME1};${MANAPICORE_OPENSSL_INSTALL_DIR}/lib64/${MANAPICORE_OPENSSL_LIBNAME2}")
                 endif ()
 
-                set(OPENSSL_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_OPENSSL_INSTALL_DIR}/include>)
+                set(OPENSSL_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPICORE_OPENSSL_INSTALL_DIR}/include>)
 
                 ExternalProject_Add(
                         openssl
-                        PREFIX "${MANAPIHTTP_DEPS_PREFIX}"
+                        PREFIX "${MANAPICORE_DEPS_PREFIX}"
                         DOWNLOAD_NAME openssl.tar.gz
                         URL https://github.com/openssl/openssl/archive/refs/tags/openssl-3.5.2.zip
                         URL_HASH SHA256=ea744bf784bdc3554284f6dc82d40e82cb89dd86c737151b2890289b6624c180
                         USES_TERMINAL_DOWNLOAD TRUE
                         CONFIGURE_COMMAND
-                        ${MANAPIHTTP_DEPS_PREFIX}/src/openssl/config
-                        --prefix=${MANAPIHTTP_OPENSSL_INSTALL_DIR}
-                        --openssldir=${MANAPIHTTP_OPENSSL_INSTALL_DIR}
+                        ${MANAPICORE_DEPS_PREFIX}/src/openssl/config
+                        --prefix=${MANAPICORE_OPENSSL_INSTALL_DIR}
+                        --openssldir=${MANAPICORE_OPENSSL_INSTALL_DIR}
                         BUILD_COMMAND make
                         INSTALL_COMMAND make install
-                        INSTALL_DIR ${MANAPIHTTP_OPENSSL_INSTALL_DIR}
+                        INSTALL_DIR ${MANAPICORE_OPENSSL_INSTALL_DIR}
                         BUILD_BYPRODUCTS "${OPENSSL_LIBRARIES}"
                 )
 
-                set(MANAPIHTTP_OPENSSL_DEPENDENCY_FETCH ON)
+                set(MANAPICORE_OPENSSL_DEPENDENCY_FETCH ON)
             else ()
-                set(MANAPIHTTP_OPENSSL_DEPENDENCY_FETCH OFF)
-                set(MANAPIHTTP_OPENSSL_DEPENDENCY OFF)
+                set(MANAPICORE_OPENSSL_DEPENDENCY_FETCH OFF)
+                set(MANAPICORE_OPENSSL_DEPENDENCY OFF)
             endif ()
         endif ()
     endif ()
 
-    if (MANAPIHTTP_CURL_DEPENDENCY)
-        if (MANAPIHTTP_CURL_SYSTEM_DISABLE)
+    if (MANAPICORE_CURL_DEPENDENCY)
+        if (MANAPICORE_CURL_SYSTEM_DISABLE)
             set(CURL_FOUND OFF)
         else ()
             pkg_check_modules(CURL libcurl)
         endif ()
         # set(CURL_FOUND OFF)
         if (NOT CURL_FOUND)
-            if (MANAPIHTTP_DEPENDENCY_FETCH)
-                set(MANAPIHTTP_CURL_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/curl)
+            if (MANAPICORE_DEPENDENCY_FETCH)
+                set(MANAPICORE_CURL_INSTALL_DIR ${MANAPICORE_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/curl)
 
-                if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
-                    set(MANAPIHTTP_CURL_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}curl${CMAKE_SHARED_LIBRARY_SUFFIX}")
+                if (MANAPICORE_DEPENDENCY_FETCH_SHARED)
+                    set(MANAPICORE_CURL_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}curl${CMAKE_SHARED_LIBRARY_SUFFIX}")
                 else ()
-                    set(MANAPIHTTP_CURL_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl${CMAKE_STATIC_LIBRARY_SUFFIX}")
+                    set(MANAPICORE_CURL_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}curl${CMAKE_STATIC_LIBRARY_SUFFIX}")
                 endif ()
 
-                if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
-                    set(CURL_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/curl/${MANAPIHTTP_CURL_LIBNAME}")
+                if (MANAPICORE_DEPENDENCY_FETCH_OUTPUT)
+                    set(CURL_LIBRARIES "${MANAPICORE_DEPENDENCY_FETCH_OUTPUT}/curl/${MANAPICORE_CURL_LIBNAME}")
                 else ()
-                    set(CURL_LIBRARIES "${MANAPIHTTP_CURL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_CURL_LIBNAME}")
+                    set(CURL_LIBRARIES "${MANAPICORE_CURL_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPICORE_CURL_LIBNAME}")
                 endif ()
 
-                set(CURL_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_CURL_INSTALL_DIR}/include>)
+                set(CURL_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPICORE_CURL_INSTALL_DIR}/include>)
 
                 ExternalProject_Add(
                         curl
-                        PREFIX "${MANAPIHTTP_DEPS_PREFIX}"
+                        PREFIX "${MANAPICORE_DEPS_PREFIX}"
                         DOWNLOAD_NAME curl.tar.gz
                         GIT_REPOSITORY https://github.com/curl/curl
                         GIT_TAG curl-8_15_0
                         CMAKE_ARGS
-                        -DCMAKE_INSTALL_PREFIX:PATH=${MANAPIHTTP_CURL_INSTALL_DIR}
-                        -DBUILD_SHARED_LIBS=${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}
+                        -DCMAKE_INSTALL_PREFIX:PATH=${MANAPICORE_CURL_INSTALL_DIR}
+                        -DBUILD_SHARED_LIBS=${MANAPICORE_DEPENDENCY_FETCH_SHARED}
                         BUILD_BYPRODUCTS "${CURL_LIBRARIES}"
                 )
-                set(MANAPIHTTP_CURL_DEPENDENCY_FETCH ON)
+                set(MANAPICORE_CURL_DEPENDENCY_FETCH ON)
             else ()
-                set(MANAPIHTTP_CURL_DEPENDENCY_FETCH OFF)
-                set(MANAPIHTTP_CURL_DEPENDENCY OFF)
+                set(MANAPICORE_CURL_DEPENDENCY_FETCH OFF)
+                set(MANAPICORE_CURL_DEPENDENCY OFF)
             endif ()
         endif ()
     endif ()
 
-    if (MANAPIHTTP_WOLFSSL_DEPENDENCY)
+    if (MANAPICORE_WOLFSSL_DEPENDENCY)
         pkg_check_modules(WOLFSSL wolfssl)
         if (NOT WOLFSSL_FOUND)
-            set(MANAPIHTTP_WOLFSSL_DEPENDENCY OFF)
+            set(MANAPICORE_WOLFSSL_DEPENDENCY OFF)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_TQUIC_DEPENDENCY)
+    if (MANAPICORE_TQUIC_DEPENDENCY)
         pkg_check_modules(TQUIC tquic)
         if (NOT TQUIC_FOUND)
-            set(MANAPIHTTP_TQUIC_DEPENDENCY OFF)
+            set(MANAPICORE_TQUIC_DEPENDENCY OFF)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_QUICHE_DEPENDENCY)
+    if (MANAPICORE_QUICHE_DEPENDENCY)
         pkg_check_modules(QUICHE quiche)
         if (NOT QUICHE_FOUND)
             include(./cmake/FindQuiche.cmake)
             if (NOT QUICHE_FOUND)
-                set(MANAPIHTTP_QUICHE_DEPENDENCY OFF)
+                set(MANAPICORE_QUICHE_DEPENDENCY OFF)
             endif()
         endif ()
     endif ()
 
-    if (MANAPIHTTP_MSQUIC_DEPENDENCY)
+    if (MANAPICORE_MSQUIC_DEPENDENCY)
         include(./cmake/FindMsQuic.cmake)
         if (NOT MSQUIC_FOUND)
-            set(MANAPIHTTP_MSQUIC_DEPENDENCY OFF)
+            set(MANAPICORE_MSQUIC_DEPENDENCY OFF)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_BROTLI_DEPENDENCY)
+    if (MANAPICORE_BROTLI_DEPENDENCY)
         include(./cmake/FindBrotli.cmake)
         if (NOT BROTLI_FOUND)
-            set(MANAPIHTTP_BROTLI_DEPENDENCY OFF)
+            set(MANAPICORE_BROTLI_DEPENDENCY OFF)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_GRPC_DEPENDENCY)
+    if (MANAPICORE_GRPC_DEPENDENCY)
         pkg_search_module(GRPC grpc)
         pkg_search_module(GRPCPP grpc++>=1.22.0)
 
@@ -490,108 +490,108 @@ else ()
         message(STATUS "protobuf found: ${PROTOBUF_FOUND}")
         message(STATUS "grpcpp found: ${GRPCPP_FOUND}")
         if (NOT (GRPC_FOUND AND PROTOBUF_FOUND AND GRPCPP_FOUND))
-            set(MANAPIHTTP_GRPC_DEPENDENCY OFF)
+            set(MANAPICORE_GRPC_DEPENDENCY OFF)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_ZSTD_DEPENDENCY)
+    if (MANAPICORE_ZSTD_DEPENDENCY)
         include(./cmake/FindZSTD.cmake)
         if (NOT ZSTD_FOUND)
-            set(MANAPIHTTP_ZSTD_DEPENDENCY OFF)
+            set(MANAPICORE_ZSTD_DEPENDENCY OFF)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_CPPTRACE_DEPENDENCY)
+    if (MANAPICORE_CPPTRACE_DEPENDENCY)
         include(./cmake/FindCppTrace.cmake)
         if (NOT CPPTRACE_FOUND)
-            set(MANAPIHTTP_CPPTRACE_DEPENDENCY OFF)
+            set(MANAPICORE_CPPTRACE_DEPENDENCY OFF)
         endif ()
     endif ()
 
-    if (MANAPIHTTP_NGHTTP2_DEPENDENCY)
-        if (MANAPIHTTP_NGHTTP2_SYSTEM_DISABLE)
+    if (MANAPICORE_NGHTTP2_DEPENDENCY)
+        if (MANAPICORE_NGHTTP2_SYSTEM_DISABLE)
             set(LIBNGHTTP2_FOUND OFF)
         else ()
             include(./cmake/FindLibNgHttp2.cmake)
         endif ()
         # set(LIBNGHTTP2_FOUND OFF)
         if (NOT LIBNGHTTP2_FOUND)
-            if (MANAPIHTTP_DEPENDENCY_FETCH)
-                if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
-                    set(MANAPIHTTP_LIBNGHTTP2_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}nghttp2${CMAKE_SHARED_LIBRARY_SUFFIX}")
+            if (MANAPICORE_DEPENDENCY_FETCH)
+                if (MANAPICORE_DEPENDENCY_FETCH_SHARED)
+                    set(MANAPICORE_LIBNGHTTP2_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}nghttp2${CMAKE_SHARED_LIBRARY_SUFFIX}")
                 else ()
-                    set(MANAPIHTTP_LIBNGHTTP2_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}nghttp2${CMAKE_STATIC_LIBRARY_SUFFIX}")
+                    set(MANAPICORE_LIBNGHTTP2_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}nghttp2${CMAKE_STATIC_LIBRARY_SUFFIX}")
                 endif ()
 
-                set(MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libnghttp2)
+                set(MANAPICORE_LIBNGHTTP2_INSTALL_DIR ${MANAPICORE_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libnghttp2)
 
-                if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
-                    set(LIBNGHTTP2_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/nghttp2/${MANAPIHTTP_LIBNGHTTP2_LIBNAME}")
+                if (MANAPICORE_DEPENDENCY_FETCH_OUTPUT)
+                    set(LIBNGHTTP2_LIBRARIES "${MANAPICORE_DEPENDENCY_FETCH_OUTPUT}/nghttp2/${MANAPICORE_LIBNGHTTP2_LIBNAME}")
                 else ()
-                    set(LIBNGHTTP2_LIBRARIES "${MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_LIBNGHTTP2_LIBNAME}")
+                    set(LIBNGHTTP2_LIBRARIES "${MANAPICORE_LIBNGHTTP2_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPICORE_LIBNGHTTP2_LIBNAME}")
                 endif ()
 
-                set(LIBNGHTTP2_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR}/include>)
+                set(LIBNGHTTP2_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPICORE_LIBNGHTTP2_INSTALL_DIR}/include>)
 
                 ExternalProject_Add(
                         libnghttp2
-                        PREFIX "${MANAPIHTTP_DEPS_PREFIX}"
+                        PREFIX "${MANAPICORE_DEPS_PREFIX}"
                         GIT_REPOSITORY https://github.com/nghttp2/nghttp2
                         GIT_TAG v1.66.0
                         CMAKE_ARGS
-                        -DCMAKE_INSTALL_PREFIX:PATH=${MANAPIHTTP_LIBNGHTTP2_INSTALL_DIR}
-                        -DBUILD_SHARED_LIBS=${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}
+                        -DCMAKE_INSTALL_PREFIX:PATH=${MANAPICORE_LIBNGHTTP2_INSTALL_DIR}
+                        -DBUILD_SHARED_LIBS=${MANAPICORE_DEPENDENCY_FETCH_SHARED}
                         BUILD_BYPRODUCTS "${LIBNGHTTP2_LIBRARIES}"
                 )
-                set(MANAPIHTTP_NGHTTP2_DEPENDENCY_FETCH ON)
+                set(MANAPICORE_NGHTTP2_DEPENDENCY_FETCH ON)
             else ()
-                set(MANAPIHTTP_NGHTTP2_DEPENDENCY_FETCH OFF)
-                set(MANAPIHTTP_NGHTTP2_DEPENDENCY OFF)
+                set(MANAPICORE_NGHTTP2_DEPENDENCY_FETCH OFF)
+                set(MANAPICORE_NGHTTP2_DEPENDENCY OFF)
             endif ()
         endif ()
     endif ()
 
-    if (MANAPIHTTP_NGHTTP3_DEPENDENCY)
+    if (MANAPICORE_NGHTTP3_DEPENDENCY)
 
-        if (MANAPIHTTP_NGHTTP3_SYSTEM_DISABLE)
+        if (MANAPICORE_NGHTTP3_SYSTEM_DISABLE)
             set(LIBNGHTTP3_FOUND OFF)
         else ()
             include(./cmake/FindLibNgHttp3.cmake)
         endif ()
         # set(LIBNGHTTP3_FOUND OFF)
         if (NOT LIBNGHTTP3_FOUND)
-            if (MANAPIHTTP_DEPENDENCY_FETCH)
-                if (MANAPIHTTP_DEPENDENCY_FETCH_SHARED)
-                    set(MANAPIHTTP_LIBNGHTTP3_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}nghttp3${CMAKE_SHARED_LIBRARY_SUFFIX}")
+            if (MANAPICORE_DEPENDENCY_FETCH)
+                if (MANAPICORE_DEPENDENCY_FETCH_SHARED)
+                    set(MANAPICORE_LIBNGHTTP3_LIBNAME "${CMAKE_SHARED_LIBRARY_PREFIX}nghttp3${CMAKE_SHARED_LIBRARY_SUFFIX}")
                 else ()
-                    set(MANAPIHTTP_LIBNGHTTP3_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}nghttp3${CMAKE_STATIC_LIBRARY_SUFFIX}")
+                    set(MANAPICORE_LIBNGHTTP3_LIBNAME "${CMAKE_STATIC_LIBRARY_PREFIX}nghttp3${CMAKE_STATIC_LIBRARY_SUFFIX}")
                 endif ()
 
-                set(MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR ${MANAPIHTTP_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libnghttp3)
+                set(MANAPICORE_LIBNGHTTP3_INSTALL_DIR ${MANAPICORE_DEPS_PREFIX}/${CMAKE_INSTALL_LIBDIR}/libnghttp3)
 
-                if (MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT)
-                    set(LIBNGHTTP3_LIBRARIES "${MANAPIHTTP_DEPENDENCY_FETCH_OUTPUT}/nghttp3/${MANAPIHTTP_LIBNGHTTP3_LIBNAME}")
+                if (MANAPICORE_DEPENDENCY_FETCH_OUTPUT)
+                    set(LIBNGHTTP3_LIBRARIES "${MANAPICORE_DEPENDENCY_FETCH_OUTPUT}/nghttp3/${MANAPICORE_LIBNGHTTP3_LIBNAME}")
                 else ()
-                    set(LIBNGHTTP3_LIBRARIES "${MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPIHTTP_LIBNGHTTP3_LIBNAME}")
+                    set(LIBNGHTTP3_LIBRARIES "${MANAPICORE_LIBNGHTTP3_INSTALL_DIR}/${CMAKE_INSTALL_LIBDIR}/${MANAPICORE_LIBNGHTTP3_LIBNAME}")
                 endif ()
 
 
-                set(LIBNGHTTP3_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR}/include>)
+                set(LIBNGHTTP3_INCLUDE_DIRS $<BUILD_INTERFACE:${MANAPICORE_LIBNGHTTP3_INSTALL_DIR}/include>)
 
                 ExternalProject_Add(
                         libnghttp3
-                        PREFIX "${MANAPIHTTP_DEPS_PREFIX}"
+                        PREFIX "${MANAPICORE_DEPS_PREFIX}"
                         GIT_REPOSITORY https://github.com/ngtcp2/nghttp3
                         GIT_TAG v1.11.0
                         CMAKE_ARGS
-                        -DCMAKE_INSTALL_PREFIX:PATH=${MANAPIHTTP_LIBNGHTTP3_INSTALL_DIR}
-                        -DBUILD_SHARED_LIBS=${MANAPIHTTP_DEPENDENCY_FETCH_SHARED}
+                        -DCMAKE_INSTALL_PREFIX:PATH=${MANAPICORE_LIBNGHTTP3_INSTALL_DIR}
+                        -DBUILD_SHARED_LIBS=${MANAPICORE_DEPENDENCY_FETCH_SHARED}
                         BUILD_BYPRODUCTS "${LIBNGHTTP3_LIBRARIES}"
                 )
-                set(MANAPIHTTP_NGHTTP3_DEPENDENCY_FETCH ON)
+                set(MANAPICORE_NGHTTP3_DEPENDENCY_FETCH ON)
             else ()
-                set(MANAPIHTTP_NGHTTP3_DEPENDENCY_FETCH OFF)
-                set(MANAPIHTTP_NGHTTP3_DEPENDENCY OFF)
+                set(MANAPICORE_NGHTTP3_DEPENDENCY_FETCH OFF)
+                set(MANAPICORE_NGHTTP3_DEPENDENCY OFF)
             endif ()
         endif ()
     endif ()
@@ -600,34 +600,34 @@ endif ()
 include(CheckLibraryExists)
 
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/preprocess/ManapiParams.hpp" TEXT)
-string(REPLACE "{{ VAR_MANAPIHTTP_NAME }}" "\"manapihttp\"" TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_VERSION }}" "\"${CMAKE_PROJECT_VERSION}\"" TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_JSON_DEBUG }}" $<BOOL:${MANAPIHTTP_JSON_DEBUG}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_OPENSSL_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_OPENSSL_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_WOLFSSL_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_WOLFSSL_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_QUICHE_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_QUICHE_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_TQUIC_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_TQUIC_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_ZLIB_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_ZLIB_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_CURL_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_CURL_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_GMP_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_GMP_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_MSQUIC_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_MSQUIC_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_WOLFSSL_WITH_ALPN }}" $<BOOL:${MANAPIHTTP_WOLFSSL_WITH_ALPN}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_WOLFSSL_WITH_ALPN }}" $<BOOL:${MANAPIHTTP_WOLFSSL_WITH_ALPN}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_WOLFSSL_WITH_ALPN }}" $<BOOL:${MANAPIHTTP_WOLFSSL_WITH_ALPN}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_BROTLI_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_BROTLI_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_GRPC_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_GRPC_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_ZSTD_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_ZSTD_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_NGHTTP2_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_NGHTTP2_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_NGHTTP3_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_NGHTTP3_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_CPPTRACE_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_CPPTRACE_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_STD_BACKTRACE_DEPENDENCY }}" $<BOOL:${MANAPIHTTP_STD_BACKTRACE_DEPENDENCY}> TEXT "${TEXT}")
-string(REPLACE "{{ VAR_MANAPIHTTP_IS_SHARED }}" $<BOOL:${BUILD_SHARED_LIBS}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_NAME }}" "\"manapicore\"" TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_VERSION }}" "\"${CMAKE_PROJECT_VERSION}\"" TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_JSON_DEBUG }}" $<BOOL:${MANAPICORE_JSON_DEBUG}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_OPENSSL_DEPENDENCY }}" $<BOOL:${MANAPICORE_OPENSSL_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_WOLFSSL_DEPENDENCY }}" $<BOOL:${MANAPICORE_WOLFSSL_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_QUICHE_DEPENDENCY }}" $<BOOL:${MANAPICORE_QUICHE_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_TQUIC_DEPENDENCY }}" $<BOOL:${MANAPICORE_TQUIC_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_ZLIB_DEPENDENCY }}" $<BOOL:${MANAPICORE_ZLIB_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_CURL_DEPENDENCY }}" $<BOOL:${MANAPICORE_CURL_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_GMP_DEPENDENCY }}" $<BOOL:${MANAPICORE_GMP_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_MSQUIC_DEPENDENCY }}" $<BOOL:${MANAPICORE_MSQUIC_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_WOLFSSL_WITH_ALPN }}" $<BOOL:${MANAPICORE_WOLFSSL_WITH_ALPN}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_WOLFSSL_WITH_ALPN }}" $<BOOL:${MANAPICORE_WOLFSSL_WITH_ALPN}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_WOLFSSL_WITH_ALPN }}" $<BOOL:${MANAPICORE_WOLFSSL_WITH_ALPN}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_BROTLI_DEPENDENCY }}" $<BOOL:${MANAPICORE_BROTLI_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_GRPC_DEPENDENCY }}" $<BOOL:${MANAPICORE_GRPC_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_ZSTD_DEPENDENCY }}" $<BOOL:${MANAPICORE_ZSTD_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_NGHTTP2_DEPENDENCY }}" $<BOOL:${MANAPICORE_NGHTTP2_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_NGHTTP3_DEPENDENCY }}" $<BOOL:${MANAPICORE_NGHTTP3_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_CPPTRACE_DEPENDENCY }}" $<BOOL:${MANAPICORE_CPPTRACE_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_STD_BACKTRACE_DEPENDENCY }}" $<BOOL:${MANAPICORE_STD_BACKTRACE_DEPENDENCY}> TEXT "${TEXT}")
+string(REPLACE "{{ VAR_MANAPICORE_IS_SHARED }}" $<BOOL:${BUILD_SHARED_LIBS}> TEXT "${TEXT}")
 file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/include/ManapiParams.hpp" CONTENT "${TEXT}")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/include/ManapiParams.hpp")
 
 
 
-set(MANAPIHTTP_HTTP_FILES
+set(MANAPICORE_HTTP_FILES
         include/ManapiHttp.hpp
         include/ManapiThreadPool.hpp
         include/ManapiUtils.hpp
@@ -829,17 +829,16 @@ set(MANAPIHTTP_HTTP_FILES
         src/hash/ManapiHash.cpp
 )
 
-set(MANAPIHTTP_MODULES
-        modules/ManapiJson.cppm
-        modules/ManapiJsonBuilder.cppm
+set(MANAPICORE_MODULES
+        modules/test.cppm
 )
 
-if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe" OR MANAPIHTTP_BUILD_TYPE STREQUAL "test")
+if (MANAPICORE_BUILD_TYPE STREQUAL "exe" OR MANAPICORE_BUILD_TYPE STREQUAL "test")
     # EXE
     message(STATUS "Build type 'exe'")
 
-    if (MANAPIHTTP_GRPC_DEPENDENCY)
-        if (MANAPIHTTP_BUILD_METHOD STREQUAL "conan")
+    if (MANAPICORE_GRPC_DEPENDENCY)
+        if (MANAPICORE_BUILD_METHOD STREQUAL "conan")
             if (DEFINED protobuf_BIN_DIRS_DEBUG)
                 set(Protobuf_PROTOC_EXECUTABLE ${protobuf_BIN_DIRS_DEBUG}/protoc)
             else ()
@@ -889,7 +888,7 @@ if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe" OR MANAPIHTTP_BUILD_TYPE STREQUAL "test
             )
 
 
-            if (MANAPIHTTP_BUILD_METHOD STREQUAL "conan")
+            if (MANAPICORE_BUILD_METHOD STREQUAL "conan")
                 set(GRPC_CPP_PLUGIN $<TARGET_FILE:gRPC::grpc_cpp_plugin>)
             else ()
                 find_program(GRPC_CPP_PLUGIN grpc_cpp_plugin)
@@ -961,18 +960,18 @@ if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe" OR MANAPIHTTP_BUILD_TYPE STREQUAL "test
     endif ()
 
 
-    if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe")
+    if (MANAPICORE_BUILD_TYPE STREQUAL "exe")
         add_executable(${PROJECT_NAME})
     endif ()
 
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPIHTTP_HTTP_AS_EXECUTABLE)
-    target_sources(${PROJECT_NAME} PRIVATE main.cpp impl.cpp ${MANAPIHTTP_HTTP_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_HTTP_AS_EXECUTABLE)
+    target_sources(${PROJECT_NAME} PRIVATE main.cpp impl.cpp ${MANAPICORE_HTTP_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
 
-    #    target_sources(${PROJECT_NAME} PUBLIC
-    #            FILE_SET CXX_MODULES
-    #            BASE_DIRS ${CMAKE_SOURCE_DIR}/modules
-    #            FILES ${MANAPIHTTP_MODULES}
-    #    )
+    target_sources(${PROJECT_NAME} PUBLIC
+            FILE_SET CXX_MODULES
+            BASE_DIRS ${CMAKE_SOURCE_DIR}/modules
+            FILES ${MANAPICORE_MODULES}
+    )
 
 else ()
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -988,56 +987,56 @@ else ()
         add_library(${PROJECT_NAME})
     endif ()
 
-    target_sources(${PROJECT_NAME} PRIVATE ${MANAPIHTTP_HTTP_FILES})
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPIHTTP_HTTP_AS_LIBRARY)
+    target_sources(${PROJECT_NAME} PRIVATE ${MANAPICORE_HTTP_FILES})
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_HTTP_AS_LIBRARY)
     set_target_properties(${PROJECT_NAME} PROPERTIES
             VERSION ${PROJECT_VERSION}
             SOVERSION ${PROJECT_VERSION_MAJOR})
 
-    #    target_sources(${PROJECT_NAME} PUBLIC
-    #            FILE_SET CXX_MODULES
-    #            BASE_DIRS ${CMAKE_SOURCE_DIR}/modules
-    #            FILES ${MANAPIHTTP_MODULES}
-    #    )
+    target_sources(${PROJECT_NAME} PUBLIC
+            FILE_SET CXX_MODULES
+            BASE_DIRS ${CMAKE_SOURCE_DIR}/modules
+            FILES ${MANAPICORE_MODULES}
+    )
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc @ONLY)
 endif ()
 
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmerge-all-constants>)
-# target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmodules>)
-# target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmodules-ts>)
-set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ${MANAPIHTTP_UNITY_BUILD})
+#target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmodules>)
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmodules-ts>)
+set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD OFF DISABLE_PRECOMPILE_HEADERS ON)
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 
 include(GenerateExportHeader)
 
-if (MANAPIHTTP_BUILD_TYPE STREQUAL "lib")
+if (MANAPICORE_BUILD_TYPE STREQUAL "lib")
     generate_export_header(${PROJECT_NAME} EXPORT_FILE_NAME ./include/ManapiExport.hpp)
 endif ()
 
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 
 if (DEFINED QUICHE_VERSION)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPIHTTP_QUICHE_VERSION="${QUICHE_VERSION}")
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_QUICHE_VERSION="${QUICHE_VERSION}")
     message(STATUS "QUICHE_VERSION=${QUICHE_VERSION}")
 endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     message(STATUS "Build type: Debug")
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPIHTTP_HTTP_BUILD_DEBUG)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_HTTP_BUILD_DEBUG)
 endif ()
 
 
-if (MANAPIHTTP_DISABLE_TRACE)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPIHTTP_DISABLE_TRACE)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPIHTTP_DISABLE_TRACE_HARD)
-elseif (MANAPIHTTP_DISABLE_TRACE_HARD)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPIHTTP_DISABLE_TRACE_HARD)
+if (MANAPICORE_DISABLE_TRACE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_DISABLE_TRACE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_DISABLE_TRACE_HARD)
+elseif (MANAPICORE_DISABLE_TRACE_HARD)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_DISABLE_TRACE_HARD)
 endif ()
 
 if (WIN32 AND BUILD_SHARED_LIBS)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPIHTTP_BUILD_SHARED_LIBS)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_BUILD_SHARED_LIBS)
 endif()
 
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
@@ -1046,7 +1045,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads)
 target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads ${CMAKE_DL_LIBS})
 
-if (MANAPIHTTP_BUILD_METHOD STREQUAL "conan")
+if (MANAPICORE_BUILD_METHOD STREQUAL "conan")
     message(STATUS ${libuv_INCLUDE_DIR})
     if (NOT EXISTS "${CMAKE_BINARY_DIR}/include/ext/uv.h")
         file(COPY ${libuv_INCLUDE_DIR}/uv DESTINATION ${CMAKE_BINARY_DIR}/include/ext FILES_MATCHING PATTERN "*.h")
@@ -1062,59 +1061,59 @@ if (MANAPIHTTP_BUILD_METHOD STREQUAL "conan")
         target_link_libraries (${PROJECT_NAME} PUBLIC libuv::uv)
     endif()
 
-    if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe" AND MANAPIHTTP_BUILD_METHOD STREQUAL "default")
+    if (MANAPICORE_BUILD_TYPE STREQUAL "exe" AND MANAPICORE_BUILD_METHOD STREQUAL "default")
         target_link_libraries(${PROJECT_NAME} PUBLIC libpq::libpq)
     endif ()
 
-    if (MANAPIHTTP_CPPTRACE_DEPENDENCY)
+    if (MANAPICORE_CPPTRACE_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC cpptrace::cpptrace)
     endif ()
 
-    if (MANAPIHTTP_GMP_DEPENDENCY)
+    if (MANAPICORE_GMP_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC gmp::gmp)
     endif ()
 
-    if (MANAPIHTTP_ZLIB_DEPENDENCY)
+    if (MANAPICORE_ZLIB_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC ZLIB::ZLIB)
     endif ()
 
-    if (MANAPIHTTP_CURL_DEPENDENCY)
+    if (MANAPICORE_CURL_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC CURL::libcurl)
     endif ()
 
-    if (MANAPIHTTP_OPENSSL_DEPENDENCY)
+    if (MANAPICORE_OPENSSL_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC openssl::openssl)
     endif ()
 
-    if (MANAPIHTTP_WOLFSSL_DEPENDENCY)
+    if (MANAPICORE_WOLFSSL_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC wolfssl::wolfssl)
     endif ()
 
-    if (MANAPIHTTP_QUICHE_DEPENDENCY)
+    if (MANAPICORE_QUICHE_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC quiche::quiche)
     endif ()
 
-    if (MANAPIHTTP_TQUIC_DEPENDENCY)
+    if (MANAPICORE_TQUIC_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC tquic::tquic)
     endif ()
 
-    if (MANAPIHTTP_BROTLI_DEPENDENCY)
+    if (MANAPICORE_BROTLI_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC brotli::brotli)
     endif ()
 
-    if (MANAPIHTTP_GRPC_DEPENDENCY)
+    if (MANAPICORE_GRPC_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC protobuf::libprotobuf gRPC::grpc gRPC::grpc++_reflection)
     endif ()
 
-    if (MANAPIHTTP_ZSTD_DEPENDENCY)
+    if (MANAPICORE_ZSTD_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC ${zstd_COMPONENT_NAMES})
     endif ()
 
-    if (MANAPIHTTP_NGHTTP2_DEPENDENCY)
+    if (MANAPICORE_NGHTTP2_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC libnghttp2::libnghttp2)
     endif ()
 
-    if (MANAPIHTTP_NGHTTP3_DEPENDENCY)
+    if (MANAPICORE_NGHTTP3_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PUBLIC nghttp3::nghttp3)
     endif ()
 
@@ -1126,79 +1125,79 @@ else ()
     target_link_libraries       (${PROJECT_NAME} PUBLIC ${LIBUV_LIBRARIES})
     target_include_directories  (${PROJECT_NAME} PUBLIC ${LIBUV_INCLUDE_DIRS})
 
-    if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe")
+    if (MANAPICORE_BUILD_TYPE STREQUAL "exe")
         message(STATUS "libpq: libs=${PostgreSQL_LIBRARIES} include=${PostgreSQL_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${PostgreSQL_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${PostgreSQL_INCLUDE_DIRS})
     endif()
 
-    if (MANAPIHTTP_QT_DEPENDENCY)
+    if (MANAPICORE_QT_DEPENDENCY)
         message(STATUS "qt: libs=Qt6::Core Qt6::Widgets Qt6::Quick")
         target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Core Qt6::Widgets Qt6::Quick)
     endif ()
 
-    if (MANAPIHTTP_GMP_DEPENDENCY)
+    if (MANAPICORE_GMP_DEPENDENCY)
         message(STATUS "gmp: libs=${GMP_LIBRARIES} include=${GMP_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${GMP_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${GMP_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_ZLIB_DEPENDENCY)
+    if (MANAPICORE_ZLIB_DEPENDENCY)
         message(STATUS "zlib: libs=${ZLIB_LIBRARIES} include=${ZLIB_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${ZLIB_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${ZLIB_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_CURL_DEPENDENCY)
+    if (MANAPICORE_CURL_DEPENDENCY)
         message(STATUS "curl: libs=${CURL_LIBRARIES} include=${CURL_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${CURL_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${CURL_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_OPENSSL_DEPENDENCY)
+    if (MANAPICORE_OPENSSL_DEPENDENCY)
         message(STATUS "openssl: libs=${OPENSSL_LIBRARIES} include=${OPENSSL_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${OPENSSL_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${OPENSSL_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_WOLFSSL_DEPENDENCY)
+    if (MANAPICORE_WOLFSSL_DEPENDENCY)
         message(STATUS "wolfssl: libs=${WOLFSSL_LIBRARIES} include=${WOLFSSL_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${WOLFSSL_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${WOLFSSL_INCLUDE_DIRS})
     endif ()
 
 
-    if (MANAPIHTTP_QUICHE_DEPENDENCY)
+    if (MANAPICORE_QUICHE_DEPENDENCY)
         message(STATUS "quiche: libs=${QUICHE_LIBRARIES} include=${QUICHE_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${QUICHE_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${QUICHE_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_MSQUIC_DEPENDENCY)
+    if (MANAPICORE_MSQUIC_DEPENDENCY)
         message(STATUS "msquic: libs=${MSQUIC_LIBRARIES} include=${MSQUIC_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${MSQUIC_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${MSQUIC_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_TQUIC_DEPENDENCY)
+    if (MANAPICORE_TQUIC_DEPENDENCY)
         message(STATUS "tquic: libs=${TQUIC_LIBRARIES} include=${TQUIC_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${TQUIC_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${TQUIC_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_BROTLI_DEPENDENCY)
+    if (MANAPICORE_BROTLI_DEPENDENCY)
         message(STATUS "brotli: libs=${BROTLI_LIBRARIES} include=${BROTLI_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${BROTLI_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${BROTLI_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_ZSTD_DEPENDENCY)
+    if (MANAPICORE_ZSTD_DEPENDENCY)
         message(STATUS "zstd: libs=${ZSTD_LIBRARIES} include=${ZSTD_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${ZSTD_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${ZSTD_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_GRPC_DEPENDENCY)
+    if (MANAPICORE_GRPC_DEPENDENCY)
         message(STATUS "grpc: libs=${GRPC_LIBRARIES} include=${GRPC_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${GRPC_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${GRPC_INCLUDE_DIRS})
@@ -1212,43 +1211,43 @@ else ()
         target_include_directories(${PROJECT_NAME} PUBLIC ${GRPCPP_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_NGHTTP2_DEPENDENCY)
+    if (MANAPICORE_NGHTTP2_DEPENDENCY)
         message(STATUS "nghttp2: libs=${LIBNGHTTP2_LIBRARIES} include=${LIBNGHTTP2_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNGHTTP2_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${LIBNGHTTP2_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_NGHTTP3_DEPENDENCY)
+    if (MANAPICORE_NGHTTP3_DEPENDENCY)
         message(STATUS "nghttp3: libs=${LIBNGHTTP3_LIBRARIES} include=${LIBNGHTTP3_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${LIBNGHTTP3_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${LIBNGHTTP3_INCLUDE_DIRS})
     endif ()
 
-    if (MANAPIHTTP_CPPTRACE_DEPENDENCY)
+    if (MANAPICORE_CPPTRACE_DEPENDENCY)
         message(STATUS "cpptrace: libs=${CPPTRACE_LIBRARIES} ${CPPTRACE_DWARF_LIBRARIES} include=${CPPTRACE_INCLUDE_DIRS}")
         target_link_libraries(${PROJECT_NAME} PUBLIC ${CPPTRACE_LIBRARIES} ${CPPTRACE_DWARF_LIBRARIES})
         target_include_directories(${PROJECT_NAME} PUBLIC ${CPPTRACE_INCLUDE_DIRS})
     endif ()
 
     if (NOT EXISTS "${CMAKE_BINARY_DIR}/include/uv.h")
-        if (MANAPIHTTP_LIBUV_INSTALL_DIR)
-            set(copy_MANAPIHTTP_LIBUV_INSTALL_DIR ${MANAPIHTTP_LIBUV_INSTALL_DIR})
+        if (MANAPICORE_LIBUV_INSTALL_DIR)
+            set(copy_MANAPICORE_LIBUV_INSTALL_DIR ${MANAPICORE_LIBUV_INSTALL_DIR})
         else()
             if (LIBUV_INCLUDE_DIRS)
-                set(copy_MANAPIHTTP_LIBUV_INSTALL_DIR ${LIBUV_INCLUDE_DIRS})
+                set(copy_MANAPICORE_LIBUV_INSTALL_DIR ${LIBUV_INCLUDE_DIRS})
             else()
                 if (EXISTS "/usr/include/uv.h")
-                    set(copy_MANAPIHTTP_LIBUV_INSTALL_DIR "/usr/include")
+                    set(copy_MANAPICORE_LIBUV_INSTALL_DIR "/usr/include")
                 elseif (EXISTS "/usr/include/x86_64-linux-gnu/uv.h")
-                    set(copy_MANAPIHTTP_LIBUV_INSTALL_DIR "/usr/include/x86_64-linux-gnu")
-                elseif (MANAPIHTTP_INSTALL_ARCH)
-                    set(copy_MANAPIHTTP_LIBUV_INSTALL_DIR "/usr/include${MANAPIHTTP_INSTALL_ARCH}")
+                    set(copy_MANAPICORE_LIBUV_INSTALL_DIR "/usr/include/x86_64-linux-gnu")
+                elseif (MANAPICORE_INSTALL_ARCH)
+                    set(copy_MANAPICORE_LIBUV_INSTALL_DIR "/usr/include${MANAPICORE_INSTALL_ARCH}")
                 endif()
             endif()
         endif()
 
-        file(COPY ${copy_MANAPIHTTP_LIBUV_INSTALL_DIR}/uv DESTINATION ${CMAKE_BINARY_DIR}/include/ext FILES_MATCHING PATTERN "*.h")
-        file(COPY ${copy_MANAPIHTTP_LIBUV_INSTALL_DIR}/uv.h DESTINATION ${CMAKE_BINARY_DIR}/include/ext FILES_MATCHING PATTERN "*.h")
+        file(COPY ${copy_MANAPICORE_LIBUV_INSTALL_DIR}/uv DESTINATION ${CMAKE_BINARY_DIR}/include/ext FILES_MATCHING PATTERN "*.h")
+        file(COPY ${copy_MANAPICORE_LIBUV_INSTALL_DIR}/uv.h DESTINATION ${CMAKE_BINARY_DIR}/include/ext FILES_MATCHING PATTERN "*.h")
 
         if (NOT EXISTS "${CMAKE_BINARY_DIR}/include/ext/uv.h")
             message( FATAL_ERROR "Failed to copy uv.h from ${libuv_CONAN_INCLUDE_DIRS}" )
@@ -1257,31 +1256,31 @@ else ()
 
 endif ()
 
-if (MANAPIHTTP_GMP_DEPENDENCY_FETCH)
+if (MANAPICORE_GMP_DEPENDENCY_FETCH)
     add_dependencies(${PROJECT_NAME} gmp)
 endif ()
 
-if (MANAPIHTTP_ZLIB_DEPENDENCY_FETCH)
+if (MANAPICORE_ZLIB_DEPENDENCY_FETCH)
     add_dependencies(${PROJECT_NAME} zlib)
 endif ()
 
-if (MANAPIHTTP_LIBUV_DEPENDENCY_FETCH)
+if (MANAPICORE_LIBUV_DEPENDENCY_FETCH)
     add_dependencies(${PROJECT_NAME} libuv)
 endif ()
 
-if (MANAPIHTTP_CURL_DEPENDENCY_FETCH)
+if (MANAPICORE_CURL_DEPENDENCY_FETCH)
     add_dependencies(${PROJECT_NAME} curl)
 endif ()
 
-if (MANAPIHTTP_OPENSSL_DEPENDENCY_FETCH)
+if (MANAPICORE_OPENSSL_DEPENDENCY_FETCH)
     add_dependencies(${PROJECT_NAME} openssl)
 endif ()
 
-if (MANAPIHTTP_NGHTTP2_DEPENDENCY_FETCH)
+if (MANAPICORE_NGHTTP2_DEPENDENCY_FETCH)
     add_dependencies(${PROJECT_NAME} libnghttp2)
 endif ()
 
-if (MANAPIHTTP_NGHTTP3_DEPENDENCY_FETCH)
+if (MANAPICORE_NGHTTP3_DEPENDENCY_FETCH)
     add_dependencies(${PROJECT_NAME} libnghttp3)
 endif ()
 
@@ -1323,13 +1322,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_G
     if (WIN32)
 
     else ()
-        if (MANAPIHTTP_STD_BACKTRACE_DEPENDENCY)
+        if (MANAPICORE_STD_BACKTRACE_DEPENDENCY)
             find_library(STDCPPEXP_LIBRARY NAMES stdc++exp)
             target_link_libraries(${PROJECT_NAME} PRIVATE stdc++exp)
         endif()
     endif()
 else()
-    if (MANAPIHTTP_STD_BACKTRACE_DEPENDENCY)
+    if (MANAPICORE_STD_BACKTRACE_DEPENDENCY)
         target_link_libraries(${PROJECT_NAME} PRIVATE stdc++_libbacktrace)
     endif ()
 endif()
@@ -1346,7 +1345,7 @@ if (WIN32)
     # set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} "/FS")
 endif ()
 
-if (MANAPIHTTP_ENABLE_TESTS AND MANAPIHTTP_BUILD_TYPE STREQUAL "lib")
+if (MANAPICORE_ENABLE_TESTS AND MANAPICORE_BUILD_TYPE STREQUAL "lib")
     message(STATUS "Enable Testing")
 
     add_subdirectory(./tests)
@@ -1356,7 +1355,7 @@ else ()
     message(STATUS "Disable Testing")
 endif ()
 
-if (MANAPIHTTP_BUILD_TYPE STREQUAL "exe")
+if (MANAPICORE_BUILD_TYPE STREQUAL "exe")
     # nothing
 else ()
     set(pc_libs_private)
@@ -1371,30 +1370,30 @@ else ()
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 
-    if (MANAPIHTTP_INSTALL_ARCH)
-        set(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR}${MANAPIHTTP_INSTALL_ARCH})
-        set(CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}${MANAPIHTTP_INSTALL_ARCH})
+    if (MANAPICORE_INSTALL_ARCH)
+        set(CMAKE_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR}${MANAPICORE_INSTALL_ARCH})
+        set(CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}${MANAPICORE_INSTALL_ARCH})
     endif ()
 
 
-    install(TARGETS ${PROJECT_NAME} EXPORT manapihttp-targets
+    install(TARGETS ${PROJECT_NAME} EXPORT manapicore-targets
             ARCHIVE  DESTINATION ${CMAKE_INSTALL_LIBDIR}
             LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
             RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
             INCLUDES  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            #            FILE_SET CXX_MODULES
-            #            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/src
-            #            CXX_MODULES_BMI
-            #            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
-            #            FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECTNAME}
+            FILE_SET CXX_MODULES
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/src
+            CXX_MODULES_BMI
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
+            FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECTNAME}
     )
 
     install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
     install(DIRECTORY ${CMAKE_BINARY_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 
-    install(EXPORT manapihttp-targets
+    install(EXPORT manapicore-targets
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-            #            CXX_MODULES_DIRECTORY .
+            CXX_MODULES_DIRECTORY .
     )
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -1402,7 +1401,7 @@ else ()
             COMPILE_PDB_OUTPUT_DIRECTORY ${CMAKE_INSTALL_BINDIR}
     )
 
-    install(FILES cmake/manapihttp-config.cmake
+    install(FILES cmake/manapicore-config.cmake
             DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
     )
     #
@@ -1410,27 +1409,27 @@ else ()
 endif ()
 
 # lib must be replaced with CMAKE_INSTALL_LIBDIR
-#include("${manapihttp_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapihttp/manapihttp-config.cmake")
+#include("${manapicore_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapicore/manapicore-config.cmake")
 #
-#set_target_properties(manapihttp::manapihttp PROPERTIES
+#set_target_properties(manapicore::manapicore PROPERTIES
 #        CXX_EXTENSIONS "OFF"
 #        CXX_MODULE_STD ""
-#        IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS "MANAPIHTTP_HTTP_BUILD_DEBUG;MANAPIHTTP_QUICHE_VERSION=\"0.24.4\";MANAPIHTTP_HTTP_AS_LIBRARY"
+#        IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS "MANAPICORE_HTTP_BUILD_DEBUG;MANAPICORE_QUICHE_VERSION=\"0.24.4\";MANAPICORE_HTTP_AS_LIBRARY"
 #        IMPORTED_CXX_MODULES_COMPILE_FEATURES "cxx_std_23"
-#        IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES "/home/Timur/.conan2/p/b/manap001c9f726cfa4/b/include;/home/Timur/.conan2/p/b/manap001c9f726cfa4/b/build/Debug/include;/home/Timur/.conan2/p/b/manap001c9f726cfa4/b/build/Debug/generated;${manapihttp_PACKAGE_FOLDER_DEBUG}/include/manapihttp"
+#        IMPORTED_CXX_MODULES_INCLUDE_DIRECTORIES "/home/Timur/.conan2/p/b/manap001c9f726cfa4/b/include;/home/Timur/.conan2/p/b/manap001c9f726cfa4/b/build/Debug/include;/home/Timur/.conan2/p/b/manap001c9f726cfa4/b/build/Debug/generated;${manapicore_PACKAGE_FOLDER_DEBUG}/include/manapicore"
 #        INTERFACE_COMPILE_FEATURES "cxx_std_23"
-#        INTERFACE_INCLUDE_DIRECTORIES "${manapihttp_PACKAGE_FOLDER_DEBUG}/include/manapihttp"
+#        INTERFACE_INCLUDE_DIRECTORIES "${manapicore_PACKAGE_FOLDER_DEBUG}/include/manapicore"
 #)
 #
-#target_sources(manapihttp::manapihttp
+#target_sources(manapicore::manapicore
 #        INTERFACE
 #        FILE_SET "CXX_MODULES"
 #        TYPE "CXX_MODULES"
-#        BASE_DIRS "${manapihttp_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapihttp/src"
-#        FILES "${manapihttp_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapihttp/src/ManapiJson.cppm"
+#        BASE_DIRS "${manapicore_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapicore/src"
+#        FILES "${manapicore_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapicore/src/ManapiJson.cppm"
 #)
 #
-#set_property(TARGET "manapihttp::manapihttp"
+#set_property(TARGET "manapicore::manapicore"
 #        PROPERTY IMPORTED_CXX_MODULES_DEBUG
-#        "manapi=${manapihttp_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapihttp/src/ManapiJson.cppm,${manapihttp_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapihttp/bmi-GNU_Debug/manapi.gcm"
+#        "manapi=${manapicore_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapicore/src/ManapiJson.cppm,${manapicore_PACKAGE_FOLDER_DEBUG}/lib/cmake/manapicore/bmi-GNU_Debug/manapi.gcm"
 #)

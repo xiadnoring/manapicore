@@ -26,7 +26,7 @@ namespace manapi::hash {
             sha256();
             void update(const unsigned char *message, std::size_t len) override;
             void final(unsigned char *digest) override;
-            MANAPIHTTP_NODISCARD std::size_t final_size () const override;
+            MANAPICORE_NODISCARD std::size_t final_size () const override;
             static const unsigned int DIGEST_SIZE = ( 256 / 8);
 
         protected:

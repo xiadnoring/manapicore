@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Source: https://github.com/xiadnoring/manapi-http
-Upstream-Name: manapihttp
+Upstream-Name: manapicore
 Upstream-Contact: Timur Zajnullin <timurtuty@yandex.ru>
 
 Files:

@@ -57,7 +57,7 @@ union threadpool__source {
     std::coroutine_handle<> handle;
 };
 
-static void task_doit(std::move_only_function<void()>&task) MANAPIHTTP_NOEXCEPT {
+static void task_doit(std::move_only_function<void()>&task) MANAPICORE_NOEXCEPT {
     assert((task));
     try {
         task();
@@ -70,7 +70,7 @@ static void task_doit(std::move_only_function<void()>&task) MANAPIHTTP_NOEXCEPT 
     }
 }
 
-static void task_doit(std::coroutine_handle<> &task) MANAPIHTTP_NOEXCEPT {
+static void task_doit(std::coroutine_handle<> &task) MANAPICORE_NOEXCEPT {
     assert((task));
 
     try {
@@ -85,7 +85,7 @@ static void task_doit(std::coroutine_handle<> &task) MANAPIHTTP_NOEXCEPT {
 }
 
 
-static int mthreadpool_get_task(manapi::mthread_pool::data_t *data, std::size_t index, threadpool__source *source) MANAPIHTTP_NOEXCEPT {
+static int mthreadpool_get_task(manapi::mthread_pool::data_t *data, std::size_t index, threadpool__source *source) MANAPICORE_NOEXCEPT {
     std::lock_guard<std::mutex> lk (data->m_queue_mutex);
 
     if ( index < data->m_tasks_by_thread.size() && !data->m_tasks_by_thread[index].empty()) {
@@ -157,7 +157,7 @@ namespace manapi {
     }
 
     
-    void mthread_pool::stop() MANAPIHTTP_NOEXCEPT {
+    void mthread_pool::stop() MANAPICORE_NOEXCEPT {
         if (!(this->m_data->m_flags & THREADPOOL__FLAG_ACTIVE)) {
             return;
         }
@@ -166,11 +166,11 @@ namespace manapi {
     }
 
     
-    std::size_t mthread_pool::size() const MANAPIHTTP_NOEXCEPT {
+    std::size_t mthread_pool::size() const MANAPICORE_NOEXCEPT {
         return this->m_data->m_threadnum;
     }
 
-    std::size_t mthread_pool::tasks_size() const MANAPIHTTP_NOEXCEPT {
+    std::size_t mthread_pool::tasks_size() const MANAPICORE_NOEXCEPT {
         std::lock_guard<std::mutex> lk (this->m_data->m_queue_mutex);
         return this->m_data->m_tasks.size();
     }
@@ -182,7 +182,7 @@ namespace manapi {
     }
 
     
-    void mthread_pool::join() MANAPIHTTP_NOEXCEPT {
+    void mthread_pool::join() MANAPICORE_NOEXCEPT {
         for (auto &thread: this->m_data->m_threads) {
             thread.join();
         }
@@ -245,7 +245,7 @@ namespace manapi {
         }
     }
 
-    void mthread_pool::release_task(std::move_only_function<void()> &&cb) MANAPIHTTP_NOEXCEPT {
+    void mthread_pool::release_task(std::move_only_function<void()> &&cb) MANAPICORE_NOEXCEPT {
         {
             std::lock_guard<std::mutex> lk(this->m_data->m_queue_mutex);
             assert(this->m_data->m_reserved_tasks >= 1);
@@ -275,7 +275,7 @@ namespace manapi {
         }
     }
 
-    void mthread_pool::notify_all() MANAPIHTTP_NOEXCEPT {
+    void mthread_pool::notify_all() MANAPICORE_NOEXCEPT {
         this->m_data->m_cv.notify_all ();
     }
 
@@ -289,7 +289,7 @@ namespace manapi {
     
     ethread_pool::~ethread_pool() = default;
 
-    std::size_t ethread_pool::tasks_size() const MANAPIHTTP_NOEXCEPT {
+    std::size_t ethread_pool::tasks_size() const MANAPICORE_NOEXCEPT {
         return this->m_data->m_tasks.size() + this->m_data->m_handlers.size();
     }
 
@@ -319,17 +319,17 @@ namespace manapi {
     }
 
     
-    void ethread_pool::set_notify() MANAPIHTTP_NOEXCEPT {
+    void ethread_pool::set_notify() MANAPICORE_NOEXCEPT {
         this->m_data->m_flags |= THREADPOOL__FLAG_NOTIFY;
     }
 
     
-    void ethread_pool::set_notify_cb(std::move_only_function<void()> ontask) MANAPIHTTP_NOEXCEPT {
+    void ethread_pool::set_notify_cb(std::move_only_function<void()> ontask) MANAPICORE_NOEXCEPT {
         this->m_data->m_ontask = std::move(ontask);
     }
 
     
-    void ethread_pool::stop() MANAPIHTTP_NOEXCEPT {
+    void ethread_pool::stop() MANAPICORE_NOEXCEPT {
         if (!(this->m_data->m_flags & THREADPOOL__FLAG_ACTIVE)) {
             return;
         }
@@ -389,7 +389,7 @@ namespace manapi {
     }
 
 
-    void ethread_pool::join() MANAPIHTTP_NOEXCEPT {
+    void ethread_pool::join() MANAPICORE_NOEXCEPT {
 
     }
 
@@ -409,7 +409,7 @@ namespace manapi {
         }
     }
 
-    void ethread_pool::release_tasks(manapi::task_types type, std::size_t sz) MANAPIHTTP_NOEXCEPT {
+    void ethread_pool::release_tasks(manapi::task_types type, std::size_t sz) MANAPICORE_NOEXCEPT {
         switch (type) {
             case TASK_TYPE_FUNC:
                 assert(this->m_data->m_reserved_tasks >= sz);

@@ -19,9 +19,9 @@ namespace manapi {
 
         ctoken sub () const;
 
-        ctoken (ctoken &&n) MANAPIHTTP_NOEXCEPT;
+        ctoken (ctoken &&n) MANAPICORE_NOEXCEPT;
 
-        ctoken &operator=(ctoken &&n) MANAPIHTTP_NOEXCEPT;
+        ctoken &operator=(ctoken &&n) MANAPICORE_NOEXCEPT;
 
         ctoken (const ctoken &n);
 
@@ -51,7 +51,7 @@ namespace manapi {
          * @param callback Callback that will be called while canceling
          * @note It must be called only in @code event loop thread@endcode
          */
-        void cancel_callback (std::move_only_function<void()> callback) MANAPIHTTP_NOEXCEPT;
+        void cancel_callback (std::move_only_function<void()> callback) MANAPICORE_NOEXCEPT;
 
         /**
          * Set an other cancellation that will be cancelled while canceling
@@ -66,17 +66,17 @@ namespace manapi {
          *
          * @throw manapi::exception with error code @code ERR_CANCELLATION_FAILED@endcode in case of failure while sending a signal
          */
-        void cancel () MANAPIHTTP_NOEXCEPT;
+        void cancel () MANAPICORE_NOEXCEPT;
 
         /**
          * Request a callback to cancel your action
          */
-        void ask_cancel_callback () MANAPIHTTP_NOEXCEPT;
+        void ask_cancel_callback () MANAPICORE_NOEXCEPT;
 
         /**
          * Returns true if token was cancelled
          */
-        MANAPIHTTP_NODISCARD bool is_cancelled () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_cancelled () const MANAPICORE_NOEXCEPT;
 
         /**
          * Set timeout in milliseconds
@@ -84,7 +84,7 @@ namespace manapi {
          * @param timeout Timeout in milliseconds
          * @return Ok on succes, otherwise it returns InternalError, ResourceExhausted
          */
-        manapi::status timeout (size_t timeout) MANAPIHTTP_NOEXCEPT;
+        manapi::status timeout (size_t timeout) MANAPICORE_NOEXCEPT;
 
         /**
          * Set timeout in millseconds
@@ -99,14 +99,14 @@ namespace manapi {
          *
          * @return a message stating that it asks a callback for cancellation
          */
-        MANAPIHTTP_NODISCARD bool contains_cancel_callback () const;
+        MANAPICORE_NODISCARD bool contains_cancel_callback () const;
 
         /**
          * Disable cancellation without calling the callback to cancel
          */
         void disable ();
 
-        MANAPIHTTP_NODISCARD const std::shared_ptr<ctoken_data_t> &data () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const std::shared_ptr<ctoken_data_t> &data () const MANAPICORE_NOEXCEPT;
     private:
         std::shared_ptr<ctoken_data_t> m_data;
     };

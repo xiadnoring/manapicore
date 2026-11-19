@@ -156,11 +156,11 @@
 //    co_return status_internal("tcp: init failed");
 //}
 //
-//void manapi::net::worker::TCP::waiting(const shared_conn &conn, bool state) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::waiting(const shared_conn &conn, bool state) MANAPICORE_NOEXCEPT {
 //    prepared::waiting(conn, state);
 //}
 //
-//void manapi::net::worker::TCP::onaccept(const std::shared_ptr<ev::tcp> &watcher, int status) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::onaccept(const std::shared_ptr<ev::tcp> &watcher, int status) MANAPICORE_NOEXCEPT {
 //    if (status) return;
 //
 //    shared_conn connection;
@@ -175,7 +175,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::TCP::onrecv(const std::shared_ptr<ev::tcp> &watcher, const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::onrecv(const std::shared_ptr<ev::tcp> &watcher, const worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    auto const connection = conn->as<tcp_connection_t>();
 //
 //    manapi_log_trace_hard("tcp:recv conn=%p size=%zu", conn.get(), this->m_sc.base()->size());
@@ -198,7 +198,7 @@
 //}
 //
 //
-//manapi::net::worker::shared_conn manapi::net::worker::TCP::accept (const ev::shared_tcp &w, shared_conn (*init_cb) (void *user_data), void *user_data) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::shared_conn manapi::net::worker::TCP::accept (const ev::shared_tcp &w, shared_conn (*init_cb) (void *user_data), void *user_data) MANAPICORE_NOEXCEPT {
 //
 //    auto const count = this->m_worker_data->count.load();
 //
@@ -264,7 +264,7 @@
 //                        manapi::async::current()->logger()->ferror(manapi::ERR_INTERNAL, "tcp: onrecv(...) unexpected error: %s", e.what());
 //                        this->close_connection(connection, CLOSE_CONN_ERR);
 //                    }
-//                }, [] (const std::shared_ptr<ev::tcp> &, size_t suggested_size, ev::buff_t *buff) MANAPIHTTP_NOEXCEPT -> void {
+//                }, [] (const std::shared_ptr<ev::tcp> &, size_t suggested_size, ev::buff_t *buff) MANAPICORE_NOEXCEPT -> void {
 //                    auto res = manapi::async::memory_fabric()->buffer(suggested_size);
 //                    if (res.ok()) {
 //                        auto buffer = res.unwrap();
@@ -359,11 +359,11 @@
 //    return nullptr;
 //}
 //
-//manapi::net::worker::shared_conn manapi::net::worker::TCP::accept(const ev::shared_tcp &w) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::shared_conn manapi::net::worker::TCP::accept(const ev::shared_tcp &w) MANAPICORE_NOEXCEPT {
 //    return this->accept(w, connection_init_cb, this);
 //}
 //
-//void manapi::net::worker::TCP::close_connection(shared_conn conn, int flags) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::close_connection(shared_conn conn, int flags) MANAPICORE_NOEXCEPT {
 //    if (!conn) return;
 //
 //    auto connection = conn->as<tcp_connection_t>();
@@ -530,11 +530,11 @@
 //    manapi::net::worker::interface_worker::stop(token);
 //}
 //
-//void manapi::net::worker::TCP::feed_event(const shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::feed_event(const shared_conn &conn, int flags, manapi::slice_complex *sc) MANAPICORE_NOEXCEPT {
 //    prepared::feed_event(this, conn, flags, sc);
 //}
 //
-//ssize_t manapi::net::worker::TCP::sync_write_ex(const manapi::net::worker::shared_conn &conn, manapi::ev::buff_t *buf, uint32_t buf_cnt, bool finish, std::size_t maxsize) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::TCP::sync_write_ex(const manapi::net::worker::shared_conn &conn, manapi::ev::buff_t *buf, uint32_t buf_cnt, bool finish, std::size_t maxsize) MANAPICORE_NOEXCEPT {
 //    auto connection = conn->as<tcp_connection_t>();
 //
 //    if (connection->flags & CONN_CLOSED) return CONN_IO_ERROR;
@@ -594,7 +594,7 @@
 //    return rhs;
 //}
 //
-//ssize_t manapi::net::worker::TCP::sync_write_ex(const worker::shared_conn &conn, manapi::slice &sv, bool finish, std::size_t maxsize) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::TCP::sync_write_ex(const worker::shared_conn &conn, manapi::slice &sv, bool finish, std::size_t maxsize) MANAPICORE_NOEXCEPT {
 //    auto connection = conn->as<tcp_connection_t>();
 //
 //    if (connection->flags & CONN_CLOSED) return CONN_IO_ERROR;
@@ -648,22 +648,22 @@
 //    return rhs;
 //}
 //
-//ssize_t manapi::net::worker::TCP::sync_write(const worker::shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::worker::TCP::sync_write(const worker::shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPICORE_NOEXCEPT {
 //    return prepared::sync_write(this, conn, buff, nbuff, finish);
 //}
 //
-//void manapi::net::worker::TCP::event_on(const shared_conn & conn, worker_watcher_cb&& callback, int flags) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::event_on(const shared_conn & conn, worker_watcher_cb&& callback, int flags) MANAPICORE_NOEXCEPT {
 //    return prepared::event_on(this, conn, conn->as<connection_prepared_base_t>(), std::forward<decltype(callback)>(callback), flags);
 //}
 //
-//void manapi::net::worker::TCP::event_unsub(const manapi::net::worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::event_unsub(const manapi::net::worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    prepared::event_unsub( this, conn, conn->as<connection_prepared_base_t>() );
 //}
 //
-//int manapi::net::worker::TCP::event_flags(const shared_conn & conn, int flags) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::TCP::event_flags(const shared_conn & conn, int flags) MANAPICORE_NOEXCEPT {
 //    auto const data = conn->as<tcp_connection_t>();
 //
-//    MANAPIHTTP_WORKER_EVENT_LOOP(data) {
+//    MANAPICORE_WORKER_EVENT_LOOP(data) {
 //        if (data->flags & ev::DISCONNECT) {
 //            if (!data->ev_cb.empty())
 //                this->notify_cb(data->ev_cb.back().first, conn, CONN_CLOSED, nullptr);
@@ -673,17 +673,17 @@
 //            }
 //        }
 //
-//        MANAPIHTTP_WORKER_EVENT_BREAK(data)
+//        MANAPICORE_WORKER_EVENT_BREAK(data)
 //    }
 //
 //    return prev;
 //}
 //
-//int manapi::net::worker::TCP::event_flags(const shared_conn & conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::TCP::event_flags(const shared_conn & conn) MANAPICORE_NOEXCEPT {
 //    return prepared::event_flags(conn);
 //}
 //
-//void manapi::net::worker::TCP::try_read_start(const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::try_read_start(const shared_conn &conn, tcp_connection_t *data) MANAPICORE_NOEXCEPT {
 //    if (!data->watcher || data->watcher->is_active() || data->transfered > this->m_config->speed_limit_rate || data->top->recv.size() > this->m_config->max_buffer_size) {
 //        return;
 //    }
@@ -692,7 +692,7 @@
 //    if (res) manapi_log_error("%s failed due to %s", "tcp:read_start", ev::strerror(res));
 //}
 //
-//void manapi::net::worker::TCP::read_stop(const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::read_stop(const shared_conn &conn, tcp_connection_t *data) MANAPICORE_NOEXCEPT {
 //    if (!data->watcher || !data->watcher->is_active()) {
 //        return;
 //    }
@@ -701,7 +701,7 @@
 //    if (res) manapi_log_error("%s failed due to %s", "tcp:read_stop", ev::strerror(res));
 //}
 //
-//int manapi::net::worker::TCP::flush_write(const worker::shared_conn &connection, bool flush) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::TCP::flush_write(const worker::shared_conn &connection, bool flush) MANAPICORE_NOEXCEPT {
 //    auto conn = connection->as<tcp_connection_t>();
 //
 //    if (!flush) flush = (conn->flags & CONN_SEND_END);
@@ -800,12 +800,12 @@
 //    return CONN_IO_ERROR;
 //}
 //
-//void manapi::net::worker::TCP::flush_read(const shared_conn &conn, tcp_connection_t *data) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::flush_read(const shared_conn &conn, tcp_connection_t *data) MANAPICORE_NOEXCEPT {
 //    prepared::flush_read(this, conn, data);
 //    this->try_read_start(conn, data);
 //}
 //
-//void manapi::net::worker::TCP::update_limit_rate() MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::update_limit_rate() MANAPICORE_NOEXCEPT {
 //    /* in the event loop */
 //    for (auto it = this->m_ips.begin(); it != this->m_ips.end(); ) {
 //        if (it->second.empty()) {
@@ -828,7 +828,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::TCP::on_timeout(shared_conn conn) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::on_timeout(shared_conn conn) MANAPICORE_NOEXCEPT {
 //    auto const data = conn->as<tcp_connection_t>();
 //
 //    prepared::timer_clear(std::move(data->t));
@@ -839,16 +839,16 @@
 //    this->close_connection(conn, CLOSE_CONN_SHUTDOWN);
 //}
 //
-//void manapi::net::worker::TCP::update_limit_rate_connection(const shared_conn &sconn) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::update_limit_rate_connection(const shared_conn &sconn) MANAPICORE_NOEXCEPT {
 //    prepared::update_limit_rate_connection(sconn, sconn->as<connection_prepared_base_t>(), this, &this->m_global);
 //}
 //
-//bool manapi::net::worker::TCP::is_writable(const shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::worker::TCP::is_writable(const shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    auto const data = conn->as<tcp_connection_t>();
 //    return prepared::is_writable (this->m_config.get(), data);
 //}
 //
-//manapi::net::worker::shared_conn manapi::net::worker::TCP::connection_init_cb(void *user_data) MANAPIHTTP_NOEXCEPT {
+//manapi::net::worker::shared_conn manapi::net::worker::TCP::connection_init_cb(void *user_data) MANAPICORE_NOEXCEPT {
 //    try {
 //        auto p = std::make_unique<tcp_connection_t>();
 //
@@ -859,7 +859,7 @@
 //    }
 //}
 //
-//void manapi::net::worker::TCP::connection_interface_eraser(worker::connection *ptr) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::TCP::connection_interface_eraser(worker::connection *ptr) MANAPICORE_NOEXCEPT {
 //    if (!ptr)
 //        return;
 //
@@ -885,14 +885,14 @@
 //    wrk->m_token.unref();
 //}
 //
-//int manapi::net::worker::TCP::init_conn(const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::TCP::init_conn(const worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    if (this->m_global.init_cb(conn, &this->m_global, this))
 //        return -1;
 //    return 0;
 //}
 //
 //
-//int manapi::net::worker::TCP::conn_after_write(const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::TCP::conn_after_write(const worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    auto cdata = conn->as<tcp_connection_t>();
 //
 //    if ((cdata->flags & CONN_SEND_END) && (cdata->flags & CONN_RECV_END)) {

@@ -1,13 +1,13 @@
 #include <iostream>
 #include <format>
 
-#include <manapihttp/ManapiHttp.hpp>
-#include <manapihttp/fs/ManapiFilesystem.hpp>
-#include <manapihttp/ManapiInitTools.hpp>
+#include <manapicore/ManapiHttp.hpp>
+#include <manapicore/fs/ManapiFilesystem.hpp>
+#include <manapicore/ManapiInitTools.hpp>
 
 int main () {
-    manapi::init_tools::log_name_enable("manapihttp", true);
-    manapi::init_tools::log_name_enable("manapihttp::fs", true);
+    manapi::init_tools::log_name_enable("manapicore", true);
+    manapi::init_tools::log_name_enable("manapicore::fs", true);
     manapi::init_tools::log_trace_init (manapi::debug::LOG_TRACE_LOW);
 
     manapi::async::context::threadpoolfs(4);

@@ -1,6 +1,6 @@
 #include "ManapiFetch.hpp"
 
-#if MANAPIHTTP_CURL_DEPENDENCY
+#if MANAPICORE_CURL_DEPENDENCY
 
 #   include <exception>
 #   include <cstring>
@@ -15,7 +15,7 @@
 #   include "fs/ManapiFileStream.hpp"
 #   include "./include/ManapiUtils.hpp"
 
-#   define MANAPIHTTP_CURL_VERSION_REQUIRE(major, minor, patch) MANAPIHTTP_SINCE_AT_CUSTOM(LIBCURL_VERSION_MAJOR,LIBCURL_VERSION_MINOR,LIBCURL_VERSION_PATCH, major, minor, patch)
+#   define MANAPICORE_CURL_VERSION_REQUIRE(major, minor, patch) MANAPICORE_SINCE_AT_CUSTOM(LIBCURL_VERSION_MAJOR,LIBCURL_VERSION_MINOR,LIBCURL_VERSION_PATCH, major, minor, patch)
 
 // Utils
 
@@ -56,7 +56,7 @@ union manapi__fetch_recv_body_t {
 
     ~manapi__fetch_recv_body_t() {}
 
-    void reset (uint32_t &flags, bool is_async) MANAPIHTTP_NOEXCEPT {
+    void reset (uint32_t &flags, bool is_async) MANAPICORE_NOEXCEPT {
         if (flags & MANAPI__CURL_FLAG_ASYNC_RECV) {
             if (is_async) return;
             this->async_cb.~move_only_function();
@@ -78,7 +78,7 @@ union manapi__fetch_handler_headers_t {
 
     ~manapi__fetch_handler_headers_t() {}
 
-    void reset (uint32_t &flags, bool is_async) MANAPIHTTP_NOEXCEPT {
+    void reset (uint32_t &flags, bool is_async) MANAPICORE_NOEXCEPT {
         if (flags & MANAPI__CURL_FLAG_ASYNC_HEADERS) {
             if (is_async) return;
             this->async_cb.~move_only_function();
@@ -102,7 +102,7 @@ union manapi__fetch_send_body_t {
 
     ~manapi__fetch_send_body_t() {}
 
-    void reset (uint32_t &flags, bool is_async) MANAPIHTTP_NOEXCEPT {
+    void reset (uint32_t &flags, bool is_async) MANAPICORE_NOEXCEPT {
         if (flags & MANAPI__CURL_FLAG_ASYNC_SEND) {
             if (is_async) return;
             this->async_cb.~move_only_function();
@@ -121,7 +121,7 @@ union manapi__fetch_send_body_t {
         new (this) decltype (this->sync_cb) ();
     }
 
-    void clear (uint32_t &flags) MANAPIHTTP_NOEXCEPT {
+    void clear (uint32_t &flags) MANAPICORE_NOEXCEPT {
         if (flags & MANAPI__CURL_FLAG_ASYNC_SEND) {
             this->async_cb.~move_only_function();
             flags ^= MANAPI__CURL_FLAG_ASYNC_SEND;
@@ -216,9 +216,9 @@ struct manapi::net::fetch::data_t {
 static manapi::future<> manapi__curl_header_handler__async (std::shared_ptr<manapi::net::fetch> parent, manapi::net::fetch::data_t *m_data, bool finish) {
     try {
 
-        manapi_log_trace2 ("manapihttp::fetch", "fetch:calling async_cb");
+        manapi_log_trace2 ("manapicore::fetch", "fetch:calling async_cb");
         auto rhs = co_await m_data->cbs.headers.async_cb ( parent );
-        manapi_log_trace2 ("manapihttp::fetch", "fetch:finish calling async_cb result = %d", (int)rhs);
+        manapi_log_trace2 ("manapicore::fetch", "fetch:finish calling async_cb result = %d", (int)rhs);
 
 
         if (rhs) {
@@ -248,7 +248,7 @@ static manapi::future<> manapi__curl_header_handler__async (std::shared_ptr<mana
 
         assert(m_data->builder.deps);
 
-        manapi_log_trace2 ("manapihttp::fetch", "fetch:deps=%u", m_data->builder.deps);
+        manapi_log_trace2 ("manapicore::fetch", "fetch:deps=%u", m_data->builder.deps);
 
         if (!--m_data->builder.deps) {
             m_data->builder.resolve();
@@ -301,7 +301,7 @@ static manapi::future<> manapi__curl_write_handler__async (std::shared_ptr<manap
 
     if (! (m_data->flags & MANAPI__CURL_FLAG_SENDING) ) {
         assert(m_data->builder.deps);
-        manapi_log_trace2 ("manapihttp::fetch", "fetch:deps=%u", m_data->builder.deps);
+        manapi_log_trace2 ("manapicore::fetch", "fetch:deps=%u", m_data->builder.deps);
         if (!--m_data->builder.deps) {
             m_data->builder.resolve();
         }
@@ -352,7 +352,7 @@ static manapi::future<> manapi__curl_recv_handler__async (std::shared_ptr<manapi
 
     if (! (m_data->flags & MANAPI__CURL_FLAG_RECVING) ) {
         assert(m_data->builder.deps);
-        manapi_log_trace2 ("manapihttp::fetch", "fetch:deps=%u", m_data->builder.deps);
+        manapi_log_trace2 ("manapicore::fetch", "fetch:deps=%u", m_data->builder.deps);
         if (!--m_data->builder.deps) {
             m_data->builder.resolve();
         }
@@ -554,7 +554,7 @@ std::size_t manapi::net::curl_write_handler (char *buffer, std::size_t size, std
         if (m_data->flags & MANAPI__CURL_FLAG_RECVING)
             m_data->flags ^= MANAPI__CURL_FLAG_RECVING;
     }
-#if MANAPIHTTP_CURL_VERSION_REQUIRE(7,87,0)
+#if MANAPICORE_CURL_VERSION_REQUIRE(7,87,0)
     return CURL_WRITEFUNC_ERROR;
 #else
     return 0;
@@ -630,7 +630,7 @@ manapi::status manapi::net::fetch::init(std::string url) {
     }
 }
 
-manapi::status_or<std::shared_ptr<manapi::net::fetch>> manapi::net::fetch::create(std::string url) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<std::shared_ptr<manapi::net::fetch>> manapi::net::fetch::create(std::string url) MANAPICORE_NOEXCEPT {
     return std::shared_ptr<fetch>(new fetch(std::move(url)));
 }
 
@@ -750,12 +750,12 @@ manapi::future<manapi::status> manapi::net::fetch::perform(manapi::ctoken token)
                         manapi::async::current()->eventloop()->watch_curl(&perform_data.p->m_data->curl,
                             [&perform_data](int status)
                                   -> void {
-                            manapi_log_trace2 ( "manapihttp::fetch", "watch_curl:Unbind perform_data=%p deps=%u", &perform_data, perform_data.p->m_data->builder.deps);
+                            manapi_log_trace2 ( "manapicore::fetch", "watch_curl:Unbind perform_data=%p deps=%u", &perform_data, perform_data.p->m_data->builder.deps);
                             perform_data.status = static_cast<CURLcode> (status);
                             if (!--perform_data.p->m_data->builder.deps) {
                                 perform_data.p->m_data->builder.resolve();
                             }
-                            manapi_log_trace2 ( "manapihttp::fetch", "watch_curl:Finish unbind perform_data=%p", &perform_data);
+                            manapi_log_trace2 ( "manapicore::fetch", "watch_curl:Finish unbind perform_data=%p", &perform_data);
                         }).unwrap();
                     }
                     catch (...) {
@@ -854,7 +854,7 @@ void manapi::net::fetch::clear() {
     manapi__fetch_cleanup (this, this->m_data.get());
 }
 
-manapi::status manapi::net::fetch::recv_body(std::move_only_function<ssize_t(char *, std::size_t)> handler) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::recv_body(std::move_only_function<ssize_t(char *, std::size_t)> handler) MANAPICORE_NOEXCEPT {
     if (this->m_data->flags & MANAPI__CURL_FLAG_HEADERS_RECEIVED) return manapi::status_unavailable();
 
     this->m_data->cbs.recv.reset( this->m_data->flags, false );
@@ -867,7 +867,7 @@ manapi::future<manapi::status_or<std::string>> manapi::net::fetch::text() {
     try {
         std::string content;
 
-        auto res = this->recv_body ([&content](char *buffer, size_t size) MANAPIHTTP_NOEXCEPT -> ssize_t {
+        auto res = this->recv_body ([&content](char *buffer, size_t size) MANAPICORE_NOEXCEPT -> ssize_t {
             try {
                 content.append(buffer, size);
                 return static_cast<ssize_t>(size);
@@ -905,7 +905,7 @@ manapi::future<manapi::status_or<manapi::json>> manapi::net::fetch::json() {
 }
 
 
-manapi::status manapi::net::fetch::recv_async_body(std::move_only_function<manapi::future<ssize_t>(manapi::slice_view buffs, bool fin)> handler) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::recv_async_body(std::move_only_function<manapi::future<ssize_t>(manapi::slice_view buffs, bool fin)> handler) MANAPICORE_NOEXCEPT {
 
     if (this->m_data->flags & MANAPI__CURL_FLAG_HEADERS_RECEIVED) return manapi::status_unavailable();
 
@@ -915,7 +915,7 @@ manapi::status manapi::net::fetch::recv_async_body(std::move_only_function<manap
     return manapi::status_ok();
 }
 
-manapi::status manapi::net::fetch::recv_headers(std::move_only_function<bool(const std::shared_ptr<manapi::net::fetch> &)> handler) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::recv_headers(std::move_only_function<bool(const std::shared_ptr<manapi::net::fetch> &)> handler) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
     this->m_data->cbs.headers.reset( this->m_data->flags, false );
@@ -924,7 +924,7 @@ manapi::status manapi::net::fetch::recv_headers(std::move_only_function<bool(con
     return manapi::status_ok();
 }
 
-manapi::status manapi::net::fetch::recv_async_headers(std::move_only_function<manapi::future<bool>(const std::shared_ptr<manapi::net::fetch> &)> handler) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::recv_async_headers(std::move_only_function<manapi::future<bool>(const std::shared_ptr<manapi::net::fetch> &)> handler) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
     this->m_data->cbs.headers.reset( this->m_data->flags, true );
@@ -933,7 +933,7 @@ manapi::status manapi::net::fetch::recv_async_headers(std::move_only_function<ma
     return manapi::status_ok();
 }
 
-manapi::status manapi::net::fetch::send_body(fetch_formdata params) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::send_body(fetch_formdata params) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
     this->m_data->body.reset( this->m_data->flags, MANAPI__CURL_FLAG_BODY_FORMDATA );
@@ -943,7 +943,7 @@ manapi::status manapi::net::fetch::send_body(fetch_formdata params) MANAPIHTTP_N
 }
 
 
-manapi::status manapi::net::fetch::method(std::string_view method) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::method(std::string_view method) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
     if (!manapi::string::equals("get", method, 0b01)) {
@@ -971,7 +971,7 @@ manapi::status manapi::net::fetch::method(std::string_view method) MANAPIHTTP_NO
     return manapi::status_ok();
 }
 
-manapi::status manapi::net::fetch::send_body(std::string str) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::send_body(std::string str) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
     this->m_data->body.reset( this->m_data->flags, MANAPI__CURL_FLAG_BODY_PLAIN );
@@ -980,7 +980,7 @@ manapi::status manapi::net::fetch::send_body(std::string str) MANAPIHTTP_NOEXCEP
     return manapi::status_ok();
 }
 
-manapi::status manapi::net::fetch::send_body(manapi::slice_view str) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::send_body(manapi::slice_view str) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
 
@@ -1023,7 +1023,7 @@ manapi::future<manapi::status> manapi::net::fetch::send_body(http::file_transfer
     });
 }
 
-manapi::status manapi::net::fetch::send_async_body(std::move_only_function<manapi::future<ssize_t>(slice_view buffs, bool &fin)> handler) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::send_async_body(std::move_only_function<manapi::future<ssize_t>(slice_view buffs, bool &fin)> handler) MANAPICORE_NOEXCEPT {
 
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
@@ -1035,7 +1035,7 @@ manapi::status manapi::net::fetch::send_async_body(std::move_only_function<manap
     return manapi::status_ok();
 }
 
-manapi::status manapi::net::fetch::send_body(std::move_only_function<ssize_t(char *, std::size_t)> handler) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::send_body(std::move_only_function<ssize_t(char *, std::size_t)> handler) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
     this->m_data->body.reset( this->m_data->flags, MANAPI__CURL_FLAG_BODY_CALLBACK );
@@ -1046,7 +1046,7 @@ manapi::status manapi::net::fetch::send_body(std::move_only_function<ssize_t(cha
     return manapi::status_ok();
 }
 
-manapi::status manapi::net::fetch::send_header(std::string_view key, std::string_view value) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::send_header(std::string_view key, std::string_view value) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
     try {
@@ -1093,11 +1093,11 @@ manapi::status manapi::net::fetch::send_header(std::string_view key, std::string
     }
 }
 
-void *manapi::net::fetch::custom() MANAPIHTTP_NOEXCEPT {
+void *manapi::net::fetch::custom() MANAPICORE_NOEXCEPT {
     return this->m_data->curl.get();
 }
 
-uint16_t manapi::net::fetch::status_code() const MANAPIHTTP_NOEXCEPT {
+uint16_t manapi::net::fetch::status_code() const MANAPICORE_NOEXCEPT {
     long code;
 
     CURLcode status;
@@ -1109,7 +1109,7 @@ uint16_t manapi::net::fetch::status_code() const MANAPIHTTP_NOEXCEPT {
     return static_cast<uint16_t>(code);
 }
 
-manapi::status manapi::net::fetch::option(manapi::net::fetch::option_type type, int32_t value) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::option(manapi::net::fetch::option_type type, int32_t value) MANAPICORE_NOEXCEPT {
     if ( this->m_data->flags & MANAPI__CURL_FLAG_IS_PROCESSING) return manapi::status_unavailable();
 
     CURLoption curlopt_type;
@@ -1134,7 +1134,7 @@ manapi::status manapi::net::fetch::option(manapi::net::fetch::option_type type, 
     return status_invalid_argument(curl_easy_strerror(res));
 }
 
-manapi::status manapi::net::fetch::send_content_length(int64_t length) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch::send_content_length(int64_t length) MANAPICORE_NOEXCEPT {
     CURLcode status;
     if ((status = curl_easy_setopt(this->m_data->curl.get(), CURLOPT_POSTFIELDSIZE_LARGE, length)) != CURLE_OK)
         return manapi::status_unknown(::curl_easy_strerror(status));
@@ -1146,14 +1146,14 @@ manapi::net::fetch_formdata::fetch_formdata() = default;
 
 manapi::net::fetch_formdata::~fetch_formdata() = default;
 
-manapi::net::fetch_formdata::fetch_formdata(fetch_formdata &&fd)  MANAPIHTTP_NOEXCEPT : mdata(std::move(fd.mdata)) {}
+manapi::net::fetch_formdata::fetch_formdata(fetch_formdata &&fd)  MANAPICORE_NOEXCEPT : mdata(std::move(fd.mdata)) {}
 
-manapi::net::fetch_formdata & manapi::net::fetch_formdata::operator=(fetch_formdata &&fd) MANAPIHTTP_NOEXCEPT {
+manapi::net::fetch_formdata & manapi::net::fetch_formdata::operator=(fetch_formdata &&fd) MANAPICORE_NOEXCEPT {
     this->mdata = std::move(fd.mdata);
     return *this;
 }
 
-manapi::status manapi::net::fetch_formdata::set_text(std::string name, std::string value) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch_formdata::set_text(std::string name, std::string value) MANAPICORE_NOEXCEPT {
     try {
         multipart_param_value res{};
         res.strdata = std::move(value);
@@ -1168,7 +1168,7 @@ manapi::status manapi::net::fetch_formdata::set_text(std::string name, std::stri
     }
 }
 
-manapi::status manapi::net::fetch_formdata::set_file(std::string name, std::string filepath) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch_formdata::set_file(std::string name, std::string filepath) MANAPICORE_NOEXCEPT {
     try {
         multipart_param_value res{};
         res.strdata = std::move(filepath);
@@ -1185,7 +1185,7 @@ manapi::status manapi::net::fetch_formdata::set_file(std::string name, std::stri
     }
 }
 
-manapi::status manapi::net::fetch_formdata::set_callback(std::string name, std::size_t size, std::move_only_function<size_t(void *buff, size_t buff_size)> cb) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::net::fetch_formdata::set_callback(std::string name, std::size_t size, std::move_only_function<size_t(void *buff, size_t buff_size)> cb) MANAPICORE_NOEXCEPT {
     try {
         multipart_param_value res{};
         res.filedata = multipart_param_value_file({std::move(cb), size});
@@ -1200,15 +1200,15 @@ manapi::status manapi::net::fetch_formdata::set_callback(std::string name, std::
     }
 }
 
-void manapi::net::fetch_formdata::clear() MANAPIHTTP_NOEXCEPT {
+void manapi::net::fetch_formdata::clear() MANAPICORE_NOEXCEPT {
     this->mdata.clear();
 }
 
-manapi::net::fetch_formdata::tdata::iterator manapi::net::fetch_formdata::begin() MANAPIHTTP_NOEXCEPT {
+manapi::net::fetch_formdata::tdata::iterator manapi::net::fetch_formdata::begin() MANAPICORE_NOEXCEPT {
     return this->mdata.begin();
 }
 
-manapi::net::fetch_formdata::tdata::iterator manapi::net::fetch_formdata::end() MANAPIHTTP_NOEXCEPT {
+manapi::net::fetch_formdata::tdata::iterator manapi::net::fetch_formdata::end() MANAPICORE_NOEXCEPT {
     return this->mdata.end();
 }
 

@@ -61,31 +61,31 @@ namespace manapi::ext::pq {
 
         status (manapi::err_num code, const char * msg, std::size_t sqlcode, std::string sqlmsg);
 
-        status (status &&n) MANAPIHTTP_NOEXCEPT;
+        status (status &&n) MANAPICORE_NOEXCEPT;
 
-        status &operator=(status &&n) MANAPIHTTP_NOEXCEPT;
+        status &operator=(status &&n) MANAPICORE_NOEXCEPT;
 
-        status (manapi::status &&n) MANAPIHTTP_NOEXCEPT;
+        status (manapi::status &&n) MANAPICORE_NOEXCEPT;
 
-        status &operator=(manapi::status &&n) MANAPIHTTP_NOEXCEPT;
+        status &operator=(manapi::status &&n) MANAPICORE_NOEXCEPT;
 
         status (const status &n);
 
-        MANAPIHTTP_NODISCARD std::string fullmsg() const override;
+        MANAPICORE_NODISCARD std::string fullmsg() const override;
 
-        MANAPIHTTP_NODISCARD bool is_sqlerr () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_sqlerr () const MANAPICORE_NOEXCEPT;
 
         /**
          * Get the sql error msg
          * @return sql error msg
          */
-        MANAPIHTTP_NODISCARD std::string_view sqlmsg () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD std::string_view sqlmsg () const MANAPICORE_NOEXCEPT;
 
         /**
          * Get the sql status code
          * @return sql status code
          */
-        MANAPIHTTP_NODISCARD sql_states sqlcode () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD sql_states sqlcode () const MANAPICORE_NOEXCEPT;
 
     private:
         std::size_t m_sqlcode;
@@ -105,23 +105,23 @@ namespace manapi::ext::pq {
 
         status_or (const T &n) : manapi::status_or<T, E>(n) {}
 
-        status_or(status_or &&n) MANAPIHTTP_NOEXCEPT = default;
+        status_or(status_or &&n) MANAPICORE_NOEXCEPT = default;
 
-        status_or&operator=(status_or &&n) MANAPIHTTP_NOEXCEPT = default;
+        status_or&operator=(status_or &&n) MANAPICORE_NOEXCEPT = default;
 
         /**
          * Get the sql error message
          * @return sql error message
          */
-        MANAPIHTTP_NODISCARD std::string_view sqlmsg () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD std::string_view sqlmsg () const MANAPICORE_NOEXCEPT {
             return this->err_.sqlmsg();
         }
 
-        MANAPIHTTP_NODISCARD int sqlcode () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD int sqlcode () const MANAPICORE_NOEXCEPT {
             return this->err_.sqlcode();
         }
 
-        MANAPIHTTP_NODISCARD bool is_sqlerr () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD bool is_sqlerr () const MANAPICORE_NOEXCEPT {
             return this->err_.is_sqlerr();
         }
     };

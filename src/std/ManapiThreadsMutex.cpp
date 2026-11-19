@@ -8,18 +8,18 @@ struct manapi::async::tmutex::tmutex_promise {
     ev::shared_async w;
     std::coroutine_handle<> handle;
 
-    bool await_ready () MANAPIHTTP_NOEXCEPT;
+    bool await_ready () MANAPICORE_NOEXCEPT;
 
-    void await_resume () MANAPIHTTP_NOEXCEPT;
+    void await_resume () MANAPICORE_NOEXCEPT;
 
     void await_suspend (std::coroutine_handle<> handle);
 };
 
-bool manapi::async::tmutex::tmutex_promise::await_ready() MANAPIHTTP_NOEXCEPT {
+bool manapi::async::tmutex::tmutex_promise::await_ready() MANAPICORE_NOEXCEPT {
     return false;
 }
 
-void manapi::async::tmutex::tmutex_promise::await_resume() MANAPIHTTP_NOEXCEPT {
+void manapi::async::tmutex::tmutex_promise::await_resume() MANAPICORE_NOEXCEPT {
     if (this->token) {
         this->token->disable();
     }

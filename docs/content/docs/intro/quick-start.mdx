@@ -10,16 +10,16 @@ Import the ManapiHttp library into your project.
 
 ### Using System Libraries (Default)
 ```cmake
-find_package(manapihttp REQUIRED)
+find_package(manapicore REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} manapihttp)
+target_link_libraries(${PROJECT_NAME} manapicore)
 ```
 
 ### Using Conan
 ```cmake
-find_package(manapihttp REQUIRED)
+find_package(manapicore REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} manapihttp::manapihttp)
+target_link_libraries(${PROJECT_NAME} manapicore::manapicore)
 ```
 
 ## Build
@@ -30,9 +30,9 @@ Once all preparations are complete, let's write a "Hello, World!" program.
 #include <iostream>
 #include <format>
 
-#include <manapihttp/ManapiInitTools.hpp>
-#include <manapihttp/ManapiHttp.hpp>
-#include <manapihttp/fs/ManapiFilesystem.hpp>
+#include <manapicore/ManapiInitTools.hpp>
+#include <manapicore/ManapiHttp.hpp>
+#include <manapicore/fs/ManapiFilesystem.hpp>
 
 int main(int argc, char *argv[]) {
     /* Enable low-level log tracing */

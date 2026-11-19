@@ -43,7 +43,7 @@
 //         */
 //        manapi::future<manapi::status> run (std::shared_ptr<worker::base_http> site, std::shared_ptr<manapi::net::worker::worker_data_t> wdata);
 //
-//        MANAPIHTTP_NODISCARD const std::shared_ptr <manapi::net::http::config> &config() const;
+//        MANAPICORE_NODISCARD const std::shared_ptr <manapi::net::http::config> &config() const;
 //    private:
 //        std::size_t m_id;
 //

@@ -17,7 +17,7 @@
 //
 //static manapi::future<manapi::status> http_req_read_body_( manapi::net::worker::base *worker, manapi::net::worker::shared_conn *conn, manapi::net::http::request_data_t *req, manapi::net::http::request::onrecv_sync_cb handler);
 //
-//static manapi::json_error::status http_req_prepare_get_params (std::unique_ptr<std::map<std::string, std::string, std::less<>>> &params, manapi::net::http::request_data_t *req_data, const manapi::json_mask *mask) MANAPIHTTP_NOEXCEPT {
+//static manapi::json_error::status http_req_prepare_get_params (std::unique_ptr<std::map<std::string, std::string, std::less<>>> &params, manapi::net::http::request_data_t *req_data, const manapi::json_mask *mask) MANAPICORE_NOEXCEPT {
 //    using namespace manapi;
 //
 //    try {
@@ -72,7 +72,7 @@
 //    return this->m_request_data->http;
 //}
 //
-//MANAPIHTTP_NODISCARD const std::map<std::string, std::string, std::less<>> &manapi::net::http::request::ref_headers () const {
+//MANAPICORE_NODISCARD const std::map<std::string, std::string, std::less<>> &manapi::net::http::request::ref_headers () const {
 //    return this->m_request_data->headers;
 //}
 //
@@ -80,7 +80,7 @@
 //    return std::move(this->m_request_data->headers);
 //}
 //
-//manapi::status_or<std::string_view> manapi::net::http::request::param(std::string_view param) const MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<std::string_view> manapi::net::http::request::param(std::string_view param) const MANAPICORE_NOEXCEPT {
 //    auto it = this->m_request_data->params.find(param);
 //    if (it == this->m_request_data->params.end())
 //        return manapi::status_not_found("params:Not found");
@@ -88,7 +88,7 @@
 //    return std::string_view{it->second};
 //}
 //
-//manapi::status_or<std::pair<std::string, std::string>> manapi::net::http::request::param_extract( std::string_view param) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<std::pair<std::string, std::string>> manapi::net::http::request::param_extract( std::string_view param) MANAPICORE_NOEXCEPT {
 //    auto it = this->m_request_data->params.find(param);
 //    if (it == this->m_request_data->params.end())
 //        return manapi::status_not_found("params:Not found");
@@ -299,7 +299,7 @@
 //    return this->m_request_data->body_size;
 //}
 //
-//manapi::json_error::status manapi::net::http::request::verify_get(const manapi::json_mask *mask) MANAPIHTTP_NOEXCEPT {
+//manapi::json_error::status manapi::net::http::request::verify_get(const manapi::json_mask *mask) MANAPICORE_NOEXCEPT {
 //    return ::http_req_prepare_get_params(this->m_get_params, this->m_request_data, mask);
 //}
 //

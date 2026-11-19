@@ -1,7 +1,7 @@
 #pragma once
 
-#ifdef MANAPIHTTP_BUILD_SHARED_LIBS
-#   undef MANAPIHTTP_BUILD_SHARED_LIBS
+#ifdef MANAPICORE_BUILD_SHARED_LIBS
+#   undef MANAPICORE_BUILD_SHARED_LIBS
 #endif
 
 #include "ManapiInitTools.hpp"
@@ -16,7 +16,7 @@
 
 #define HTTP1PORT "8888"
 #define HTTP2PORT "8887"
-#define MANAPIHTTP_TESTS_MAIN UTEST_STATE(); \
+#define MANAPICORE_TESTS_MAIN UTEST_STATE(); \
 int main(int argc, const char *const argv[]) { \
     try { manapi::init_tools::log_trace_init(manapi::debug::trace_level::LOG_TRACE_LOW); }\
     catch (...) { manapi::init_tools::log_trace_init(manapi::debug::LOG_TRACE_NONE); }\

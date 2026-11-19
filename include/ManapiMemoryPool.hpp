@@ -19,11 +19,11 @@ namespace manapi {
 
         virtual ~object_item_pool_root ();
 
-        object_item_pool_root (object_item_pool_root &&n) MANAPIHTTP_NOEXCEPT;
+        object_item_pool_root (object_item_pool_root &&n) MANAPICORE_NOEXCEPT;
 
-        object_item_pool_root& operator= (object_item_pool_root &&n) MANAPIHTTP_NOEXCEPT;
+        object_item_pool_root& operator= (object_item_pool_root &&n) MANAPICORE_NOEXCEPT;
 
-        operator bool() const MANAPIHTTP_NOEXCEPT {
+        operator bool() const MANAPICORE_NOEXCEPT {
             return !!this->object;
         }
     protected:
@@ -37,9 +37,9 @@ namespace manapi {
 
         ~object_item_pool() override;
 
-        object_item_pool (object_item_pool &&n) MANAPIHTTP_NOEXCEPT = default;
+        object_item_pool (object_item_pool &&n) MANAPICORE_NOEXCEPT = default;
 
-        object_item_pool &operator=(object_item_pool &&n) MANAPIHTTP_NOEXCEPT = default;
+        object_item_pool &operator=(object_item_pool &&n) MANAPICORE_NOEXCEPT = default;
 
         T *operator->() {
             return this->object;
@@ -73,11 +73,11 @@ namespace manapi {
 
         manapi::bytebuffer buffer (void *pointer, std::size_t suggested);
 
-        void free (void *ptr, std::size_t size) MANAPIHTTP_NOEXCEPT;
+        void free (void *ptr, std::size_t size) MANAPICORE_NOEXCEPT;
 
         void clear ();
 
-        static int mem_type (std::size_t size) MANAPIHTTP_NOEXCEPT;
+        static int mem_type (std::size_t size) MANAPICORE_NOEXCEPT;
 
         static constexpr std::size_t area_size () { return 4096; }
 

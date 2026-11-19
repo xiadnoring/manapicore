@@ -24,7 +24,7 @@ namespace manapi {
 
             virtual ReturnType operator()(Args&&...) = 0;
 
-            virtual void move (void *data) MANAPIHTTP_NOEXCEPT = 0;
+            virtual void move (void *data) MANAPICORE_NOEXCEPT = 0;
         };
 
         template <typename Functor, typename Result, typename... Arguments>
@@ -37,7 +37,7 @@ namespace manapi {
                 return f (std::forward<Arguments> (args)...);
             }
 
-            void move (void *data) MANAPIHTTP_NOEXCEPT override {
+            void move (void *data) MANAPICORE_NOEXCEPT override {
                 new (data) FunctorHolder (std::move(this->f));
             }
 
@@ -76,7 +76,7 @@ namespace manapi {
 
         }
 
-        MANAPIHTTP_NODISCARD operator bool () const {
+        MANAPICORE_NODISCARD operator bool () const {
             return this->flg;
         }
 
@@ -86,7 +86,7 @@ namespace manapi {
             return (*reinterpret_cast<impl::FunctorHolderBase<Result, Arguments...> *>(this->data.stack)) (std::forward<Arguments> (args)...);
         }
 
-        move_only_function_base (move_only_function_base&& other) MANAPIHTTP_NOEXCEPT {
+        move_only_function_base (move_only_function_base&& other) MANAPICORE_NOEXCEPT {
             memset (&this->data.stack, '\0', sizeof (this->data.stack));
             if (other) {
                 reinterpret_cast<impl::FunctorHolderBase<Result, Arguments...> *>(other.data.stack)->move(this->data.stack);
@@ -97,7 +97,7 @@ namespace manapi {
             other.flg = false;
         }
 
-        move_only_function_base& operator= (move_only_function_base&& other) MANAPIHTTP_NOEXCEPT {
+        move_only_function_base& operator= (move_only_function_base&& other) MANAPICORE_NOEXCEPT {
             if (this == &other) {
                 return *this;
             }
@@ -130,9 +130,9 @@ namespace manapi {
         template <typename Functor>
         fixed_function (Functor &&f) : Base(std::forward<decltype(f)>(f)) {}
 
-        fixed_function (fixed_function<Result(Arguments...)> &&n) MANAPIHTTP_NOEXCEPT = default;
+        fixed_function (fixed_function<Result(Arguments...)> &&n) MANAPICORE_NOEXCEPT = default;
 
-        fixed_function& operator= (fixed_function<Result(Arguments...)> &&n) MANAPIHTTP_NOEXCEPT = default;
+        fixed_function& operator= (fixed_function<Result(Arguments...)> &&n) MANAPICORE_NOEXCEPT = default;
     };
 
     template<typename Result, typename ...Arguments>

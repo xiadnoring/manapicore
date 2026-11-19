@@ -84,22 +84,22 @@ jobs:
       run:  |
             [[ ${{ matrix.library_type }} == "SHARED" ]] && shared=True || shared=False
             conan install . \
-            -o "manapihttp/*:shared=$shared" \
-            -o "manapihttp/*:lib=True" \
-            -o "manapihttp/*:json_debug=False" \
-            -o "manapihttp/*:openssl_dependency=True" \
-            -o "manapihttp/*:wolfssl_dependency=False" \
-            -o "manapihttp/*:quiche_dependency=False" \
-            -o "manapihttp/*:tquic_dependency=False" \
-            -o "manapihttp/*:zlib_dependency=True" \
-            -o "manapihttp/*:curl_dependency=True" \
-            -o "manapihttp/*:gmp_dependency=True" \
-            -o "manapihttp/*:zstd_dependency=True" \
-            -o "manapihttp/*:brotli_dependency=True" \
-            -o "manapihttp/*:grpc_dependency=False" \
-            -o "manapihttp/*:nghttp2_dependency=True" \
-            -o "manapihttp/*:nghttp3_dependency=True" \
-            -o "manapihttp/*:cpptrace_dependency=True" \
+            -o "manapicore/*:shared=$shared" \
+            -o "manapicore/*:lib=True" \
+            -o "manapicore/*:json_debug=False" \
+            -o "manapicore/*:openssl_dependency=True" \
+            -o "manapicore/*:wolfssl_dependency=False" \
+            -o "manapicore/*:quiche_dependency=False" \
+            -o "manapicore/*:tquic_dependency=False" \
+            -o "manapicore/*:zlib_dependency=True" \
+            -o "manapicore/*:curl_dependency=True" \
+            -o "manapicore/*:gmp_dependency=True" \
+            -o "manapicore/*:zstd_dependency=True" \
+            -o "manapicore/*:brotli_dependency=True" \
+            -o "manapicore/*:grpc_dependency=False" \
+            -o "manapicore/*:nghttp2_dependency=True" \
+            -o "manapicore/*:nghttp3_dependency=True" \
+            -o "manapicore/*:cpptrace_dependency=True" \
             --build=missing
 
     - name: Clean up
@@ -114,7 +114,7 @@ jobs:
     #    key: ${{ steps.cache-conan-ubuntu.outputs.cache-primary-key }}
 
     - name: Configure CMake
-      run: cmake --preset conan-release -DMANAPIHTTP_ENABLE_TESTS=ON -DMANAPIHTTP_DISABLE_TRACE_HARD=ON -DMANAPIHTTP_STD_BACKTRACE_DEPENDENCY=OFF -DMANAPIHTTP_CPPTRACE_DEPENDENCY=ON
+      run: cmake --preset conan-release -DMANAPICORE_ENABLE_TESTS=ON -DMANAPICORE_DISABLE_TRACE_HARD=ON -DMANAPICORE_STD_BACKTRACE_DEPENDENCY=OFF -DMANAPICORE_CPPTRACE_DEPENDENCY=ON
 
     - name: Build
       run: cmake --build build/Release -j4 --config Release
@@ -189,13 +189,13 @@ jobs:
 
       - name: Conan install dependencies (shared)
         if: ${{ matrix.library_type == 'SHARED' }}
-        run: conan install . -s build_type=Release -o "manapihttp/*:shared=False" -o "manapihttp/*:lib=True" -o "manapihttp/*:json_debug=False" -o "manapihttp/*:openssl_dependency=True" -o "manapihttp/*:wolfssl_dependency=False" -o "manapihttp/*:quiche_dependency=False" -o "manapihttp/*:tquic_dependency=False" -o "manapihttp/*:zlib_dependency=True" -o "manapihttp/*:curl_dependency=True" -o "manapihttp/*:gmp_dependency=True" -o "manapihttp/*:zstd_dependency=True" -o "manapihttp/*:brotli_dependency=True" -o "manapihttp/*:grpc_dependency=False" -o "manapihttp/*:nghttp2_dependency=True" -o "manapihttp/*:nghttp3_dependency=True" -o "manapihttp/*:cpptrace_dependency=True" -b=missing
-        # run: conan install . -s build_type=Debug -o "manapihttp/*:shared=True" -o "manapihttp/*:lib=True" -o "manapihttp/*:json_debug=False" -o "manapihttp/*:openssl_dependency=False" -o "manapihttp/*:wolfssl_dependency=False" -o "manapihttp/*:quiche_dependency=False" -o "manapihttp/*:tquic_dependency=False" -o "manapihttp/*:zlib_dependency=False" -o "manapihttp/*:curl_dependency=False" -o "manapihttp/*:gmp_dependency=False" -o "manapihttp/*:zstd_dependency=False" -o "manapihttp/*:brotli_dependency=False" -o "manapihttp/*:grpc_dependency=False" -o "manapihttp/*:nghttp2_dependency=False" -o "manapihttp/*:nghttp3_dependency=False" -o "manapihttp/*:cpptrace_dependency=False" -b=missing
+        run: conan install . -s build_type=Release -o "manapicore/*:shared=False" -o "manapicore/*:lib=True" -o "manapicore/*:json_debug=False" -o "manapicore/*:openssl_dependency=True" -o "manapicore/*:wolfssl_dependency=False" -o "manapicore/*:quiche_dependency=False" -o "manapicore/*:tquic_dependency=False" -o "manapicore/*:zlib_dependency=True" -o "manapicore/*:curl_dependency=True" -o "manapicore/*:gmp_dependency=True" -o "manapicore/*:zstd_dependency=True" -o "manapicore/*:brotli_dependency=True" -o "manapicore/*:grpc_dependency=False" -o "manapicore/*:nghttp2_dependency=True" -o "manapicore/*:nghttp3_dependency=True" -o "manapicore/*:cpptrace_dependency=True" -b=missing
+        # run: conan install . -s build_type=Debug -o "manapicore/*:shared=True" -o "manapicore/*:lib=True" -o "manapicore/*:json_debug=False" -o "manapicore/*:openssl_dependency=False" -o "manapicore/*:wolfssl_dependency=False" -o "manapicore/*:quiche_dependency=False" -o "manapicore/*:tquic_dependency=False" -o "manapicore/*:zlib_dependency=False" -o "manapicore/*:curl_dependency=False" -o "manapicore/*:gmp_dependency=False" -o "manapicore/*:zstd_dependency=False" -o "manapicore/*:brotli_dependency=False" -o "manapicore/*:grpc_dependency=False" -o "manapicore/*:nghttp2_dependency=False" -o "manapicore/*:nghttp3_dependency=False" -o "manapicore/*:cpptrace_dependency=False" -b=missing
 
       - name: Conan install dependencies (static)
         if: ${{ matrix.library_type == 'STATIC' }}
-        run: conan install . -s build_type=Release -o "manapihttp/*:shared=True" -o "manapihttp/*:lib=True" -o "manapihttp/*:json_debug=False" -o "manapihttp/*:openssl_dependency=True" -o "manapihttp/*:wolfssl_dependency=False" -o "manapihttp/*:quiche_dependency=False" -o "manapihttp/*:tquic_dependency=False" -o "manapihttp/*:zlib_dependency=True" -o "manapihttp/*:curl_dependency=True" -o "manapihttp/*:gmp_dependency=True" -o "manapihttp/*:zstd_dependency=True" -o "manapihttp/*:brotli_dependency=True" -o "manapihttp/*:grpc_dependency=False" -o "manapihttp/*:nghttp2_dependency=True" -o "manapihttp/*:nghttp3_dependency=True" -o "manapihttp/*:cpptrace_dependency=True" -b=missing
-        # run: conan install . -s build_type=Debug -o "manapihttp/*:shared=True" -o "manapihttp/*:lib=True" -o "manapihttp/*:json_debug=False" -o "manapihttp/*:openssl_dependency=False" -o "manapihttp/*:wolfssl_dependency=False" -o "manapihttp/*:quiche_dependency=False" -o "manapihttp/*:tquic_dependency=False" -o "manapihttp/*:zlib_dependency=False" -o "manapihttp/*:curl_dependency=False" -o "manapihttp/*:gmp_dependency=False" -o "manapihttp/*:zstd_dependency=False" -o "manapihttp/*:brotli_dependency=False" -o "manapihttp/*:grpc_dependency=False" -o "manapihttp/*:nghttp2_dependency=False" -o "manapihttp/*:nghttp3_dependency=False" -o "manapihttp/*:cpptrace_dependency=False" -b=missing
+        run: conan install . -s build_type=Release -o "manapicore/*:shared=True" -o "manapicore/*:lib=True" -o "manapicore/*:json_debug=False" -o "manapicore/*:openssl_dependency=True" -o "manapicore/*:wolfssl_dependency=False" -o "manapicore/*:quiche_dependency=False" -o "manapicore/*:tquic_dependency=False" -o "manapicore/*:zlib_dependency=True" -o "manapicore/*:curl_dependency=True" -o "manapicore/*:gmp_dependency=True" -o "manapicore/*:zstd_dependency=True" -o "manapicore/*:brotli_dependency=True" -o "manapicore/*:grpc_dependency=False" -o "manapicore/*:nghttp2_dependency=True" -o "manapicore/*:nghttp3_dependency=True" -o "manapicore/*:cpptrace_dependency=True" -b=missing
+        # run: conan install . -s build_type=Debug -o "manapicore/*:shared=True" -o "manapicore/*:lib=True" -o "manapicore/*:json_debug=False" -o "manapicore/*:openssl_dependency=False" -o "manapicore/*:wolfssl_dependency=False" -o "manapicore/*:quiche_dependency=False" -o "manapicore/*:tquic_dependency=False" -o "manapicore/*:zlib_dependency=False" -o "manapicore/*:curl_dependency=False" -o "manapicore/*:gmp_dependency=False" -o "manapicore/*:zstd_dependency=False" -o "manapicore/*:brotli_dependency=False" -o "manapicore/*:grpc_dependency=False" -o "manapicore/*:nghttp2_dependency=False" -o "manapicore/*:nghttp3_dependency=False" -o "manapicore/*:cpptrace_dependency=False" -b=missing
 
       - name: Clean up
         run: conan cache clean "*/*"
@@ -210,7 +210,7 @@ jobs:
       #    key: ${{ steps.cache-conan-windows.outputs.cache-primary-key }}
 
       - name: Configure CMake
-        run: cmake --preset conan-default -DMANAPIHTTP_ENABLE_TESTS=ON -DMANAPIHTTP_DISABLE_TRACE_HARD=ON -DMANAPIHTTP_STD_BACKTRACE_DEPENDENCY=OFF -DMANAPIHTTP_CPPTRACE_DEPENDENCY=ON
+        run: cmake --preset conan-default -DMANAPICORE_ENABLE_TESTS=ON -DMANAPICORE_DISABLE_TRACE_HARD=ON -DMANAPICORE_STD_BACKTRACE_DEPENDENCY=OFF -DMANAPICORE_CPPTRACE_DEPENDENCY=ON
 
       - name: Build
         run: cmake --build build -j4 --config Release

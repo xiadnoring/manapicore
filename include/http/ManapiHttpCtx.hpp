@@ -29,7 +29,7 @@
 //
 //        server_ctx ();
 //    public:
-//        static manapi::status_or<std::shared_ptr<server_ctx>> create () MANAPIHTTP_NOEXCEPT;
+//        static manapi::status_or<std::shared_ptr<server_ctx>> create () MANAPICORE_NOEXCEPT;
 //
 //        ~server_ctx ();
 //

@@ -30,11 +30,11 @@ namespace manapi {
 
         json_mask_type_t (const json_mask_type_t &n);
 
-        json_mask_type_t (json_mask_type_t &&n) MANAPIHTTP_NOEXCEPT;
+        json_mask_type_t (json_mask_type_t &&n) MANAPICORE_NOEXCEPT;
 
         json_mask_type_t &operator=(const json_mask_type_t &n);
 
-        json_mask_type_t &operator=(json_mask_type_t &&n) MANAPIHTTP_NOEXCEPT;
+        json_mask_type_t &operator=(json_mask_type_t &&n) MANAPICORE_NOEXCEPT;
     };
 
     struct json_dump_path_t {
@@ -100,11 +100,11 @@ namespace manapi {
 
         json_mask_object_t (const json_mask_object_t &n);
 
-        json_mask_object_t (json_mask_object_t &&n) MANAPIHTTP_NOEXCEPT;
+        json_mask_object_t (json_mask_object_t &&n) MANAPICORE_NOEXCEPT;
 
         json_mask_object_t &operator=(const json_mask_object_t &n);
 
-        json_mask_object_t &operator=(json_mask_object_t &&n) MANAPIHTTP_NOEXCEPT;
+        json_mask_object_t &operator=(json_mask_object_t &&n) MANAPICORE_NOEXCEPT;
 
         json_source *copy() const override;
     };

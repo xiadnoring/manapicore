@@ -11,7 +11,7 @@
 #include "./utest.h"
 #include "./tools.hpp"
 
-#if defined(MANAPIHTTP_FETCH_SUPPORT) && false
+#if defined(MANAPICORE_FETCH_SUPPORT) && false
 UTEST(http, http_router_exists) {
     using http = manapi::net::http::server;
 
@@ -715,4 +715,4 @@ UTEST(http_and_fetch, get_proxy) {
 
 #endif
 
-MANAPIHTTP_TESTS_MAIN
+MANAPICORE_TESTS_MAIN

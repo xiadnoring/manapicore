@@ -21,17 +21,17 @@ namespace manapi::fs {
         };
 
 
-        operator bool () const MANAPIHTTP_NOEXCEPT;
+        operator bool () const MANAPICORE_NOEXCEPT;
 
-        static manapi::status_or<std::shared_ptr<fstream>> create (std::string path, ctoken cancellation = nullptr) MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<fstream>> create (std::string path, ctoken cancellation = nullptr) MANAPICORE_NOEXCEPT;
 
-        static manapi::status_or<std::shared_ptr<fstream>> create (ev::unique_file fd, ctoken cancellation = nullptr) MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<fstream>> create (ev::unique_file fd, ctoken cancellation = nullptr) MANAPICORE_NOEXCEPT;
 
-        static manapi::status_or<std::shared_ptr<fstream>> create (ev::file fd, bool own, ctoken cancellation = nullptr) MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<fstream>> create (ev::file fd, bool own, ctoken cancellation = nullptr) MANAPICORE_NOEXCEPT;
 
-        fstream (fstream &&n) MANAPIHTTP_NOEXCEPT = delete;
+        fstream (fstream &&n) MANAPICORE_NOEXCEPT = delete;
 
-        fstream &operator=(fstream &&n) MANAPIHTTP_NOEXCEPT = delete;
+        fstream &operator=(fstream &&n) MANAPICORE_NOEXCEPT = delete;
 
         fstream (const fstream &n) = delete;
 
@@ -39,7 +39,7 @@ namespace manapi::fs {
 
         future<manapi::ev::status> open (int flags, int mode = 0644);
 
-        MANAPIHTTP_NODISCARD bool is_open () const;
+        MANAPICORE_NODISCARD bool is_open () const;
 
         ~fstream();
 
@@ -61,13 +61,13 @@ namespace manapi::fs {
 
         void close ();
 
-        MANAPIHTTP_NODISCARD int64_t tellg() const;
+        MANAPICORE_NODISCARD int64_t tellg() const;
 
         int64_t seekg (int64_t pos, seek_flag_t flag = FILE_SEEK_START);
 
-        MANAPIHTTP_NODISCARD manapi::future<manapi::ev::status_or<std::size_t>> size () const;
+        MANAPICORE_NODISCARD manapi::future<manapi::ev::status_or<std::size_t>> size () const;
 
-        MANAPIHTTP_NODISCARD bool eof () const;
+        MANAPICORE_NODISCARD bool eof () const;
     private:
         fstream_data_t* m_data;
     };

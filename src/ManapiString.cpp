@@ -32,7 +32,7 @@ std::string manapi::string::random (size_t len) {
     return random(len, std::string_view{ptr, sizeof(ptr) - 1});
 }
 
-void manapi::string::random(char *dst, size_t len) MANAPIHTTP_NOEXCEPT {
+void manapi::string::random(char *dst, size_t len) MANAPICORE_NOEXCEPT {
     random(dst, len, std::string_view{ptr, sizeof(ptr) - 1});
 }
 
@@ -53,7 +53,7 @@ std::string manapi::string::random (size_t len, std::string_view src) {
     return std::move(result);
 }
 
-void manapi::string::random(char *dst, size_t len, std::string_view src) MANAPIHTTP_NOEXCEPT {
+void manapi::string::random(char *dst, size_t len, std::string_view src) MANAPICORE_NOEXCEPT {
     if (src.empty()) {
         manapi_log_error("random:source is empty");
         return;
@@ -187,7 +187,7 @@ std::string manapi::string::fill(size_t s, char c) {
     return std::move(b);
 }
 
-std::size_t manapi::string::count(char c, std::string_view str) MANAPIHTTP_NOEXCEPT {
+std::size_t manapi::string::count(char c, std::string_view str) MANAPICORE_NOEXCEPT {
     std::size_t res = 0;
     auto it = str.find(c);
     while (it != std::string_view::npos) {

@@ -17,7 +17,7 @@
 //#include "std/ManapiRef.hpp"
 //
 //
-//#if MANAPIHTTP_GRPC_DEPENDENCY
+//#if MANAPICORE_GRPC_DEPENDENCY
 //
 //#include <grpcpp/grpcpp.h>
 //#include <grpc/event_engine/event_engine.h>
@@ -42,7 +42,7 @@
 //    }
 //};
 //
-//#if !MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if !MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //
 //// struct wgrpc_static_storage_t {
 ////     std::unordered_set <std::size_t> wgrpc_dns_exists;
@@ -157,20 +157,20 @@
 //        assert (s == ev) ;
 //        {
 //            std::unique_ptr<decltype(on_shutdown)> cb{nullptr};
-//            MANAPIHTTP_MUST_ALLOC_START
+//            MANAPICORE_MUST_ALLOC_START
 //            cb = std::make_unique<decltype(on_shutdown)>(nullptr);
-//            MANAPIHTTP_MUST_ALLOC_END
+//            MANAPICORE_MUST_ALLOC_END
 //
 //            *cb = std::move(on_shutdown);
 //
-//            MANAPIHTTP_MUST_ALLOC_START
+//            MANAPICORE_MUST_ALLOC_START
 //            ev->eventloop()->stop_callback (conn, [cb = std::move(cb)] (const manapi::ev::shared_tcp &w) mutable
 //                -> void {
 //                if (cb && *cb) {
 //                    cb->operator()(absl::OkStatus());
 //                }
 //            });
-//            MANAPIHTTP_MUST_ALLOC_END
+//            MANAPICORE_MUST_ALLOC_END
 //            ev->eventloop()->stop_watcher(std::move(conn));
 //
 //            return;
@@ -281,7 +281,7 @@
 //    return manapi__task_connect_cancel(handle);
 //}
 //
-//#   if !MANAPIHTTP_GRPC_SINCE_AT(1,71,0)
+//#   if !MANAPICORE_GRPC_SINCE_AT(1,71,0)
 //class manapi__event_engine_factory final : public grpc_event_engine::experimental::EventEngine {
 //    std::shared_ptr<manapi::net::wgrpc::event_engine_wrapper> m_ev;
 //public:
@@ -329,7 +329,7 @@
 //    bool IsWorkerThread() override {
 //        return this->m_ev->IsWorkerThread();
 //    }
-//#       if MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#       if MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //    absl::StatusOr<std::unique_ptr<DNSResolver>> GetDNSResolver(const DNSResolver::ResolverOptions &options) override {
 //        return this->m_ev->GetDNSResolver(options);
 //    }
@@ -380,7 +380,7 @@
 //    return data.res;
 //}
 //
-//void manapi::net::wgrpc::event_engine_wrapper::enable_threadpool(bool status) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::wgrpc::event_engine_wrapper::enable_threadpool(bool status) MANAPICORE_NOEXCEPT {
 //    if (status) {
 //        this->flags |= MANAPI_ENGINE_FLAG_ENABLE_THREADPOOL;
 //    }
@@ -404,7 +404,7 @@
 //
 //manapi::net::wgrpc::net_listener::~net_listener() {
 //    net_listener::shutdown(this, std::move(this->connection), std::move(this->on_shutdown), std::move(this->ev));
-//    manapi_log_trace2("manapihttp::grpc", "wgrpc:delete net_listener: %p", this);
+//    manapi_log_trace2("manapicore::grpc", "wgrpc:delete net_listener: %p", this);
 //}
 //
 //absl::StatusOr<int> manapi::net::wgrpc::net_listener::Bind(const grpc_event_engine::experimental::EventEngine::ResolvedAddress &addr) {
@@ -433,7 +433,7 @@
 //    return absl::OkStatus();
 //}
 //
-//void manapi::net::wgrpc::net_listener::shutdown(net_listener *id, manapi::ev::shared_tcp conn, manapi::net::wgrpc::resolve_callback_t<absl::Status> on_shutdown_cb, async::shared_cthread ev) MANAPIHTTP_NOEXCEPT  {
+//void manapi::net::wgrpc::net_listener::shutdown(net_listener *id, manapi::ev::shared_tcp conn, manapi::net::wgrpc::resolve_callback_t<absl::Status> on_shutdown_cb, async::shared_cthread ev) MANAPICORE_NOEXCEPT  {
 //    try {
 //        if (conn) {
 //            auto &s = async::try_current();
@@ -459,7 +459,7 @@
 //
 //manapi::status manapi::net::wgrpc::net_listener::set(ev::shared_tcp connection) {
 //    try {
-//        manapi_log_trace2("manapihttp::grpc", "wgrpc:listener tcp: %p", connection.get());
+//        manapi_log_trace2("manapicore::grpc", "wgrpc:listener tcp: %p", connection.get());
 //        auto res = current_wgrpc_storage().wgrpc_tcp_listeners.insert(this).second;
 //        assert(res);
 //    }
@@ -479,12 +479,12 @@
 //manapi::net::wgrpc::dns_resolved::dns_resolved(event_engine_wrapper *engine) {
 //    this->engine = engine;
 //}
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //void manapi::net::wgrpc::dns_resolved::LookupHostname(LookupHostnameCallback on_resolve, absl::string_view name, absl::string_view default_port) {
 //#else
 //grpc_event_engine::experimental::EventEngine::DNSResolver::LookupTaskHandle manapi::net::wgrpc::dns_resolved::LookupHostname(LookupHostnameCallback on_resolve, absl::string_view name, absl::string_view default_port, grpc_event_engine::experimental::EventEngine::Duration timeout) {
 //#endif
-//#if true || MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if true || MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //    auto ctx = manapi::async::try_current();
 //    if (!ctx) {
 //        ctx = current_wgrpc_storage().ctx;
@@ -619,12 +619,12 @@
 //        }, std::move(on_resolve), name, default_port));
 //    });
 //#endif
-//#if !MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if !MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //    return grpc_event_engine::experimental::EventEngine::DNSResolver::LookupTaskHandle{};
 //#endif
 //}
 //
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //void manapi::net::wgrpc::dns_resolved::LookupSRV(LookupSRVCallback on_resolve, absl::string_view name) {
 //    this->engine->Run([on_resolve = std::move(on_resolve)] () mutable
 //        -> void {
@@ -643,7 +643,7 @@
 //}
 //#endif
 //
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //void manapi::net::wgrpc::dns_resolved::LookupTXT(LookupTXTCallback on_resolve, absl::string_view name) {
 //    this->engine->Run([on_resolve = std::move(on_resolve)] () mutable
 //        -> void {
@@ -679,13 +679,13 @@
 //    return grpc_event_engine::experimental::EventEngine::DNSResolver::LookupTaskHandle{};
 //}
 //#endif
-//#if !MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if !MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //bool manapi::net::wgrpc::dns_resolved::CancelLookup(LookupTaskHandle handle) {
 //    return true;
 //}
 //#endif
 //
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //void * manapi::net::wgrpc::dns_resolved::QueryExtension(absl::string_view basic_string_view) {
 //    return DNSResolver::QueryExtension(basic_string_view);
 //}
@@ -702,11 +702,11 @@
 //    this->conn = std::move(conn);
 //    this->peer_addr = std::move(peer_addr);
 //    this->memory_allocator = std::move(memory_allocator);
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //    this->metric = nullptr;
 //#endif
 //    this->init_();
-//    manapi_log_trace2("manapihttp::grpc", "wgrpc:new net_endpoint: %p", this);
+//    manapi_log_trace2("manapicore::grpc", "wgrpc:new net_endpoint: %p", this);
 //}
 //
 //void manapi::net::wgrpc::net_endpoint::init_() {
@@ -766,7 +766,7 @@
 //        });
 //
 //    ctx->eventloop()->alloc_callback(this->conn,
-//        [this] (const std::shared_ptr<manapi::ev::tcp> &, size_t suggested_size, manapi::ev::buff_t *buf) MANAPIHTTP_NOEXCEPT
+//        [this] (const std::shared_ptr<manapi::ev::tcp> &, size_t suggested_size, manapi::ev::buff_t *buf) MANAPICORE_NOEXCEPT
 //        -> void {
 //            auto size = suggested_size;
 //            if (!(this->flags & MANAPI_GRPC_ENDPOINT_WANT_READ)) {
@@ -784,7 +784,7 @@
 //    });
 //}
 //
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //
 //std::shared_ptr<grpc_event_engine::experimental::EventEngine::Endpoint::TelemetryInfo> manapi::net::wgrpc::net_endpoint::GetTelemetryInfo() const {
 //    return this->metric;
@@ -792,7 +792,7 @@
 //
 //#endif
 //
-//static void unbind_net_endpoint (manapi::ev::shared_tcp conn, manapi::async::shared_cthread ev) MANAPIHTTP_NOEXCEPT {
+//static void unbind_net_endpoint (manapi::ev::shared_tcp conn, manapi::async::shared_cthread ev) MANAPICORE_NOEXCEPT {
 //    try {
 //        auto &s = manapi::async::try_current();
 //        if (s == ev) {
@@ -828,11 +828,11 @@
 //        manapi_log_error(e.what());
 //    }
 //
-//    manapi_log_trace2("manapihttp::grpc", "wgrpc:delete net_endpoint: %p", this);
+//    manapi_log_trace2("manapicore::grpc", "wgrpc:delete net_endpoint: %p", this);
 //}
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,54,0)
 //bool manapi::net::wgrpc::net_endpoint::Read(manapi::net::wgrpc::resolve_callback_t<absl::Status> on_read, grpc_event_engine::experimental::SliceBuffer *buffer,
-//#   if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#   if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //ReadArgs args
 //#   else
 //const ReadArgs *args
@@ -845,7 +845,7 @@
 //
 //    if (ctx == this->ev) {
 //        auto const already = this->buffer.Length();
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //        auto read_hint_bytes = args.read_hint_bytes();
 //#else
 //        auto read_hint_bytes = args->read_hint_bytes;
@@ -913,7 +913,7 @@
 //        this->ev->eventloop()->request_callback([&data_read] (event_loop *ev) mutable
 //            -> void {
 //            try {
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,54,0)
 //                data_read.res = data_read.endpoint->Read
 //#else
 //                data_read.res = false;
@@ -936,9 +936,9 @@
 //
 //    return data_read.res;
 //}
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,54,0)
 //bool manapi::net::wgrpc::net_endpoint::Write(manapi::net::wgrpc::resolve_callback_t<absl::Status> on_writable, grpc_event_engine::experimental::SliceBuffer *data,
-//#   if MANAPIHTTP_GRPC_SINCE_AT(1,73,0)
+//#   if MANAPICORE_GRPC_SINCE_AT(1,73,0)
 //WriteArgs args
 //#   else
 //const WriteArgs *args
@@ -955,7 +955,7 @@
 //        ssize_t rhs = 0;
 //
 //        for (; carret < data->Count(); ++carret) {
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,54,0)
 //            auto &a = data->operator[](carret);
 //#else
 //            auto a = data->RefSlice(carret);
@@ -980,7 +980,7 @@
 //
 //        for (std::size_t i = 0; carret < data->Count(); ++carret, ++i) {
 //            auto &c = store.get()[i];
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,54,0)
 //            c.base = (char*)((data)->operator[](carret).data()) + rhs;
 //            c.len = data->operator[](carret).size() - static_cast<std::size_t>(rhs);
 //#else
@@ -1035,7 +1035,7 @@
 //        this->ev->eventloop()->request_callback([&data_write] (event_loop *ev) mutable
 //            -> void {
 //            try {
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,54,0)
 //                data_write.res = data_write.endpoint->Write
 //#else
 //                data_write.res = false;
@@ -1066,7 +1066,7 @@
 //const grpc_event_engine::experimental::EventEngine::ResolvedAddress & manapi::net::wgrpc::net_endpoint::GetPeerAddress() const {
 //    return *this->peer_addr;
 //}
-//#if !MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
+//#if !MANAPICORE_GRPC_SINCE_AT(1,54,0)
 //void manapi::net::wgrpc::net_endpoint::Read(manapi::net::wgrpc::resolve_callback_t<absl::Status> on_read,
 //                                            grpc_event_engine::experimental::SliceBuffer *buffer,
 //                                            const grpc_event_engine::experimental::EventEngine::Endpoint::ReadArgs *args) {
@@ -1103,14 +1103,14 @@
 //}
 //
 //manapi::net::wgrpc::event_engine_wrapper::~event_engine_wrapper() {
-//    manapi_log_trace2("manapihttp::grpc", "wgrpc:delete event_engine_wrapper: %p", this);
+//    manapi_log_trace2("manapicore::grpc", "wgrpc:delete event_engine_wrapper: %p", this);
 //}
 //
-//void manapi::net::wgrpc::event_engine_wrapper::magic(std::string_view m) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::wgrpc::event_engine_wrapper::magic(std::string_view m) MANAPICORE_NOEXCEPT {
 //    this->magic_ = m;
 //}
 //
-//std::string_view manapi::net::wgrpc::event_engine_wrapper::magic() const MANAPIHTTP_NOEXCEPT {
+//std::string_view manapi::net::wgrpc::event_engine_wrapper::magic() const MANAPICORE_NOEXCEPT {
 //    return this->magic_;
 //}
 //
@@ -1146,7 +1146,7 @@
 //            [ref]
 //            (const std::shared_ptr<manapi::ev::tcp> &w, int status) mutable
 //            -> void {
-//                manapi_log_trace2("manapihttp::grpc", "wgrpc:connect tcp: %p", w.get());
+//                manapi_log_trace2("manapicore::grpc", "wgrpc:connect tcp: %p", w.get());
 //                std::unique_ptr<wgrpc_connection_data_t> conn_data{nullptr};
 //
 //                auto &zb = current_wgrpc_storage();
@@ -1442,7 +1442,7 @@
 //            }
 //
 //            auto conn = wres.unwrap();
-//            manapi_log_trace2("manapihttp::grpc", "wgrpc:accept tcp: %p", conn.get());
+//            manapi_log_trace2("manapicore::grpc", "wgrpc:accept tcp: %p", conn.get());
 //
 //            if (conn->accept(w.get())) {
 //                manapi::async::current()->eventloop()->stop_watcher(std::move(conn));
@@ -1792,7 +1792,7 @@
 //bool manapi::net::wgrpc::event_engine_wrapper::IsWorkerThread() {
 //    return !manapi::async::try_current();
 //}
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,57,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,57,0)
 //absl::StatusOr<std::unique_ptr<grpc_event_engine::experimental::EventEngine::DNSResolver>> manapi::net::wgrpc::event_engine_wrapper::GetDNSResolver(const DNSResolver::ResolverOptions &options) {
 //    try {
 //        return std::make_unique<dns_resolved>(this);
@@ -1826,7 +1826,7 @@
 //        if (!std::atomic_compare_exchange_strong(&sev, &znull, ev))
 //            return;
 //
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,71,0)
+//#if MANAPICORE_GRPC_SINCE_AT(1,71,0)
 //        auto finish_id = manapi::async::eventloop()->subscribe_clean_up(
 //                [] () -> void {
 //                    auto &sev = event_engine_wrapper::get_instance();
@@ -1886,7 +1886,7 @@
 //
 //manapi::net::wgrpc::server_ctx::~server_ctx() {}
 //
-//manapi::status_or<std::shared_ptr<manapi::net::wgrpc::server_ctx>> manapi::net::wgrpc::server_ctx::create () MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<std::shared_ptr<manapi::net::wgrpc::server_ctx>> manapi::net::wgrpc::server_ctx::create () MANAPICORE_NOEXCEPT {
 //    try {
 //        return std::shared_ptr<server_ctx>(new server_ctx());
 //    }
@@ -1900,8 +1900,8 @@
 //    return *this->m_data;
 //}
 //
-//manapi::status manapi::net::wgrpc::server_ctx::enable_threadpool(bool status) MANAPIHTTP_NOEXCEPT {
-//#if MANAPIHTTP_GRPC_SINCE_AT(1,71,0)
+//manapi::status manapi::net::wgrpc::server_ctx::enable_threadpool(bool status) MANAPICORE_NOEXCEPT {
+//#if MANAPICORE_GRPC_SINCE_AT(1,71,0)
 //    auto engine = grpc_event_engine::experimental::GetDefaultEventEngine();
 //#else
 //    auto engine = wgrpc::event_engine_wrapper::get_instance();
@@ -1917,7 +1917,7 @@
 //    return manapi::status_ok();
 //}
 //
-//void manapi::net::wgrpc::server_ctx::clean() MANAPIHTTP_NOEXCEPT {
+//void manapi::net::wgrpc::server_ctx::clean() MANAPICORE_NOEXCEPT {
 //    auto &ctx = manapi::async::try_current();
 //    auto &zb = ::current_wgrpc_storage();
 //
@@ -1939,7 +1939,7 @@
 //}
 //
 //
-//manapi::status_or<std::shared_ptr<manapi::net::wgrpc::server>> manapi::net::wgrpc::server::create (std::shared_ptr<wgrpc::server_ctx> ctx) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<std::shared_ptr<manapi::net::wgrpc::server>> manapi::net::wgrpc::server::create (std::shared_ptr<wgrpc::server_ctx> ctx) MANAPICORE_NOEXCEPT {
 //    try {
 //        return std::shared_ptr<server>(new server(std::move(ctx)));
 //    }
@@ -1950,7 +1950,7 @@
 //}
 //
 //manapi::net::wgrpc::server::~server() {
-//    manapi_log_trace2("manapihttp::grpc", "wgrpc:delete server: %p", this);
+//    manapi_log_trace2("manapicore::grpc", "wgrpc:delete server: %p", this);
 //}
 //
 //manapi::future<manapi::status> manapi::net::wgrpc::server::config(std::string path) {

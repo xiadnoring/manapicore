@@ -1,4 +1,4 @@
-manapihttp (1.1.0dfsg-2) unstable; urgency=high
+manapicore (1.1.0dfsg-2) unstable; urgency=high
   * bug fixes
   * disable some logs
   * async framework rework

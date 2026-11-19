@@ -250,4 +250,4 @@ UTEST(fs, rm_dir_all_2) {
     wait_ctx(ctx);
 }
 
-MANAPIHTTP_TESTS_MAIN
+MANAPICORE_TESTS_MAIN

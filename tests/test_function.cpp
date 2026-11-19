@@ -82,11 +82,11 @@ UTEST(func, function_deleter) {
 
         func_deleter_t (int *state) : state(state) {}
 
-        func_deleter_t (func_deleter_t &&n) MANAPIHTTP_NOEXCEPT {
+        func_deleter_t (func_deleter_t &&n) MANAPICORE_NOEXCEPT {
             this->state = std::exchange(n.state, nullptr);
         }
 
-        func_deleter_t&operator= (func_deleter_t &&n) MANAPIHTTP_NOEXCEPT {
+        func_deleter_t&operator= (func_deleter_t &&n) MANAPICORE_NOEXCEPT {
             if (this != &n) {
                 this->state = std::exchange(n.state, nullptr);
             }
@@ -123,4 +123,4 @@ UTEST(func, function_null) {
     ASSERT_TRUE(a() == 1);
 }
 
-MANAPIHTTP_TESTS_MAIN
+MANAPICORE_TESTS_MAIN

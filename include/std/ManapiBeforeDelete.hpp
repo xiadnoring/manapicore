@@ -26,26 +26,26 @@ namespace manapi {
          */
         before_delete (std::move_only_function <void()> f);
 
-        before_delete (before_delete &&n) MANAPIHTTP_NOEXCEPT;
+        before_delete (before_delete &&n) MANAPICORE_NOEXCEPT;
 
         ~before_delete();
 
-        before_delete &operator=(before_delete &&n) MANAPIHTTP_NOEXCEPT;
+        before_delete &operator=(before_delete &&n) MANAPICORE_NOEXCEPT;
 
         /**
          * Call the callback and remove it
          */
-        void call () MANAPIHTTP_NOEXCEPT;
+        void call () MANAPICORE_NOEXCEPT;
 
         /**
          * Disable the callback before destruction
          */
-        void disable () MANAPIHTTP_NOEXCEPT;
+        void disable () MANAPICORE_NOEXCEPT;
 
         /**
          * Enable the callback before destruction
          */
-        void enable () MANAPIHTTP_NOEXCEPT;
+        void enable () MANAPICORE_NOEXCEPT;
     private:
         /**
          * auto call state
@@ -65,16 +65,16 @@ namespace manapi {
          */
         sbefore_delete (std::move_only_function <void()> f);
 
-        sbefore_delete (sbefore_delete &&n) MANAPIHTTP_NOEXCEPT;
+        sbefore_delete (sbefore_delete &&n) MANAPICORE_NOEXCEPT;
 
         ~sbefore_delete();
 
-        sbefore_delete &operator=(sbefore_delete &&n) MANAPIHTTP_NOEXCEPT;
+        sbefore_delete &operator=(sbefore_delete &&n) MANAPICORE_NOEXCEPT;
 
         /**
          * Call the callback and remove it
          */
-        void call () MANAPIHTTP_NOEXCEPT;
+        void call () MANAPICORE_NOEXCEPT;
     private:
         std::move_only_function <void()> f;
     };
@@ -113,9 +113,9 @@ namespace manapi {
             }
         }
 
-        vbefore_delete (vbefore_delete &&n) MANAPIHTTP_NOEXCEPT = default;
+        vbefore_delete (vbefore_delete &&n) MANAPICORE_NOEXCEPT = default;
 
-        vbefore_delete &operator=(vbefore_delete &&n) MANAPIHTTP_NOEXCEPT = default;
+        vbefore_delete &operator=(vbefore_delete &&n) MANAPICORE_NOEXCEPT = default;
     private:
         std::move_only_function <void(T)> f;
     };
@@ -155,12 +155,12 @@ namespace manapi {
             }
         }
 
-        static_before_delete (static_before_delete &&n) MANAPIHTTP_NOEXCEPT {
+        static_before_delete (static_before_delete &&n) MANAPICORE_NOEXCEPT {
             this->active = std::exchange(n.active, true);
             this->f = std::move(n.f);
         }
 
-        static_before_delete &operator=(static_before_delete &&n) MANAPIHTTP_NOEXCEPT {
+        static_before_delete &operator=(static_before_delete &&n) MANAPICORE_NOEXCEPT {
             if (this != &n) {
                 this->active = std::exchange(n.active, true);
                 this->f = std::move(n.f);

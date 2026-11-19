@@ -1,12 +1,12 @@
 prefix="@CMAKE_INSTALL_PREFIX@"
 exec_prefix="${prefix}"
-libdir="${prefix}/lib@MANAPIHTTP_INSTALL_ARCH@"
-includedir="${prefix}/include@MANAPIHTTP_INSTALL_ARCH@"
+libdir="${prefix}/lib@MANAPICORE_INSTALL_ARCH@"
+includedir="${prefix}/include@MANAPICORE_INSTALL_ARCH@"
 
 Name: @PROJECT_NAME@
 Description: @CMAKE_PROJECT_DESCRIPTION@
 URL: @CMAKE_PROJECT_HOMEPAGE_URL@
 Version: @PROJECT_VERSION@
 Cflags: -I"${includedir}"
-Libs: -L"${libdir}" -lmanapihttp
-Libs.private: -L"${libdir}" -lmanapihttp @pc_libs_private@
+Libs: -L"${libdir}" -lmanapicore
+Libs.private: -L"${libdir}" -lmanapicore @pc_libs_private@

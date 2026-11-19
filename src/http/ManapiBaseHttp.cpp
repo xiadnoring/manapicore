@@ -23,7 +23,7 @@
 //#include "std/ManapiTimer.hpp"
 //#include "std/ManapiChannel.hpp"
 //
-//#ifdef MANAPIHTTP_FETCH_SUPPORT
+//#ifdef MANAPICORE_FETCH_SUPPORT
 //struct response_proxy_data_t {
 //    int64_t content_length;
 //    std::shared_ptr<manapi::net::fetch> fetch;
@@ -479,7 +479,7 @@
 //                            "<title> </title>\n\t</head>\n\t<body>\n\t\t<center>\n\t\t\t"
 //                            "<h1> </h1>\n\t\t</center>\n\t\t<hr>\n\t\t"
 //                            "<center>/</center>\n\t"
-//                            "</body>\n</html>") - 1 + msg.size() + sizeof (MANAPIHTTP_VERSION) - 1 + sizeof (MANAPIHTTP_NAME) - 1 + (ptr - buff);
+//                            "</body>\n</html>") - 1 + msg.size() + sizeof (MANAPICORE_VERSION) - 1 + sizeof (MANAPICORE_NAME) - 1 + (ptr - buff);
 //}
 //
 //void manapi::net::http::internal::generate_default_page(manapi::slice *sv, int status, std::string_view msg) {
@@ -501,9 +501,9 @@
 //
 //    sv->push_back( "</h1>\n\t\t</center>\n\t\t<hr>\n\t\t<center>", sizeof ("</h1>\n\t\t</center>\n\t\t<hr>\n\t\t<center>") - 1 ).unwrap();
 //
-//    sv->push_back( MANAPIHTTP_VERSION, sizeof (MANAPIHTTP_VERSION) - 1 ).unwrap();
+//    sv->push_back( MANAPICORE_VERSION, sizeof (MANAPICORE_VERSION) - 1 ).unwrap();
 //    sv->push_back( "/", sizeof ("/") - 1 ).unwrap();
-//    sv->push_back( MANAPIHTTP_NAME, sizeof (MANAPIHTTP_NAME) - 1 ).unwrap();
+//    sv->push_back( MANAPICORE_NAME, sizeof (MANAPICORE_NAME) - 1 ).unwrap();
 //
 //    sv->push_back( "</center>\n\t</body>\n</html>", sizeof ("</center>\n\t</body>\n</html>") - 1 ).unwrap();
 //}
@@ -846,7 +846,7 @@
 //}
 //
 //manapi::future<void> manapi::net::http::internal::send_response_proxy(std::unique_ptr<response> res, response_features_t features) {
-//#ifdef MANAPIHTTP_FETCH_SUPPORT
+//#ifdef MANAPICORE_FETCH_SUPPORT
 //    try {
 //        auto proxy_err = res->url();
 //        if (!proxy_err) {

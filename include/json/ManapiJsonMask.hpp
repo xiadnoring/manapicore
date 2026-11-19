@@ -27,13 +27,13 @@ namespace manapi {
 
             status (err_num code, const char * msg, std::string data, std::size_t pos, std::string path);
 
-            status (json_error::status &&n) MANAPIHTTP_NOEXCEPT;
+            status (json_error::status &&n) MANAPICORE_NOEXCEPT;
 
-            status &operator=(json_error::status &&n) MANAPIHTTP_NOEXCEPT;
+            status &operator=(json_error::status &&n) MANAPICORE_NOEXCEPT;
 
-            status (manapi::status &&n) MANAPIHTTP_NOEXCEPT;
+            status (manapi::status &&n) MANAPICORE_NOEXCEPT;
 
-            status &operator=(manapi::status &&n) MANAPIHTTP_NOEXCEPT;
+            status &operator=(manapi::status &&n) MANAPICORE_NOEXCEPT;
 
             std::string fullmsg() const override;
 
@@ -41,7 +41,7 @@ namespace manapi {
 
             std::string additional_data ();
 
-            MANAPIHTTP_NODISCARD std::size_t pos () const;
+            MANAPICORE_NODISCARD std::size_t pos () const;
         private:
             std::string m_data;
             std::string m_path;
@@ -57,9 +57,9 @@ namespace manapi {
 
             status_or (T &&n) : manapi::status_or<T, E>(std::forward<decltype(n)>(n)) {}
 
-            status_or(status_or &&n) MANAPIHTTP_NOEXCEPT = default;
+            status_or(status_or &&n) MANAPICORE_NOEXCEPT = default;
 
-            status_or&operator=(status_or &&n) MANAPIHTTP_NOEXCEPT = default;
+            status_or&operator=(status_or &&n) MANAPICORE_NOEXCEPT = default;
 
             std::string path () {
                 return this->err_.path();
@@ -69,7 +69,7 @@ namespace manapi {
                 return this->err_.additional_data();
             }
 
-            MANAPIHTTP_NODISCARD std::size_t pos () const {
+            MANAPICORE_NODISCARD std::size_t pos () const {
                 return this->err_.pos();
             }
         };
@@ -113,21 +113,21 @@ namespace manapi {
 
         json_mask(const json_mask &n);
 
-        json_mask(json_mask &&n) MANAPIHTTP_NOEXCEPT;
+        json_mask(json_mask &&n) MANAPICORE_NOEXCEPT;
 
         ~json_mask();
 
-        MANAPIHTTP_NODISCARD bool enabled () const;
+        MANAPICORE_NODISCARD bool enabled () const;
 
-        MANAPIHTTP_NODISCARD manapi::json_error::status valid (const json &obj) const;
+        MANAPICORE_NODISCARD manapi::json_error::status valid (const json &obj) const;
 
-        MANAPIHTTP_NODISCARD manapi::json_error::status valid (const json &obj, manapi::json_mask_path_t *orig, uint32_t orig_len, const json_mask_object_t **out) const;
+        MANAPICORE_NODISCARD manapi::json_error::status valid (const json &obj, manapi::json_mask_path_t *orig, uint32_t orig_len, const json_mask_object_t **out) const;
 
-        MANAPIHTTP_NODISCARD manapi::json_error::status valid (const std::map <std::string, std::string> &obj) const;
+        MANAPICORE_NODISCARD manapi::json_error::status valid (const std::map <std::string, std::string> &obj) const;
 
-        MANAPIHTTP_NODISCARD manapi::json_error::status valid (const std::map <std::string, std::string, std::less<>> &obj) const;
+        MANAPICORE_NODISCARD manapi::json_error::status valid (const std::map <std::string, std::string, std::less<>> &obj) const;
 
-        MANAPIHTTP_NODISCARD const json_mask_object_t* api_tree () const;
+        MANAPICORE_NODISCARD const json_mask_object_t* api_tree () const;
 
         void api_tree (const json_mask_object_t* tree, bool own);
 

@@ -44,9 +44,9 @@ namespace manapi::net {
 
         ~formdata_recv ();
 
-        formdata_recv (formdata_recv &&n) MANAPIHTTP_NOEXCEPT;
+        formdata_recv (formdata_recv &&n) MANAPICORE_NOEXCEPT;
 
-        formdata_recv &operator=(formdata_recv &&n) MANAPIHTTP_NOEXCEPT;
+        formdata_recv &operator=(formdata_recv &&n) MANAPICORE_NOEXCEPT;
 
         manapi::future<manapi::status> get (std::string_view content_type, onparam_cb_t cb);
 
@@ -71,25 +71,25 @@ namespace manapi::net {
 
         ~formdata_send ();
 
-        formdata_send (formdata_send &&n) MANAPIHTTP_NOEXCEPT;
+        formdata_send (formdata_send &&n) MANAPICORE_NOEXCEPT;
 
-        formdata_send& operator= (formdata_send &&n) MANAPIHTTP_NOEXCEPT;
+        formdata_send& operator= (formdata_send &&n) MANAPICORE_NOEXCEPT;
 
-        manapi::status set_file (const std::string &name, std::string filepath) MANAPIHTTP_NOEXCEPT;
+        manapi::status set_file (const std::string &name, std::string filepath) MANAPICORE_NOEXCEPT;
 
-        manapi::status set_file (const std::string &name, std::string filepath, std::string filename, std::string filemime) MANAPIHTTP_NOEXCEPT;
+        manapi::status set_file (const std::string &name, std::string filepath, std::string filename, std::string filemime) MANAPICORE_NOEXCEPT;
 
-        manapi::status set_text (const std::string &name, std::string data) MANAPIHTTP_NOEXCEPT;
+        manapi::status set_text (const std::string &name, std::string data) MANAPICORE_NOEXCEPT;
 
-        void erase (std::string_view name) MANAPIHTTP_NOEXCEPT;
+        void erase (std::string_view name) MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD bool contains (std::string_view name) const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool contains (std::string_view name) const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD manapi::future<manapi::status_or<uint64_t>> payload_size () const;
+        MANAPICORE_NODISCARD manapi::future<manapi::status_or<uint64_t>> payload_size () const;
 
-        MANAPIHTTP_NODISCARD manapi::status_or<uint64_t> multipart_size (std::size_t boundary_size) const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD manapi::status_or<uint64_t> multipart_size (std::size_t boundary_size) const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD std::string generate_boundary () const;
+        MANAPICORE_NODISCARD std::string generate_boundary () const;
 
         manapi::future<manapi::status> data2multipart (std::string boundary, std::move_only_function<manapi::future<manapi::status>(manapi::slice_view, bool fin)> write);
     private:

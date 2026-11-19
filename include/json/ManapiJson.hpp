@@ -54,7 +54,7 @@ namespace manapi {
 
         typedef std::string_view STRING_VIEW;
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
         typedef bigint BIGINT;
 #endif
         typedef bool BOOLEAN;
@@ -65,7 +65,7 @@ namespace manapi {
             void    *src;
             BOOLEAN *m_bool_src;
             ARRAY   *m_array_src;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
             BIGINT  *m_bigint_src;
 #endif
             OBJECT  *m_object_src;
@@ -102,7 +102,7 @@ namespace manapi {
             type_source = 10,
             /* slice */
             type_slice = 11,
-            /* max type code reserved by manapihttp */
+            /* max type code reserved by manapicore */
             type_max = type_source
         };
 
@@ -182,7 +182,7 @@ namespace manapi {
          * make it movable
          * @param other JSON
          */
-        json(json &&other) MANAPIHTTP_NOEXCEPT;
+        json(json &&other) MANAPICORE_NOEXCEPT;
 
         /**
          * initialize JSON using an initializer list
@@ -359,7 +359,7 @@ namespace manapi {
          * @param key string
          * @return true if the key exists in the JSON
          */
-        MANAPIHTTP_NODISCARD bool contains (const std::string &key) const;
+        MANAPICORE_NODISCARD bool contains (const std::string &key) const;
 
         /**
          * get a value by the key
@@ -394,14 +394,14 @@ namespace manapi {
          * @param key key
          * @return value if it exists, otherwise it throws an exception
          */
-        MANAPIHTTP_NODISCARD const json &at (const STRING &key) const;
+        MANAPICORE_NODISCARD const json &at (const STRING &key) const;
 
         /**
          * get a value by the index
          * @param index index
          * @return value if it exists, otherwise it throws an exception
          */
-        MANAPIHTTP_NODISCARD const json &at (size_t index) const;
+        MANAPICORE_NODISCARD const json &at (size_t index) const;
 
         /**
          * get a value by the key
@@ -425,7 +425,7 @@ namespace manapi {
         json &operator= (DECIMAL num);
         json &operator= (const NULLPTR &n);
         json &operator= (const json &obj);
-        json &operator= (json &&obj) MANAPIHTTP_NOEXCEPT;
+        json &operator= (json &&obj) MANAPICORE_NOEXCEPT;
         json &operator= (const std::initializer_list <json> &data);
         json &operator= (manapi::slice &&sv);
         json &operator= (const manapi::slice_base &sv);
@@ -587,7 +587,7 @@ namespace manapi {
         bool operator<= (DECIMAL n) const;
         bool operator== (const NULLPTR &n) const;
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
         bool operator!= (const BIGINT &n) const;
         bool operator== (const BIGINT &n) const;
         bool operator< (const BIGINT & n) const;
@@ -717,7 +717,7 @@ namespace manapi {
 
         void pop_back ();
 
-        MANAPIHTTP_NODISCARD int data_type () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD int data_type () const MANAPICORE_NOEXCEPT;
 
         template<class T>
         requires(std::is_same_v<T, OBJECT>)
@@ -764,91 +764,91 @@ namespace manapi {
 
         void source (manapi::json_source *source);
 
-        MANAPIHTTP_NODISCARD OBJECT::const_iterator find (STRING_VIEW key) const;
+        MANAPICORE_NODISCARD OBJECT::const_iterator find (STRING_VIEW key) const;
 
-        MANAPIHTTP_NODISCARD const ARRAY &each() const;
+        MANAPICORE_NODISCARD const ARRAY &each() const;
 
-        MANAPIHTTP_NODISCARD const OBJECT &entries() const;
+        MANAPICORE_NODISCARD const OBJECT &entries() const;
 
-        MANAPIHTTP_NODISCARD ARRAY &each();
+        MANAPICORE_NODISCARD ARRAY &each();
 
-        MANAPIHTTP_NODISCARD OBJECT &entries();
+        MANAPICORE_NODISCARD OBJECT &entries();
 
         manapi::json &first ();
 
         manapi::json &second ();
 
-        MANAPIHTTP_NODISCARD const manapi::json &first () const;
+        MANAPICORE_NODISCARD const manapi::json &first () const;
 
-        MANAPIHTTP_NODISCARD const manapi::json &second () const;
+        MANAPICORE_NODISCARD const manapi::json &second () const;
 
         /**
          * check the JSON type
          * @return true if it's an object
          */
-        MANAPIHTTP_NODISCARD bool is_object () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_object () const MANAPICORE_NOEXCEPT;
 
         /**
          * check the JSON type
          * @return true if it's an array
          */
-        MANAPIHTTP_NODISCARD bool is_array () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_array () const MANAPICORE_NOEXCEPT;
 
         /**
          * check the JSON type
          * @return true if it's a string
          */
-        MANAPIHTTP_NODISCARD bool is_string () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_string () const MANAPICORE_NOEXCEPT;
 
         /**
          * check the JSON type
          * @return true if it's a slice
          */
-        MANAPIHTTP_NODISCARD bool is_slice () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_slice () const MANAPICORE_NOEXCEPT;
 
         /**
          * check the JSON type
          * @return true if it's a integer
          */
-        MANAPIHTTP_NODISCARD bool is_integer () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_integer () const MANAPICORE_NOEXCEPT;
 
         /**
          * check the JSON type
          * @return true if it's a null
          */
-        MANAPIHTTP_NODISCARD bool is_null () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_null () const MANAPICORE_NOEXCEPT;
 
         /**
          * check the JSON type
          * @return true if it's a decimal
          */
-        MANAPIHTTP_NODISCARD bool is_decimal () const MANAPIHTTP_NOEXCEPT;
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+        MANAPICORE_NODISCARD bool is_decimal () const MANAPICORE_NOEXCEPT;
+#ifdef MANAPICORE_BIGINT_SUPPORT
 
         /**
          * check the JSON type
          * @return true if it's a integer
          */
-        MANAPIHTTP_NODISCARD bool is_bigint () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_bigint () const MANAPICORE_NOEXCEPT;
 #endif
 
         /**
          * check the JSON type
          * @return true if it's a bool
          */
-        MANAPIHTTP_NODISCARD bool is_bool () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_bool () const MANAPICORE_NOEXCEPT;
 
         /**
          * check the JSON type
          * @return true if it's a pair
          */
-        MANAPIHTTP_NODISCARD bool is_pair () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_pair () const MANAPICORE_NOEXCEPT;
 
         /**
          * check the JSON type
          * @return true if it's a source
          */
-        MANAPIHTTP_NODISCARD bool is_source () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_source () const MANAPICORE_NOEXCEPT;
 
         json_source *release_source ();
 
@@ -856,103 +856,103 @@ namespace manapi {
          * strict source retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const json_source &as_source () const;
+        MANAPICORE_NODISCARD const json_source &as_source () const;
 
         /**
          * strict source retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD json_source &as_source ();
+        MANAPICORE_NODISCARD json_source &as_source ();
 
         /**
          * strict object retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const OBJECT &as_object () const;
+        MANAPICORE_NODISCARD const OBJECT &as_object () const;
 
         /**
          * strict object retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD OBJECT &as_object ();
+        MANAPICORE_NODISCARD OBJECT &as_object ();
 
         /**
          * strict array retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const ARRAY &as_array () const;
+        MANAPICORE_NODISCARD const ARRAY &as_array () const;
 
         /**
          * strict array retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD ARRAY &as_array ();
+        MANAPICORE_NODISCARD ARRAY &as_array ();
 
         /**
          * strict string retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const STRING &as_string () const;
+        MANAPICORE_NODISCARD const STRING &as_string () const;
 
         /**
          * strict string retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD STRING &as_string ();
+        MANAPICORE_NODISCARD STRING &as_string ();
 
         /**
          * strict integer retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const INTEGER &as_integer () const;
+        MANAPICORE_NODISCARD const INTEGER &as_integer () const;
 
         /**
          * strict integer retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD INTEGER &as_integer ();
+        MANAPICORE_NODISCARD INTEGER &as_integer ();
 
         /**
          * strict null retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD NULLPTR as_null () const;
+        MANAPICORE_NODISCARD NULLPTR as_null () const;
 
         /**
          * strict decimal retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const DECIMAL &as_decimal () const;
+        MANAPICORE_NODISCARD const DECIMAL &as_decimal () const;
 
         /**
          * strict decimal retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD DECIMAL &as_decimal ();
+        MANAPICORE_NODISCARD DECIMAL &as_decimal ();
 
         /**
          * strict boolean retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const BOOLEAN &as_bool () const;
+        MANAPICORE_NODISCARD const BOOLEAN &as_bool () const;
 
         /**
          * strict boolean retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD BOOLEAN &as_bool ();
+        MANAPICORE_NODISCARD BOOLEAN &as_bool ();
 
         /**
          * strict boolean retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const manapi::slice &as_slice () const;
+        MANAPICORE_NODISCARD const manapi::slice &as_slice () const;
 
         /**
          * strict boolean retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD manapi::slice &as_slice ();
+        MANAPICORE_NODISCARD manapi::slice &as_slice ();
 
         /**
          * string retrieval
@@ -1018,7 +1018,7 @@ namespace manapi {
          * get a pointer
          * @return pointer to data
          */
-        MANAPIHTTP_NODISCARD void *as_ptr () const;
+        MANAPICORE_NODISCARD void *as_ptr () const;
 
         /**
          * get a JSON dump string
@@ -1026,7 +1026,7 @@ namespace manapi {
          * @param shift left alignment
          * @return JSON string
          */
-        MANAPIHTTP_NODISCARD std::string dump (uint32_t spaces = 0, uint32_t shift = 0) const;
+        MANAPICORE_NODISCARD std::string dump (uint32_t spaces = 0, uint32_t shift = 0) const;
 
         /**
          * get a JSON dump slices
@@ -1037,11 +1037,11 @@ namespace manapi {
          */
         void slice (manapi::slice *sv, uint32_t spaces = 0, uint32_t shift = 0) const;
 
-        MANAPIHTTP_NODISCARD size_t size () const;
+        MANAPICORE_NODISCARD size_t size () const;
 
-        MANAPIHTTP_NODISCARD bool empty () const;
+        MANAPICORE_NODISCARD bool empty () const;
 
-#ifdef MANAPIHTTP_BIGINT_SUPPORT
+#ifdef MANAPICORE_BIGINT_SUPPORT
         /**
          * bigint retrieval
          *
@@ -1073,13 +1073,13 @@ namespace manapi {
          * strict bigint retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD const BIGINT &as_bigint () const;
+        MANAPICORE_NODISCARD const BIGINT &as_bigint () const;
 
         /**
          * strict bigint retrieval
          * @return
          */
-        MANAPIHTTP_NODISCARD BIGINT &as_bigint ();
+        MANAPICORE_NODISCARD BIGINT &as_bigint ();
 #endif
     protected:
         int m_type;
@@ -1100,13 +1100,13 @@ namespace manapi {
          * Get the json error message
          * @return the json error message
          */
-        MANAPIHTTP_NODISCARD const char *what () const MANAPIHTTP_NOEXCEPT override;
+        MANAPICORE_NODISCARD const char *what () const MANAPICORE_NOEXCEPT override;
 
         /**
          * Get the json error number
          * @return the json error number
          */
-        MANAPIHTTP_NODISCARD const json_err_num &err_num () const;
+        MANAPICORE_NODISCARD const json_err_num &err_num () const;
     private:
         std::string message;
         json_err_num errnum;

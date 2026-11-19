@@ -37,14 +37,14 @@ manapi::bytebuffer::~bytebuffer() {
     this->clear();
 }
 
-manapi::bytebuffer::bytebuffer(bytebuffer &&n) MANAPIHTTP_NOEXCEPT {
+manapi::bytebuffer::bytebuffer(bytebuffer &&n) MANAPICORE_NOEXCEPT {
     this->m_s = std::exchange(n.m_s, 0);
     this->m_reserved = std::exchange(n.m_reserved, 0);
     this->m_src = std::exchange(n.m_src, nullptr);
     this->m_shift = std::exchange(n.m_shift, 0);
 }
 
-manapi::bytebuffer & manapi::bytebuffer::operator=(bytebuffer &&n) MANAPIHTTP_NOEXCEPT {
+manapi::bytebuffer & manapi::bytebuffer::operator=(bytebuffer &&n) MANAPICORE_NOEXCEPT {
     this->clear();
 
     this->m_s = std::exchange(n.m_s, 0);
@@ -82,7 +82,7 @@ std::size_t manapi::bytebuffer::realsize() const {
     return this->m_reserved;
 }
 
-manapi::status manapi::bytebuffer::realresize(std::size_t s) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::bytebuffer::realresize(std::size_t s) MANAPICORE_NOEXCEPT {
 
     if (this->m_s == s)
         return status_ok();
@@ -126,19 +126,19 @@ manapi::status manapi::bytebuffer::realresize(std::size_t s) MANAPIHTTP_NOEXCEPT
     return status_ok();
 }
 
-manapi::status manapi::bytebuffer::resize(std::size_t s) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::bytebuffer::resize(std::size_t s) MANAPICORE_NOEXCEPT {
     return this->realresize(s + this->m_shift);
 }
 
-manapi::status manapi::bytebuffer::resize_max(std::size_t s) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::bytebuffer::resize_max(std::size_t s) MANAPICORE_NOEXCEPT {
     return this->resize(std::max<std::size_t>(s, this->realsize()));
 }
 
-void manapi::bytebuffer::reset_shift() MANAPIHTTP_NOEXCEPT {
+void manapi::bytebuffer::reset_shift() MANAPICORE_NOEXCEPT {
     this->m_shift = 0;
 }
 
-void manapi::bytebuffer::clear() MANAPIHTTP_NOEXCEPT {
+void manapi::bytebuffer::clear() MANAPICORE_NOEXCEPT {
     if (this->m_src && this->m_reserved)
         manapi::async::current()->memory_fabric()->free(reinterpret_cast<void*>(this->m_src), this->m_reserved);
 

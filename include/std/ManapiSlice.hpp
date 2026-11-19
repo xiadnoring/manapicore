@@ -49,13 +49,13 @@ namespace manapi {
          * get the storage buffer size
          * @return the storage buffer size
          */
-        MANAPIHTTP_NODISCARD std::size_t size () const;
+        MANAPICORE_NODISCARD std::size_t size () const;
 
         /**
          * is it the last in chain
          * @return true if it's the last in the chain; otherwise, returns false
          */
-        MANAPIHTTP_NODISCARD bool is_last () const;
+        MANAPICORE_NODISCARD bool is_last () const;
     private:
         slice_part_t *m_part;
 
@@ -91,13 +91,13 @@ namespace manapi {
          * get the storage buffer size
          * @return the storage buffer size
          */
-        MANAPIHTTP_NODISCARD std::size_t size () const;
+        MANAPICORE_NODISCARD std::size_t size () const;
 
         /**
          * is it the last in chain
          * @return true if it's the last in the chain; otherwise, returns false
          */
-        MANAPIHTTP_NODISCARD bool is_last () const;
+        MANAPICORE_NODISCARD bool is_last () const;
     private:
         slice_part_t *m_part;
         slice_base const *m_base;
@@ -127,9 +127,9 @@ namespace manapi {
 
         virtual ~slice_base();
 
-        slice_base (slice_base &&n) MANAPIHTTP_NOEXCEPT;
+        slice_base (slice_base &&n) MANAPICORE_NOEXCEPT;
 
-        slice_base &operator=(slice_base &&n) MANAPIHTTP_NOEXCEPT;
+        slice_base &operator=(slice_base &&n) MANAPICORE_NOEXCEPT;
 
         slice_base (const slice_base &n);
 
@@ -143,60 +143,60 @@ namespace manapi {
          * @param shift left shift to add
          * @return Ok if success; otherwise it returns OutOfRange
          */
-        virtual manapi::status shift_add (std::size_t shift) MANAPIHTTP_NOEXCEPT;
+        virtual manapi::status shift_add (std::size_t shift) MANAPICORE_NOEXCEPT;
 
-        manapi::status copy_from (const void *buffer, std::size_t shift, std::size_t size) MANAPIHTTP_NOEXCEPT;
+        manapi::status copy_from (const void *buffer, std::size_t shift, std::size_t size) MANAPICORE_NOEXCEPT;
 
-        manapi::status copy_from (const void *buffer, const slice_part_t *current, std::size_t shift, std::size_t size) MANAPIHTTP_NOEXCEPT;
+        manapi::status copy_from (const void *buffer, const slice_part_t *current, std::size_t shift, std::size_t size) MANAPICORE_NOEXCEPT;
 
-        manapi::status copy_to (void *buffer, std::size_t shift, std::size_t size) MANAPIHTTP_NOEXCEPT;
+        manapi::status copy_to (void *buffer, std::size_t shift, std::size_t size) MANAPICORE_NOEXCEPT;
 
-        manapi::status copy_from (const slice_base &n, std::size_t shift, std::size_t shift_n, std::size_t size) MANAPIHTTP_NOEXCEPT;
+        manapi::status copy_from (const slice_base &n, std::size_t shift, std::size_t shift_n, std::size_t size) MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD manapi::status_or<manapi::slice_base> subslice (std::size_t pos, std::size_t size) const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD manapi::status_or<manapi::slice_base> subslice (std::size_t pos, std::size_t size) const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD manapi::status_or<manapi::slice_base> subslice (std::size_t pos) const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD manapi::status_or<manapi::slice_base> subslice (std::size_t pos) const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD std::size_t shift () const { return this->m_shift; }
+        MANAPICORE_NODISCARD std::size_t shift () const { return this->m_shift; }
 
-        MANAPIHTTP_NODISCARD std::size_t rshift () const { return this->m_rshift; }
+        MANAPICORE_NODISCARD std::size_t rshift () const { return this->m_rshift; }
 
-        MANAPIHTTP_NODISCARD bool empty () const { return this->size() == 0; }
+        MANAPICORE_NODISCARD bool empty () const { return this->size() == 0; }
 
-        MANAPIHTTP_NODISCARD const slice_part_t *slices_begin () const;
+        MANAPICORE_NODISCARD const slice_part_t *slices_begin () const;
 
-        MANAPIHTTP_NODISCARD const slice_part_t *slices_end () const;
+        MANAPICORE_NODISCARD const slice_part_t *slices_end () const;
 
-        MANAPIHTTP_NODISCARD const slice_part_t *slices_rbegin () const;
+        MANAPICORE_NODISCARD const slice_part_t *slices_rbegin () const;
 
         slice_iterator begin ();
 
         slice_iterator end ();
 
-        MANAPIHTTP_NODISCARD slice_const_iterator begin () const;
+        MANAPICORE_NODISCARD slice_const_iterator begin () const;
 
-        MANAPIHTTP_NODISCARD slice_const_iterator end () const;
+        MANAPICORE_NODISCARD slice_const_iterator end () const;
 
-        MANAPIHTTP_NODISCARD int cmp (const manapi::slice_base &n) const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD int cmp (const manapi::slice_base &n) const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD int cmp (const void *data, std::size_t size) const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD int cmp (const void *data, std::size_t size) const MANAPICORE_NOEXCEPT;
 
         void slices_buffs (ev::buff_t *buffs, std::size_t cnt, std::size_t *sz = nullptr) const;
 
-        MANAPIHTTP_NODISCARD std::unique_ptr<ev::buff_t, ev::buffer_deleter> slices_buffs (std::size_t max_cnt, std::size_t *cnt = nullptr, std::size_t *sz = nullptr) const;
+        MANAPICORE_NODISCARD std::unique_ptr<ev::buff_t, ev::buffer_deleter> slices_buffs (std::size_t max_cnt, std::size_t *cnt = nullptr, std::size_t *sz = nullptr) const;
 
-        MANAPIHTTP_NODISCARD uint32_t slices_size () const { return this->m_count; }
+        MANAPICORE_NODISCARD uint32_t slices_size () const { return this->m_count; }
 
-        MANAPIHTTP_NODISCARD std::size_t size () const;
+        MANAPICORE_NODISCARD std::size_t size () const;
 
-        MANAPIHTTP_NODISCARD std::string to_string () const;
+        MANAPICORE_NODISCARD std::string to_string () const;
     };
 
     class slice final : public slice_base {
     public:
         slice ();
 
-        static manapi::status_or<slice> create (std::size_t n) MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<slice> create (std::size_t n) MANAPICORE_NOEXCEPT;
 
         slice (std::unique_ptr<slice_part_t, slice_part_deleter> buffs,slice_part_t*last, uint32_t nbuff);
 
@@ -214,9 +214,9 @@ namespace manapi {
 
         slice (const ev::buff_t *buff);
 
-        slice (slice &&n) MANAPIHTTP_NOEXCEPT;
+        slice (slice &&n) MANAPICORE_NOEXCEPT;
 
-        slice &operator=(slice &&n) MANAPIHTTP_NOEXCEPT;
+        slice &operator=(slice &&n) MANAPICORE_NOEXCEPT;
 
         ~slice() override;
 
@@ -225,28 +225,28 @@ namespace manapi {
          * @param size capacity
          * @return Ok if success; otherwise, ResourceExhausted
          */
-        manapi::status resize (std::size_t size) MANAPIHTTP_NOEXCEPT;
+        manapi::status resize (std::size_t size) MANAPICORE_NOEXCEPT;
 
         /**
          * Adds |buffer| to the slices chain
          * @param buffer bytebuffer
          * @return Ok if success; otherwise, ResourceExhausted
          */
-        manapi::status push_back (bytebuffer buffer) MANAPIHTTP_NOEXCEPT;
+        manapi::status push_back (bytebuffer buffer) MANAPICORE_NOEXCEPT;
 
         /**
          * Adds |s| to the slices chain
          * @param s slices
          * @return Ok if success; otherwise, InternalError
          */
-        manapi::status push_back (slice &&s) MANAPIHTTP_NOEXCEPT;
+        manapi::status push_back (slice &&s) MANAPICORE_NOEXCEPT;
 
         /**
          * Moves |buff| to the slices chain
          * @param buff buffer
          * @return Ok if success, otherwise, ResourceExhausted
          */
-        manapi::status push_back (const ev::buff_t *buff) MANAPIHTTP_NOEXCEPT;
+        manapi::status push_back (const ev::buff_t *buff) MANAPICORE_NOEXCEPT;
 
         /**
          * Copy |buffer| to the back of the slices chain
@@ -254,14 +254,14 @@ namespace manapi {
          * @param size buffer size
          * @return Ok if success, otherwise, ResourceExhausted
          */
-        manapi::status push_back (const void *buffer, std::size_t size) MANAPIHTTP_NOEXCEPT;
+        manapi::status push_back (const void *buffer, std::size_t size) MANAPICORE_NOEXCEPT;
 
         /**
          * Adds |buffer| to the slices chain
          * @param buffer buffer
          * @return Ok if success, otherwise, ResourceExhausted
          */
-        manapi::status push_back (std::string_view buffer) MANAPIHTTP_NOEXCEPT;
+        manapi::status push_back (std::string_view buffer) MANAPICORE_NOEXCEPT;
 
         /**
          * Adjusts the left shift by |shift| and clears free buffers
@@ -271,13 +271,13 @@ namespace manapi {
          * @param shift left shift to add
          * @return Ok if success; otherwise it returns OutOfRange
          */
-        manapi::status shift_add (std::size_t shift) MANAPIHTTP_NOEXCEPT override;
+        manapi::status shift_add (std::size_t shift) MANAPICORE_NOEXCEPT override;
 
-        manapi::status_or<manapi::slice> split (std::size_t start, std::size_t size) MANAPIHTTP_NOEXCEPT;
+        manapi::status_or<manapi::slice> split (std::size_t start, std::size_t size) MANAPICORE_NOEXCEPT;
 
-        void clear () MANAPIHTTP_NOEXCEPT;
+        void clear () MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD manapi::slice copy () const;
+        MANAPICORE_NODISCARD manapi::slice copy () const;
     };
 
     class slice_view final : public slice_base {
@@ -307,17 +307,17 @@ namespace manapi {
 
         slice_ref &operator=(const slice_ref &n);
 
-        slice_ref (slice_ref &&n) MANAPIHTTP_NOEXCEPT;
+        slice_ref (slice_ref &&n) MANAPICORE_NOEXCEPT;
 
-        slice_ref &operator=(slice_ref &&n) MANAPIHTTP_NOEXCEPT;
+        slice_ref &operator=(slice_ref &&n) MANAPICORE_NOEXCEPT;
 
         ~slice_ref() override;
 
         manapi::status push_back (const void *buffer, std::size_t size);
 
-        manapi::status shift_add(std::size_t shift) MANAPIHTTP_NOEXCEPT override;
+        manapi::status shift_add(std::size_t shift) MANAPICORE_NOEXCEPT override;
 
-        void clear () MANAPIHTTP_NOEXCEPT;
+        void clear () MANAPICORE_NOEXCEPT;
     };
 
     class slice_complex {
@@ -339,29 +339,29 @@ namespace manapi {
 
         slice_complex ( manapi::slice_view &&n );
 
-        slice_complex (manapi::slice_complex &&n) MANAPIHTTP_NOEXCEPT;
+        slice_complex (manapi::slice_complex &&n) MANAPICORE_NOEXCEPT;
 
-        slice_complex &operator= ( manapi::slice &&n ) MANAPIHTTP_NOEXCEPT;
+        slice_complex &operator= ( manapi::slice &&n ) MANAPICORE_NOEXCEPT;
 
-        slice_complex &operator= ( manapi::slice_view &&n ) MANAPIHTTP_NOEXCEPT;
+        slice_complex &operator= ( manapi::slice_view &&n ) MANAPICORE_NOEXCEPT;
 
-        slice_complex &operator= (manapi::slice_complex &&n ) MANAPIHTTP_NOEXCEPT;
+        slice_complex &operator= (manapi::slice_complex &&n ) MANAPICORE_NOEXCEPT;
 
-        slice_base *base ( ) MANAPIHTTP_NOEXCEPT;
+        slice_base *base ( ) MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const slice_base *base ( ) const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const slice_base *base ( ) const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD bool is_slice () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_slice () const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD bool is_slice_view () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool is_slice_view () const MANAPICORE_NOEXCEPT;
 
-        slice *get_slice () MANAPIHTTP_NOEXCEPT;
+        slice *get_slice () MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const slice *get_slice () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const slice *get_slice () const MANAPICORE_NOEXCEPT;
 
-        slice_view *get_slice_view () MANAPIHTTP_NOEXCEPT;
+        slice_view *get_slice_view () MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const slice_view *get_slice_view () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const slice_view *get_slice_view () const MANAPICORE_NOEXCEPT;
 
         slice_complex &to_slice ();
     private:

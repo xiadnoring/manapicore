@@ -30,32 +30,32 @@ namespace manapi::ext::pq {
             this->m_res.reset(res);
         }
 
-        result (result &&n) MANAPIHTTP_NOEXCEPT {
+        result (result &&n) MANAPICORE_NOEXCEPT {
             this->m_res = std::move(n.m_res);
         }
 
         ~result() = default;
 
-        result &operator=(result &&n) MANAPIHTTP_NOEXCEPT {
+        result &operator=(result &&n) MANAPICORE_NOEXCEPT {
             if (this != &n) {
                 this->m_res = std::move(n.m_res);
             }
             return *this;
         }
 
-        operator bool() const MANAPIHTTP_NOEXCEPT {
+        operator bool() const MANAPICORE_NOEXCEPT {
             return !!this->m_res;
         }
 
-        MANAPIHTTP_NODISCARD int size () const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD int size () const MANAPICORE_NOEXCEPT {
             return PQntuples(this->m_res.get());
         }
 
-        MANAPIHTTP_NODISCARD bool empty () {
+        MANAPICORE_NODISCARD bool empty () {
             return this->size()==0;
         }
 
-        PGresult *native_handle () MANAPIHTTP_NOEXCEPT {
+        PGresult *native_handle () MANAPICORE_NOEXCEPT {
             return this->m_res.get();
         }
 
@@ -63,7 +63,7 @@ namespace manapi::ext::pq {
             return {PQcopyResult(this->m_res.get(), PG_COPYRES_ATTRS | PG_COPYRES_TUPLES)};
         }
 
-        MANAPIHTTP_NODISCARD pq::sql_states sqlstate() const MANAPIHTTP_NOEXCEPT {
+        MANAPICORE_NODISCARD pq::sql_states sqlstate() const MANAPICORE_NOEXCEPT {
             if (this->sqlstate_.has_value()) {
                 return static_cast<sql_states>(this->sqlstate_.value());
             }
@@ -97,7 +97,7 @@ namespace manapi::ext::pq {
             return this->at(index);
         }
 
-        MANAPIHTTP_NODISCARD size_t affected_rows () const {
+        MANAPICORE_NODISCARD size_t affected_rows () const {
             if (this->affected_rows_.has_value()) {
                 return this->affected_rows_.value();
             }
@@ -113,8 +113,8 @@ namespace manapi::ext::pq {
             return cnt;
         }
 
-        MANAPIHTTP_NODISCARD const_iterator begin () const MANAPIHTTP_NOEXCEPT;
-        MANAPIHTTP_NODISCARD const_iterator end () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const_iterator begin () const MANAPICORE_NOEXCEPT;
+        MANAPICORE_NODISCARD const_iterator end () const MANAPICORE_NOEXCEPT;
     private:
         std::unique_ptr<PGresult, pgresult_deleter> m_res;
         std::optional<std::size_t> mutable sqlstate_;
@@ -188,11 +188,11 @@ namespace manapi::ext::pq {
         }
     };
 
-    inline manapi::ext::pq::result::const_iterator manapi::ext::pq::result::begin() const MANAPIHTTP_NOEXCEPT {
+    inline manapi::ext::pq::result::const_iterator manapi::ext::pq::result::begin() const MANAPICORE_NOEXCEPT {
         return const_iterator{this->m_res.get(), 0};
     }
 
-    inline manapi::ext::pq::result::const_iterator manapi::ext::pq::result::end() const MANAPIHTTP_NOEXCEPT {
+    inline manapi::ext::pq::result::const_iterator manapi::ext::pq::result::end() const MANAPICORE_NOEXCEPT {
         return const_iterator{this->m_res.get(), this->size()};
     }
 }

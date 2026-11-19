@@ -30,9 +30,9 @@ namespace manapi {
 
         ~logger();
 
-        logger(logger &&n) MANAPIHTTP_NOEXCEPT;
+        logger(logger &&n) MANAPICORE_NOEXCEPT;
 
-        logger &operator=(logger &&n) MANAPIHTTP_NOEXCEPT;
+        logger &operator=(logger &&n) MANAPICORE_NOEXCEPT;
 
         logger(const logger &n);
 
@@ -63,9 +63,9 @@ namespace manapi {
          */
         void callback (callback_t callback);
 
-        void callback (logger_type type, std::string_view service, int error_code, std::string msg) MANAPIHTTP_NOEXCEPT;
+        void callback (logger_type type, std::string_view service, int error_code, std::string msg) MANAPICORE_NOEXCEPT;
 
-        void fcallback (logger_type type, std::string_view service, int error_code, const char *fmt, va_list args) MANAPIHTTP_NOEXCEPT;
+        void fcallback (logger_type type, std::string_view service, int error_code, const char *fmt, va_list args) MANAPICORE_NOEXCEPT;
 
         template<typename ...Args>
         void swarning (std::string_view service, std::string msg, Args &&...args) {
@@ -99,17 +99,17 @@ namespace manapi {
 
         std::shared_ptr<manapi::logger> create (std::string service);
 
-        void fsdebug (std::string_view service, const char *fmt, ...) MANAPIHTTP_NOEXCEPT;
+        void fsdebug (std::string_view service, const char *fmt, ...) MANAPICORE_NOEXCEPT;
 
-        void fserror (std::string_view service, int error_code, const char *fmt, ...) MANAPIHTTP_NOEXCEPT;
+        void fserror (std::string_view service, int error_code, const char *fmt, ...) MANAPICORE_NOEXCEPT;
 
-        void fswarning (std::string_view service, const char *fmt, ...) MANAPIHTTP_NOEXCEPT;
+        void fswarning (std::string_view service, const char *fmt, ...) MANAPICORE_NOEXCEPT;
 
-        void fdebug (const char *fmt, ...) MANAPIHTTP_NOEXCEPT;
+        void fdebug (const char *fmt, ...) MANAPICORE_NOEXCEPT;
 
-        void ferror (int error_code, const char *fmt, ...) MANAPIHTTP_NOEXCEPT;
+        void ferror (int error_code, const char *fmt, ...) MANAPICORE_NOEXCEPT;
 
-        void fwarning (const char *fmt, ...) MANAPIHTTP_NOEXCEPT;
+        void fwarning (const char *fmt, ...) MANAPICORE_NOEXCEPT;
     private:
         std::string m_service;
 

@@ -22,16 +22,16 @@ namespace manapi::debug {
         LOG_TRACE_HARD
     } trace_level;
 
-    void logit(log_level type, const char* file, int line, const char *name, const char* fmt, ...) MANAPIHTTP_NOEXCEPT;
+    void logit(log_level type, const char* file, int line, const char *name, const char* fmt, ...) MANAPICORE_NOEXCEPT;
 
-    void logit(log_level type, const char* file, int line, const char *name, int level, const char* fmt, ...) MANAPIHTTP_NOEXCEPT;
+    void logit(log_level type, const char* file, int line, const char *name, int level, const char* fmt, ...) MANAPICORE_NOEXCEPT;
 
-    void flogit(log_level type, const char* file, const char *func, int line, const char *name, const char* fmt, ...) MANAPIHTTP_NOEXCEPT;
+    void flogit(log_level type, const char* file, const char *func, int line, const char *name, const char* fmt, ...) MANAPICORE_NOEXCEPT;
 
-    void flogit(log_level type, const char* file, const char *func, int line, const char *name, int level, const char* fmt, ...) MANAPIHTTP_NOEXCEPT;
+    void flogit(log_level type, const char* file, const char *func, int line, const char *name, int level, const char* fmt, ...) MANAPICORE_NOEXCEPT;
 
 #ifndef LOGNAME
-#   define LOGNAME "manapihttp"
+#   define LOGNAME "manapicore"
 #endif
 
     // Convenience macros

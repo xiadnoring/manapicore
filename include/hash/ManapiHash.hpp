@@ -14,7 +14,7 @@ namespace manapi::hash {
 
         virtual void final(uint8_t *digest) = 0;
 
-        MANAPIHTTP_NODISCARD virtual std::size_t final_size () const = 0;
+        MANAPICORE_NODISCARD virtual std::size_t final_size () const = 0;
     };
 
     future<manapi::status> hash_file (hash::hash_base *inst, manapi::ev::file src, int64_t offset = -1, manapi::ctoken token = nullptr);

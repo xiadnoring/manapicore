@@ -8,17 +8,17 @@ struct manapi::async::mutex::mutex_promise {
     std::coroutine_handle<> handle;
     std::size_t pos;
 
-    bool await_ready () MANAPIHTTP_NOEXCEPT;
+    bool await_ready () MANAPICORE_NOEXCEPT;
 
-    void await_resume () MANAPIHTTP_NOEXCEPT;
+    void await_resume () MANAPICORE_NOEXCEPT;
 
     void await_suspend (std::coroutine_handle<> handle);
 };
 
-bool manapi::async::mutex::mutex_promise::await_ready() MANAPIHTTP_NOEXCEPT {
+bool manapi::async::mutex::mutex_promise::await_ready() MANAPICORE_NOEXCEPT {
     return false; }
 
-void manapi::async::mutex::mutex_promise::await_resume() MANAPIHTTP_NOEXCEPT {
+void manapi::async::mutex::mutex_promise::await_resume() MANAPICORE_NOEXCEPT {
     if (this->cancellation) {
         this->cancellation->disable();
     }
@@ -56,12 +56,12 @@ void manapi::async::mutex::mutex_promise::await_suspend(std::coroutine_handle<> 
 manapi::async::mutex_locker::mutex_locker(mutex *mx) : mx(mx) {
 }
 
-manapi::async::mutex_locker::mutex_locker(mutex_locker &&n) MANAPIHTTP_NOEXCEPT {
+manapi::async::mutex_locker::mutex_locker(mutex_locker &&n) MANAPICORE_NOEXCEPT {
     this->mx = n.mx;
     n.mx = nullptr;
 }
 
-manapi::async::mutex_locker & manapi::async::mutex_locker::operator=(mutex_locker &&n) MANAPIHTTP_NOEXCEPT {
+manapi::async::mutex_locker & manapi::async::mutex_locker::operator=(mutex_locker &&n) MANAPICORE_NOEXCEPT {
     this->mx = n.mx;
     n.mx = nullptr;
     return *this;
@@ -71,13 +71,13 @@ manapi::async::mutex_locker::~mutex_locker() {
     this->call();
 }
 
-void manapi::async::mutex_locker::call() MANAPIHTTP_NOEXCEPT {
+void manapi::async::mutex_locker::call() MANAPICORE_NOEXCEPT {
     if (this->mx) {
         this->mx->unlock();
     }
 }
 
-void manapi::async::mutex_locker::disable() MANAPIHTTP_NOEXCEPT {
+void manapi::async::mutex_locker::disable() MANAPICORE_NOEXCEPT {
     this->mx = nullptr;
 }
 
@@ -88,12 +88,12 @@ manapi::async::mutex::mutex() {
 }
 
 
-manapi::async::mutex::mutex(mutex &&n) MANAPIHTTP_NOEXCEPT {
+manapi::async::mutex::mutex(mutex &&n) MANAPICORE_NOEXCEPT {
     this->m_own = std::exchange(n.m_own, false);
     this->m_stack = std::move(n.m_stack);
 }
 
-manapi::async::mutex & manapi::async::mutex::operator=(mutex &&n) MANAPIHTTP_NOEXCEPT {
+manapi::async::mutex & manapi::async::mutex::operator=(mutex &&n) MANAPICORE_NOEXCEPT {
     this->m_own = std::exchange(n.m_own, false);
     this->m_stack = std::move(n.m_stack);
     return *this;
@@ -109,13 +109,13 @@ manapi::future<bool> manapi::async::mutex::lock(manapi::ctoken cancellation) {
     co_return !cancellation.is_cancelled();
 }
 
-bool manapi::async::mutex::try_to_lock() MANAPIHTTP_NOEXCEPT {
+bool manapi::async::mutex::try_to_lock() MANAPICORE_NOEXCEPT {
     if (this->m_own) { return false; }
     this->m_own = true;
     return true;
 }
 
-void manapi::async::mutex::unlock() MANAPIHTTP_NOEXCEPT {
+void manapi::async::mutex::unlock() MANAPICORE_NOEXCEPT {
     if (!this->m_own) {
         return;
     }
@@ -141,7 +141,7 @@ manapi::future<manapi::status_or<manapi::async::mutex_locker>> manapi::async::mu
     co_return manapi::status_cancelled("mutex:lock_guard cancelled");
 }
 
-std::size_t manapi::async::mutex::waiting() const MANAPIHTTP_NOEXCEPT {
+std::size_t manapi::async::mutex::waiting() const MANAPICORE_NOEXCEPT {
     return this->m_own + this->m_stack.size();
 }
 

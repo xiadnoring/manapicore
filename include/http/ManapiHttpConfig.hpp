@@ -96,7 +96,7 @@
 //         * @param version
 //         * @return NotFound if http version invalid otherwise http version as an integer
 //         */
-//        static manapi::status_or<http::versions::http> parse_http_version (std::string_view version) MANAPIHTTP_NOEXCEPT;
+//        static manapi::status_or<http::versions::http> parse_http_version (std::string_view version) MANAPICORE_NOEXCEPT;
 //
 //        /**
 //         * For Http/2 and QUIC

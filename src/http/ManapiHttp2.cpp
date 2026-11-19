@@ -155,7 +155,7 @@
 // * @param stream_id Stream ID
 // * @return 0 on success, -1 on write error
 // */
-//static int http_v2_send_frame (manapi::net::http::http_v2_t *ctx, int frame_type, uint8_t flags, int stream_id, manapi::ev::buff_t buffs[], uint32_t nbuff, std::size_t size, bool force = true) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_send_frame (manapi::net::http::http_v2_t *ctx, int frame_type, uint8_t flags, int stream_id, manapi::ev::buff_t buffs[], uint32_t nbuff, std::size_t size, bool force = true) MANAPICORE_NOEXCEPT {
 //    char header[9];
 //
 //    stringify_stream_id(stream_id, header + 5);
@@ -186,7 +186,7 @@
 //    return manapi::ERR_OK;
 //}
 //
-//static int http_v2_send_window_frame (manapi::net::http::http_v2_t *ctx,  int stream_id, int size) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_send_window_frame (manapi::net::http::http_v2_t *ctx,  int stream_id, int size) MANAPICORE_NOEXCEPT {
 //    /**
 //     * RFC9113 (6.9) WINDOW_UPDATE
 //     *
@@ -229,7 +229,7 @@
 //    return http_v2_send_frame(ctx,  HTTP2_FRAME_WINDOW_UPDATE, 0, stream_id, &buff, 1, buff.len);
 //}
 //
-//static int http_v2_send_ping_frame (manapi::net::http::http_v2_t *ctx, char *data) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_send_ping_frame (manapi::net::http::http_v2_t *ctx, char *data) MANAPICORE_NOEXCEPT {
 //    if (data) {
 //        manapi::ev::buff_t buf;
 //        buf.base = data;
@@ -270,18 +270,18 @@
 //    return manapi::ERR_OK;
 //}
 //
-//static int http_v2_send_data_frame (manapi::net::http::http_v2_t *ctx,  int stream_id, manapi::ev::buff_t buffs[], uint32_t nbuff, std::size_t size, bool finish) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_send_data_frame (manapi::net::http::http_v2_t *ctx,  int stream_id, manapi::ev::buff_t buffs[], uint32_t nbuff, std::size_t size, bool finish) MANAPICORE_NOEXCEPT {
 //    return http_v2_send_frame(ctx, HTTP2_FRAME_DATA, finish ? HTTP2_FLAG_DATA_END_STREAM : 0, stream_id, buffs, nbuff, size, finish);
 //}
 //
-//static int http_v2_send_data_frame (manapi::net::http::http_v2_t *ctx, int stream_id, const char *data, std::size_t size, bool finish) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_send_data_frame (manapi::net::http::http_v2_t *ctx, int stream_id, const char *data, std::size_t size, bool finish) MANAPICORE_NOEXCEPT {
 //    manapi::ev::buff_t buff;
 //    buff.base = (char*)(data);
 //    buff.len = static_cast<decltype(buff.len)>(size);
 //    return http_v2_send_frame(ctx, HTTP2_FRAME_DATA, finish ? HTTP2_FLAG_DATA_END_STREAM : 0, stream_id, &buff, 1, size, finish);
 //}
 //
-//static int http_v2_verify_setting (int key, int value) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_verify_setting (int key, int value) MANAPICORE_NOEXCEPT {
 //    //         {HTTP2_SETTING_RESERVED, manapi::json{"{null}"}},
 //    //         {HTTP2_SETTING_ENABLE_PUSH, manapi::json{"{integer(>=0 <=1)}"}},
 //    //         {HTTP2_SETTING_MAX_FRAME_SIZE, manapi::json{"{integer(>=16384 <=16777215)}"}},
@@ -317,7 +317,7 @@
 //}
 //
 //
-//static int http_v2_insert_priority (manapi::net::http::http_v2_t *ctx, const manapi::net::worker::shared_conn &sconn, manapi::net::http::http_v2_stream_t *sdata, uint8_t upriority) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_insert_priority (manapi::net::http::http_v2_t *ctx, const manapi::net::worker::shared_conn &sconn, manapi::net::http::http_v2_stream_t *sdata, uint8_t upriority) MANAPICORE_NOEXCEPT {
 //    using namespace manapi::net::http;
 //
 //    bool flg = false;
@@ -397,7 +397,7 @@
 //    return manapi::ERR_OK;
 //}
 //
-//static uint8_t http_v2_remove_priority (manapi::net::http::http_v2_t *ctx, manapi::net::http::http_v2_stream_t *s, uint8_t upriority) MANAPIHTTP_NOEXCEPT {
+//static uint8_t http_v2_remove_priority (manapi::net::http::http_v2_t *ctx, manapi::net::http::http_v2_stream_t *s, uint8_t upriority) MANAPICORE_NOEXCEPT {
 //    using namespace manapi::net::http;
 //
 //    //std::cout << "remove " << s->id << " " << (int)upriority << "\n";
@@ -458,14 +458,14 @@
 //    return manapi::ERR_OK;
 //}
 //
-//static uint8_t http_v2_real_priority_by_stream (manapi::net::http::http_v2_stream_t *s) MANAPIHTTP_NOEXCEPT {
+//static uint8_t http_v2_real_priority_by_stream (manapi::net::http::http_v2_stream_t *s) MANAPICORE_NOEXCEPT {
 //    if ((s->write_window <= 0))
 //        return HTTP2_PRIORITY_DISABLED;
 //
 //    return s->priority;
 //}
 //
-//static int http_v2_update_priority (manapi::net::http::http_v2_t *ctx, const manapi::net::worker::shared_conn &sconn, manapi::net::http::http_v2_stream_t *s) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_update_priority (manapi::net::http::http_v2_t *ctx, const manapi::net::worker::shared_conn &sconn, manapi::net::http::http_v2_stream_t *s) MANAPICORE_NOEXCEPT {
 //    uint8_t rs;
 //    uint8_t as;
 //    if (http_v2_real_priority_by_stream (s) == s->priority) {
@@ -483,7 +483,7 @@
 //    return http_v2_insert_priority(ctx, sconn, s, as);
 //}
 //
-//static int http_v2_apply_setting (manapi::net::http::http_v2_t *ctx, int key, int value, bool server) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_apply_setting (manapi::net::http::http_v2_t *ctx, int key, int value, bool server) MANAPICORE_NOEXCEPT {
 //    auto const settings = server ? ctx->server.get() : ctx->client.get();
 //
 //    if (http_v2_verify_setting(key, value))
@@ -556,7 +556,7 @@
 //    return 0;
 //}
 //
-//static int http_v2_send_goaway (manapi::net::http::http_v2_t *ctx, http_v2_goaway_t *http_goaway) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_send_goaway (manapi::net::http::http_v2_t *ctx, http_v2_goaway_t *http_goaway) MANAPICORE_NOEXCEPT {
 //    manapi::ev::buff_t data[2];
 //    char nums[8];
 //
@@ -579,7 +579,7 @@
 //    return manapi::ERR_OK;
 //}
 //
-//static int http_v2_send_settings (manapi::net::http::http_v2_t *ctx, const std::vector<std::pair<short, int>> & options) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_send_settings (manapi::net::http::http_v2_t *ctx, const std::vector<std::pair<short, int>> & options) MANAPICORE_NOEXCEPT {
 //    if (ctx->timeout) {
 //        return manapi::ERR_INTERNAL;
 //    }
@@ -642,7 +642,7 @@
 //    return manapi::ERR_OK;
 //}
 //
-//static int http_v2_rst_stream_ex (manapi::net::http::http_v2_t *ctx, manapi::net::worker::connection *conn, int stream_id, int errcode) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_rst_stream_ex (manapi::net::http::http_v2_t *ctx, manapi::net::worker::connection *conn, int stream_id, int errcode) MANAPICORE_NOEXCEPT {
 //    if (ctx->flags & manapi::net::http::HTTP2_CTX_FLAG_REALY_CLOSE)
 //        return 0;
 //
@@ -662,7 +662,7 @@
 //    return http_v2_send_frame(ctx, HTTP2_FRAME_RST_STREAM, 0, stream_id, &buff, 1, buff.len);
 //}
 //
-//int manapi::net::http::http_v2_on_closing(http_v2_t *ctx) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v2_on_closing(http_v2_t *ctx) MANAPICORE_NOEXCEPT {
 //    http_v2_goaway_t http_goaway = {
 //        .err_code = manapi::net::worker::HTTP2_ERROR_NO_ERROR,
 //        .err_msg = "shutdown"
@@ -683,7 +683,7 @@
 //    return manapi::ERR_FAILED_PRECONDITION;
 //}
 //
-//int manapi::net::http::http_v2_on_close (http_v2_t *ctx) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v2_on_close (http_v2_t *ctx) MANAPICORE_NOEXCEPT {
 //    manapi::net::worker::prepared::timer_clear(std::move(ctx->timeout));
 //
 //    for (auto it = ctx->streams.begin(); it != ctx->streams.end(); ++it) {
@@ -703,7 +703,7 @@
 //    return 0;
 //}
 //
-//int manapi::net::http::http_v2_on_close_stream(http_v2_t *ctx, int id) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v2_on_close_stream(http_v2_t *ctx, int id) MANAPICORE_NOEXCEPT {
 //    try {
 //        auto it = ctx->streams.find(id);
 //        if (it == ctx->streams.end() || !it->second) {
@@ -733,7 +733,7 @@
 //    return manapi::ERR_OK;
 //}
 //
-//static int http_v2_stream_on_write (const manapi::net::worker::shared_conn &conn, manapi::net::http::http_v2_stream_t *data) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_stream_on_write (const manapi::net::worker::shared_conn &conn, manapi::net::http::http_v2_stream_t *data) MANAPICORE_NOEXCEPT {
 //    if ((data->flags & manapi::ev::WRITE)) {
 //        if (!data->ev_cb.empty()) {
 //            data->ctx->http_v2_worker->feed_event(conn, manapi::ev::WRITE, nullptr);
@@ -745,7 +745,7 @@
 //    return 0;
 //}
 //
-//int manapi::net::http::http_v2_on_write(http_v2_t *ctx) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v2_on_write(http_v2_t *ctx) MANAPICORE_NOEXCEPT {
 //    manapi_log_trace(manapi::debug::LOG_TRACE_LOW, "http2: write event received write_window=%d", ctx->write_window);
 //
 //    if (ctx->current) {
@@ -784,7 +784,7 @@
 //    return 0;
 //}
 //
-//static int http_v2_process_window (const manapi::net::worker::shared_conn &conn, manapi::net::http::http_v2_stream_t *s) MANAPIHTTP_NOEXCEPT {
+//static int http_v2_process_window (const manapi::net::worker::shared_conn &conn, manapi::net::http::http_v2_stream_t *s) MANAPICORE_NOEXCEPT {
 //    auto ssw = static_cast<ssize_t>(s->top->recv.size());
 //    auto config = s->ctx->worker->m_config;
 //
@@ -823,7 +823,7 @@
 //    return manapi::ERR_OK;
 //}
 //
-//int manapi::net::http::http_v2_on_read_stream(const worker::shared_conn &conn) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v2_on_read_stream(const worker::shared_conn &conn) MANAPICORE_NOEXCEPT {
 //    auto const s = conn->as<http_v2_stream_t>();
 //
 //    bool const read_blocked = s->top->recv.size() >= s->ctx->worker->m_config->max_buffer_size;
@@ -837,18 +837,18 @@
 //    return http_v2_process_window (conn, s);
 //}
 //
-//static void http_v2_setup_goaway (manapi::net::http::http_v2_t *ctx, http_v2_goaway_t &http_goaway, int errnum, const char *msg) MANAPIHTTP_NOEXCEPT {
+//static void http_v2_setup_goaway (manapi::net::http::http_v2_t *ctx, http_v2_goaway_t &http_goaway, int errnum, const char *msg) MANAPICORE_NOEXCEPT {
 //    http_goaway.err_code = errnum;
 //    http_goaway.err_msg = msg;
 //    ctx->flags |= manapi::net::http::HTTP2_CTX_FLAG_REALY_CLOSE;
 //    ctx->current = HTTP2_CALLBACK_GOAWAY;
 //}
 //
-//static void connection_interface_eraser (manapi::net::worker::connection *ptr) MANAPIHTTP_NOEXCEPT {
+//static void connection_interface_eraser (manapi::net::worker::connection *ptr) MANAPICORE_NOEXCEPT {
 //    delete ptr->as<manapi::net::http::http_v2_stream_t>();
 //}
 //
-//int manapi::net::http::http_v2_work(http_v2_t *ctx, http::config *config, const char **nbuffer, std::size_t *nsize) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v2_work(http_v2_t *ctx, http::config *config, const char **nbuffer, std::size_t *nsize) MANAPICORE_NOEXCEPT {
 //    http_v2_goaway_t http_goaway;
 //
 //    std::size_t pos = 0;
@@ -1865,7 +1865,7 @@
 //                    bool const fin_block_in_frame = (ctx->frame_length==static_cast<uint32_t>(ctx->n2));
 //
 //                    {
-//                        //MANAPIHTTP_LOG("RECV DATA {}", len);
+//                        //MANAPICORE_LOG("RECV DATA {}", len);
 //
 //                        auto s = ctx->streams.find(static_cast<int>(ctx->frame_stream_id));
 //                        if (s == ctx->streams.end() || !s->second) {
@@ -2514,7 +2514,7 @@
 //    return EHTTP_V2_PROTOCOL_WANT_READ;
 //}
 //
-//ssize_t manapi::net::http::http_v2_write(const worker::shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPIHTTP_NOEXCEPT {
+//ssize_t manapi::net::http::http_v2_write(const worker::shared_conn &conn, ev::buff_t *buff, uint32_t nbuff, bool finish) MANAPICORE_NOEXCEPT {
 //    auto s = conn->as<http_v2_stream_t>();
 //    if (s->flags & (HTTP2_STREAM_CLOSED/*|http::HTTP2_STREAM_PRIORITY_LOCKED*/))
 //        return (s->flags & ev::DISCONNECT) ? -1 : 0;
@@ -2616,7 +2616,7 @@
 //    return static_cast<ssize_t>(res);
 //}
 //
-//int manapi::net::http::http_v2_rst_stream(const worker::shared_conn &s, int errcode) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::http::http_v2_rst_stream(const worker::shared_conn &s, int errcode) MANAPICORE_NOEXCEPT {
 //    auto const data = s->as<http_v2_stream_t>();
 //    return http_v2_rst_stream_ex (data->ctx, s.get(), data->id, errcode);
 //}

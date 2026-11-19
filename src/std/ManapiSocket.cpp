@@ -40,7 +40,7 @@ static manapi::ev::io_cb manapi__pio_ready_mk(int flags, manapi::socket_t fd,man
     }
 }
 
-static void manapi__pio_ready (manapi::socket_t fd, int flags, manapi::ev::io_cb cb, const manapi::async::promise_sync<manapi::ev::status_or<int>>::resolve_t &resolve, manapi::ctoken cancellation) MANAPIHTTP_NOEXCEPT {
+static void manapi__pio_ready (manapi::socket_t fd, int flags, manapi::ev::io_cb cb, const manapi::async::promise_sync<manapi::ev::status_or<int>>::resolve_t &resolve, manapi::ctoken cancellation) MANAPICORE_NOEXCEPT {
     if (!cb)
         goto err;
 
@@ -75,11 +75,11 @@ static void manapi__pio_ready (manapi::socket_t fd, int flags, manapi::ev::io_cb
     err: resolve (manapi::ev::status_internal("io:something gets wrong", manapi::ev::ERR_UNKNOWN));
 }
 
-#if MANAPIHTTP_NONUNIX
+#if MANAPICORE_NONUNIX
 
 #endif
 
-void manapi::async::set_non_blocking(socket_t fd) MANAPIHTTP_NOEXCEPT {
+void manapi::async::set_non_blocking(socket_t fd) MANAPICORE_NOEXCEPT {
 #ifdef _WIN32
     u_long arg = 1;
     ioctlsocket(fd, FIONBIO, &arg);
@@ -90,7 +90,7 @@ void manapi::async::set_non_blocking(socket_t fd) MANAPIHTTP_NOEXCEPT {
 #endif
 }
 
-manapi::status_or<manapi::socket_t> manapi::async::create_socket(int family, int protocol, int socktype) MANAPIHTTP_NOEXCEPT {
+manapi::status_or<manapi::socket_t> manapi::async::create_socket(int family, int protocol, int socktype) MANAPICORE_NOEXCEPT {
     socket_t fd = socket(family, socktype, protocol);
     if (fd < 0) {
         manapi_log_trace(manapi::debug::LOG_TRACE_HIGH, "%s fd=%d", "socket() failed", fd);
@@ -119,8 +119,8 @@ manapi::status_or<manapi::socket_t> manapi::async::create_socket(int family, int
     return fd;
 }
 
-void manapi::async::close_descriptor(socket_t fd) MANAPIHTTP_NOEXCEPT {
-#if MANAPIHTTP_NONUNIX
+void manapi::async::close_descriptor(socket_t fd) MANAPICORE_NOEXCEPT {
+#if MANAPICORE_NONUNIX
     ::closesocket(fd);
 #else
     ::close(fd);
@@ -170,7 +170,7 @@ manapi::future<manapi::ev::status> manapi::async::write_ready(socket_t fd,ctoken
     co_return (co_await custom_ready(ev::WRITE, fd, std::move(cancellation))).err();
 }
 
-socklen_t manapi::async::socklen(const sockaddr *addr) MANAPIHTTP_NOEXCEPT {
+socklen_t manapi::async::socklen(const sockaddr *addr) MANAPICORE_NOEXCEPT {
     if (addr->sa_family == ev::IPv4) {
         return sizeof (sockaddr_in);
     }

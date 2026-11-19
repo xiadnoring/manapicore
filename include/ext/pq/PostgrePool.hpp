@@ -21,15 +21,15 @@ namespace manapi::ext::pq {
 
         ~item ();
 
-        manapi::ext::pq::connection *operator->() MANAPIHTTP_NOEXCEPT;
+        manapi::ext::pq::connection *operator->() MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const manapi::ext::pq::connection *operator->() const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const manapi::ext::pq::connection *operator->() const MANAPICORE_NOEXCEPT;
 
-        manapi::ext::pq::connection &operator*() MANAPIHTTP_NOEXCEPT;
+        manapi::ext::pq::connection &operator*() MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD const manapi::ext::pq::connection &operator*() const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD const manapi::ext::pq::connection &operator*() const MANAPICORE_NOEXCEPT;
 
-        void release () MANAPIHTTP_NOEXCEPT;
+        void release () MANAPICORE_NOEXCEPT;
     private:
         manapi::ext::pq::connection *m_conn;
 
@@ -37,7 +37,7 @@ namespace manapi::ext::pq {
     };
 
     class pool : public std::enable_shared_from_this<pool> {
-        friend void item::release() MANAPIHTTP_NOEXCEPT;
+        friend void item::release() MANAPICORE_NOEXCEPT;
 
         friend class db;
 
@@ -46,7 +46,7 @@ namespace manapi::ext::pq {
 
         ~pool ();
 
-        static manapi::status_or<std::shared_ptr<pool>> create () MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<pool>> create () MANAPICORE_NOEXCEPT;
 
         future<ev::status> connect (std::size_t size, std::string host, std::string port, std::string user, std::string password, std::string db, manapi::ctoken token = nullptr);
 
@@ -56,11 +56,11 @@ namespace manapi::ext::pq {
 
         future<manapi::status_or<item>> peer (manapi::ctoken token = nullptr);
 
-        MANAPIHTTP_NODISCARD std::size_t size () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD std::size_t size () const MANAPICORE_NOEXCEPT;
 
-        MANAPIHTTP_NODISCARD bool connected () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD bool connected () const MANAPICORE_NOEXCEPT;
 
-        manapi::status connected (bool active) MANAPIHTTP_NOEXCEPT;
+        manapi::status connected (bool active) MANAPICORE_NOEXCEPT;
 
         manapi::future<> ping (std::size_t timeoutms = 5000);
     private:
@@ -89,13 +89,13 @@ namespace manapi::ext::pq {
 
         ~db ();
 
-        static manapi::status_or<std::shared_ptr<db>> create () MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<db>> create () MANAPICORE_NOEXCEPT;
 
         manapi::status set_master (std::shared_ptr<pq::pool> master);
 
         void remove_master ();
 
-        manapi::status add_slave (std::shared_ptr<pq::pool> slave) MANAPIHTTP_NOEXCEPT;
+        manapi::status add_slave (std::shared_ptr<pq::pool> slave) MANAPICORE_NOEXCEPT;
 
         void remove_slave (std::shared_ptr<pq::pool> slave);
 

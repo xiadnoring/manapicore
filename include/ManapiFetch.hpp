@@ -2,8 +2,8 @@
 
 #include "./ManapiUtils.hpp"
 
-#if MANAPIHTTP_CURL_DEPENDENCY
-# define MANAPIHTTP_FETCH_SUPPORT
+#if MANAPICORE_CURL_DEPENDENCY
+# define MANAPICORE_FETCH_SUPPORT
 
 # include <string>
 # include <vector>
@@ -60,9 +60,9 @@ namespace manapi::net {
          */
         ~fetch_formdata();
 
-        fetch_formdata(fetch_formdata &&fd) MANAPIHTTP_NOEXCEPT;
+        fetch_formdata(fetch_formdata &&fd) MANAPICORE_NOEXCEPT;
 
-        fetch_formdata &operator=(fetch_formdata &&fd) MANAPIHTTP_NOEXCEPT;
+        fetch_formdata &operator=(fetch_formdata &&fd) MANAPICORE_NOEXCEPT;
 
         /**
          * send the plain field
@@ -70,7 +70,7 @@ namespace manapi::net {
          * @param name the plain field name
          * @param value the plain field value
          */
-        manapi::status set_text (std::string name, std::string value) MANAPIHTTP_NOEXCEPT;
+        manapi::status set_text (std::string name, std::string value) MANAPICORE_NOEXCEPT;
 
         /**
          * send the file by its filepath
@@ -78,7 +78,7 @@ namespace manapi::net {
          * @param name the file field name
          * @param filepath the file path
          */
-        manapi::status set_file (std::string name, std::string filepath) MANAPIHTTP_NOEXCEPT;
+        manapi::status set_file (std::string name, std::string filepath) MANAPICORE_NOEXCEPT;
 
         /**
          * set the callback
@@ -87,26 +87,26 @@ namespace manapi::net {
          * @param size the data size
          * @param cb the callback
          */
-        manapi::status set_callback (std::string name, std::size_t size, std::move_only_function<size_t (void *buff, size_t buff_size)> cb) MANAPIHTTP_NOEXCEPT;
+        manapi::status set_callback (std::string name, std::size_t size, std::move_only_function<size_t (void *buff, size_t buff_size)> cb) MANAPICORE_NOEXCEPT;
 
         /**
          * clear current state
          */
-        void clear () MANAPIHTTP_NOEXCEPT;
+        void clear () MANAPICORE_NOEXCEPT;
 
         /**
          * get the first field
          *
          * @return the first field
          */
-        tdata::iterator begin() MANAPIHTTP_NOEXCEPT;
+        tdata::iterator begin() MANAPICORE_NOEXCEPT;
 
         /**
          * get the field boundary
          *
          * @return the field boundary
          */
-        tdata::iterator end() MANAPIHTTP_NOEXCEPT;
+        tdata::iterator end() MANAPICORE_NOEXCEPT;
     private:
         /**
          * storage
@@ -149,65 +149,65 @@ namespace manapi::net {
          * @param url the site URL
          * @param cancellation the cancellation token
          */
-        static manapi::status_or<std::shared_ptr<fetch>> create (std::string url) MANAPIHTTP_NOEXCEPT;
+        static manapi::status_or<std::shared_ptr<fetch>> create (std::string url) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the sync callback to recv body from the request
          *
          * @param handler the callback
          */
-        manapi::status recv_body(std::move_only_function<ssize_t(char *, std::size_t)> handler) MANAPIHTTP_NOEXCEPT;
+        manapi::status recv_body(std::move_only_function<ssize_t(char *, std::size_t)> handler) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the async callback to recv body from the request
          *
          * @param handler the callback
          */
-        manapi::status recv_async_body(std::move_only_function<manapi::future<ssize_t>(manapi::slice_view buffs, bool fin)> handler) MANAPIHTTP_NOEXCEPT;
+        manapi::status recv_async_body(std::move_only_function<manapi::future<ssize_t>(manapi::slice_view buffs, bool fin)> handler) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the sync callback to recv headers from the request
          *
          * @param handler the callback
          */
-        manapi::status recv_headers (std::move_only_function<bool(const std::shared_ptr<manapi::net::fetch> &)> handler) MANAPIHTTP_NOEXCEPT;
+        manapi::status recv_headers (std::move_only_function<bool(const std::shared_ptr<manapi::net::fetch> &)> handler) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the async callback to recv headers from the request
          *
          * @param handler the callback
          */
-        manapi::status recv_async_headers (std::move_only_function<manapi::future<bool>(const std::shared_ptr<manapi::net::fetch> &)> handler) MANAPIHTTP_NOEXCEPT;
+        manapi::status recv_async_headers (std::move_only_function<manapi::future<bool>(const std::shared_ptr<manapi::net::fetch> &)> handler) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the formdata to send it with the response
          *
          * @param params the form data
          */
-        manapi::status send_body (fetch_formdata params) MANAPIHTTP_NOEXCEPT;
+        manapi::status send_body (fetch_formdata params) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the method for the response
          *
          * @param method the HTTP method
          */
-        manapi::status method (std::string_view method) MANAPIHTTP_NOEXCEPT;
+        manapi::status method (std::string_view method) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the string data to send it with the response
          *
          * @param data the string data
          */
-        manapi::status send_body (std::string data) MANAPIHTTP_NOEXCEPT;
+        manapi::status send_body (std::string data) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the string data to send it with the response
          *
          * @param data the string data
          */
-        manapi::status send_body (manapi::slice_view data) MANAPIHTTP_NOEXCEPT;
+        manapi::status send_body (manapi::slice_view data) MANAPICORE_NOEXCEPT;
 
-        manapi::status send_content_length ( int64_t length ) MANAPIHTTP_NOEXCEPT;
+        manapi::status send_content_length ( int64_t length ) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the file data to send it with the response
@@ -222,21 +222,21 @@ namespace manapi::net {
          *
          * @param handler the async callback
          */
-        manapi::status send_async_body (std::move_only_function<manapi::future<ssize_t>(slice_view buffs, bool &fin)> handler) MANAPIHTTP_NOEXCEPT;
+        manapi::status send_async_body (std::move_only_function<manapi::future<ssize_t>(slice_view buffs, bool &fin)> handler) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the sync callback to send body with the response
          *
          * @param handler the sync callback
          */
-        manapi::status send_body (std::move_only_function<ssize_t(char *, std::size_t)> handler) MANAPIHTTP_NOEXCEPT;
+        manapi::status send_body (std::move_only_function<ssize_t(char *, std::size_t)> handler) MANAPICORE_NOEXCEPT;
 
         /**
          * Set the header for the response
          *
          * @param headers the headers
          */
-        manapi::status send_header (std::string_view key, std::string_view value) MANAPIHTTP_NOEXCEPT;
+        manapi::status send_header (std::string_view key, std::string_view value) MANAPICORE_NOEXCEPT;
 
         /**
          * set an option
@@ -244,20 +244,20 @@ namespace manapi::net {
          * @param value option value
          * @return the result
          */
-        manapi::status option (option_type type, int32_t value) MANAPIHTTP_NOEXCEPT;
+        manapi::status option (option_type type, int32_t value) MANAPICORE_NOEXCEPT;
 
         /**
          * Get a custom cURL object for custom configuration
          *
          * @return
          */
-        void *custom () MANAPIHTTP_NOEXCEPT;
+        void *custom () MANAPICORE_NOEXCEPT;
 
         /**
          * Get the current HTTP status code
          * @return the HTTP status code
          */
-        MANAPIHTTP_NODISCARD uint16_t status_code () const MANAPIHTTP_NOEXCEPT;
+        MANAPICORE_NODISCARD uint16_t status_code () const MANAPICORE_NOEXCEPT;
 
         /**
          * Send the request to the server

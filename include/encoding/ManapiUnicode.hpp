@@ -92,7 +92,7 @@ namespace manapi::unicode {
      */
     std::size_t escape_string_size (const manapi::slice_base *sv);
 
-    uint8_t onehex2dec (uint8_t c) MANAPIHTTP_NOEXCEPT;
+    uint8_t onehex2dec (uint8_t c) MANAPICORE_NOEXCEPT;
 
-    uint8_t onedec2hex (uint8_t c) MANAPIHTTP_NOEXCEPT;
+    uint8_t onedec2hex (uint8_t c) MANAPICORE_NOEXCEPT;
 }

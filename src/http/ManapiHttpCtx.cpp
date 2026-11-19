@@ -7,7 +7,7 @@
 //    this->m_data->worker_data = std::make_shared <net::worker::worker_data_t> ();
 //}
 //
-//manapi::status_or<std::shared_ptr<manapi::net::http::server_ctx>> manapi::net::http::server_ctx::create() MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<std::shared_ptr<manapi::net::http::server_ctx>> manapi::net::http::server_ctx::create() MANAPICORE_NOEXCEPT {
 //    try {
 //        return std::shared_ptr<manapi::net::http::server_ctx>(new manapi::net::http::server_ctx());
 //    }

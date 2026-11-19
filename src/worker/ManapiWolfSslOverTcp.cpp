@@ -1,7 +1,7 @@
 //#include "worker/ManapiWolfSslOverTcp.hpp"
 //#include "../include/ManapiUtils.hpp"
 //
-//#if MANAPIHTTP_WOLFSSL_DEPENDENCY
+//#if MANAPICORE_WOLFSSL_DEPENDENCY
 //
 //#include <wolfssl/options.h>
 //#include <wolfssl/wolfcrypt/settings.h>
@@ -177,18 +177,18 @@
 //    TLS::stop(std::move(token));
 //}
 //
-//bool manapi::net::worker::WolfSSL_TLS::ssl_is_init_fininshed(void *ssl) MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::worker::WolfSSL_TLS::ssl_is_init_fininshed(void *ssl) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_is_init_finished(static_cast<WOLFSSL *>(ssl));
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_get_error(void *ssl, int rhs) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_get_error(void *ssl, int rhs) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_get_error(static_cast<WOLFSSL *>(ssl), rhs);
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_accept(void *ssl) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_accept(void *ssl) MANAPICORE_NOEXCEPT {
 //    auto const rhs = wolfSSL_accept(static_cast<WOLFSSL *>(ssl));
 //
-//#if MANAPIHTTP_WOLFSSL_WITH_ALPN
+//#if MANAPICORE_WOLFSSL_WITH_ALPN
 //    if (rhs == 1) {
 //        char *alpn;
 //        uint16_t alpn_size;
@@ -216,43 +216,43 @@
 //    return rhs;
 //}
 //
-//void * manapi::net::worker::WolfSSL_TLS::ssl_new(void *ctx) MANAPIHTTP_NOEXCEPT {
+//void * manapi::net::worker::WolfSSL_TLS::ssl_new(void *ctx) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_new(static_cast<WOLFSSL_CTX *>(ctx));
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_write(void *ssl, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_write(void *ssl, const void *buff, int size) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_write(static_cast<WOLFSSL *>(ssl), buff, size);
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_read(void *ssl, void *buff, int size) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_read(void *ssl, void *buff, int size) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_read(static_cast<WOLFSSL *>(ssl), buff, size);
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_shutdown(void *ssl) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_shutdown(void *ssl) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_shutdown(static_cast<WOLFSSL *>(ssl));
 //}
 //
-//void manapi::net::worker::WolfSSL_TLS::ssl_set_shutdown(void *ssl, int flags) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::WolfSSL_TLS::ssl_set_shutdown(void *ssl, int flags) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_set_shutdown(static_cast<WOLFSSL *>(ssl), flags);
 //}
 //
-//void manapi::net::worker::WolfSSL_TLS::ssl_free(void *ssl) MANAPIHTTP_NOEXCEPT {
+//void manapi::net::worker::WolfSSL_TLS::ssl_free(void *ssl) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_free(static_cast<WOLFSSL *>(ssl));
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_bio_read(void *wbio, void *buff, int size) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_bio_read(void *wbio, void *buff, int size) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_BIO_read(static_cast<WOLFSSL_BIO*>(wbio), buff, static_cast<int>(size));
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_bio_should_retry(void *bio) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_bio_should_retry(void *bio) MANAPICORE_NOEXCEPT {
 //    return true;
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_bio_write(void *rbio, const void *buff, int size) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_bio_write(void *rbio, const void *buff, int size) MANAPICORE_NOEXCEPT {
 //    return wolfSSL_BIO_write(static_cast<WOLFSSL_BIO*>(rbio), buff, static_cast<int>(size));
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_read_early_data(void *ssl, void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_read_early_data(void *ssl, void *buf, std::size_t num, std::size_t *readbytes) MANAPICORE_NOEXCEPT {
 //#if 0
 //    return wolfSSL_read_early_data(static_cast<WOLFSSL*>(ssl), buf, num, readbytes);
 //#else
@@ -260,7 +260,7 @@
 //#endif
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::ssl_write_early_data(void *ssl, const void *buf, std::size_t num, std::size_t *readbytes) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::ssl_write_early_data(void *ssl, const void *buf, std::size_t num, std::size_t *readbytes) MANAPICORE_NOEXCEPT {
 //#if 0
 //    return wolfSSL_write_early_data(static_cast<WOLFSSL*>(ssl), buf, num, readbytes);
 //#else
@@ -268,7 +268,7 @@
 //#endif
 //}
 //
-//bool manapi::net::worker::WolfSSL_TLS::ssl_early_data_is_enabled(void *ctx) MANAPIHTTP_NOEXCEPT {
+//bool manapi::net::worker::WolfSSL_TLS::ssl_early_data_is_enabled(void *ctx) MANAPICORE_NOEXCEPT {
 //#if 0
 //    return true;
 //#else
@@ -277,7 +277,7 @@
 //
 //}
 //
-//int manapi::net::worker::WolfSSL_TLS::recv_setup_connection(const shared_conn &conn, tls_connection_t *data) MANAPIHTTP_NOEXCEPT {
+//int manapi::net::worker::WolfSSL_TLS::recv_setup_connection(const shared_conn &conn, tls_connection_t *data) MANAPICORE_NOEXCEPT {
 //    ERR_clear_error();
 //    WOLFSSL_CTX *ctx;
 //    wssl_worker_ctx_t *ctx_data;
@@ -305,7 +305,7 @@
 //
 //    if (!ctx_data)
 //        goto err;
-//#if MANAPIHTTP_WOLFSSL_WITH_ALPN
+//#if MANAPICORE_WOLFSSL_WITH_ALPN
 //    if (WOLFSSL_SUCCESS != wolfSSL_UseALPN(static_cast<WOLFSSL *>(data->ssl),
 //        ctx_data->alpn.data(),
 //        ctx_data->alpn.size(),
@@ -319,7 +319,7 @@
 //}
 //
 //
-//manapi::status_or<void *> manapi::net::worker::WolfSSL_TLS::ssl_create_context(size_t version) MANAPIHTTP_NOEXCEPT {
+//manapi::status_or<void *> manapi::net::worker::WolfSSL_TLS::ssl_create_context(size_t version) MANAPICORE_NOEXCEPT {
 //    if (this->ctx)
 //        return this->ctx;
 //
@@ -362,7 +362,7 @@
 //
 //        if (sess_cache) {
 //            wolfSSL_CTX_set_session_cache_mode(ctx, WOLFSSL_SESS_CACHE_SERVER);
-//#if MANAPIHTTP_WOLFSSL_WITH_ALPN
+//#if MANAPICORE_WOLFSSL_WITH_ALPN
 //            if (!wolfSSL_CTX_set_session_id_context(ctx,
 //                reinterpret_cast<const unsigned char *>(&this->m_ssl_session_ctx_id), sizeof(this->m_ssl_session_ctx_id)))
 //                goto err;
@@ -419,7 +419,7 @@
 //    return std::move(status);
 //}
 //
-//manapi::status manapi::net::worker::WolfSSL_TLS::ssl_configure_context(void *ctx, worker::pool_t *pool_data, std::size_t deeplvl) MANAPIHTTP_NOEXCEPT {
+//manapi::status manapi::net::worker::WolfSSL_TLS::ssl_configure_context(void *ctx, worker::pool_t *pool_data, std::size_t deeplvl) MANAPICORE_NOEXCEPT {
 //    try {
 //        using ci = manapi::config_interface;
 //
@@ -471,4 +471,4 @@
 //    }
 //}
 //
-//#endif // MANAPIHTTP_WOLFSSL_DEPENDENCY
+//#endif // MANAPICORE_WOLFSSL_DEPENDENCY

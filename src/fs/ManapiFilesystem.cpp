@@ -246,7 +246,7 @@ manapi::future<manapi::ev::status_or<manapi::ev::unique_file>> manapi::fs::async
     -> bool {
         if (manapi__fs_operation_result_error (w, resolve)) return true;
         auto file = static_cast<manapi::ev::file>(w->result());
-        manapi_log_trace2("manapihttp::fs", manapi::debug::LOG_TRACE_LOW, "fs:fd %d open", file);
+        manapi_log_trace2("manapicore::fs", manapi::debug::LOG_TRACE_LOW, "fs:fd %d open", file);
         static_cast<data_t *> (source)->result = manapi::ev::unique_file (file);
         resolve (manapi::ev::status_ok());
         return true;
@@ -256,14 +256,14 @@ manapi::future<manapi::ev::status_or<manapi::ev::unique_file>> manapi::fs::async
 }
 
 manapi::future<manapi::ev::status> manapi::fs::async_close(ev::file file, ctoken cancellation) {
-    manapi_log_trace2("manapihttp::fs", manapi::debug::LOG_TRACE_LOW, "fs:fd %d close", file);
+    manapi_log_trace2("manapicore::fs", manapi::debug::LOG_TRACE_LOW, "fs:fd %d close", file);
     co_return co_await manapi__fs_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
         -> int {
             return w->close(*static_cast<ev::file *> (source));
         }, +[](std::shared_ptr<ev::fs> w, manapi__fs_resolve resolve, void *source)
         -> bool {
             if (manapi__fs_operation_result_error (w, resolve)) return true;
-            manapi_log_trace2("manapihttp::fs", manapi::debug::LOG_TRACE_LOW, "fs:fd %d finished", *static_cast<ev::file *> (source));
+            manapi_log_trace2("manapicore::fs", manapi::debug::LOG_TRACE_LOW, "fs:fd %d finished", *static_cast<ev::file *> (source));
             resolve(manapi::ev::status_ok());
             return true;
         }, &file, std::move(cancellation));

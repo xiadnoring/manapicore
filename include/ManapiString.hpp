@@ -48,7 +48,7 @@ namespace manapi::string {
      * @param len the size of the output string
      * @return randomly generated string
      */
-    void random (char *dst, size_t len) MANAPIHTTP_NOEXCEPT;
+    void random (char *dst, size_t len) MANAPICORE_NOEXCEPT;
 
     /**
      * Get randomly generated string from the 'src' chars
@@ -67,7 +67,7 @@ namespace manapi::string {
      * @param src chars which will be used to generate new string
      * @return randomly generated string
      */
-    void random (char *dst, size_t len, std::string_view src) MANAPIHTTP_NOEXCEPT;
+    void random (char *dst, size_t len, std::string_view src) MANAPICORE_NOEXCEPT;
 
     /**
      * Split the string by the separator
@@ -142,7 +142,7 @@ namespace manapi::string {
      * @param str source string
      * @return
      */
-    std::size_t count (char c, std::string_view str) MANAPIHTTP_NOEXCEPT;
+    std::size_t count (char c, std::string_view str) MANAPICORE_NOEXCEPT;
 
     /**
      * Replaces |from| to |to| in |s| and returns the number of substitutions

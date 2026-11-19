@@ -23,13 +23,13 @@ namespace manapi {
 
         scope_ptr& operator=(const scope_ptr&) = delete;
 
-        scope_ptr(scope_ptr&& other) MANAPIHTTP_NOEXCEPT
+        scope_ptr(scope_ptr&& other) MANAPICORE_NOEXCEPT
             : ptr(other.ptr), own(other.own) {
             other.ptr = nullptr;
             other.own = false;
         }
 
-        scope_ptr& operator=(scope_ptr&& other) MANAPIHTTP_NOEXCEPT {
+        scope_ptr& operator=(scope_ptr&& other) MANAPICORE_NOEXCEPT {
             if (this != &other) {
                 auto ptrn = other.ptr;
                 auto ownn = other.own;
