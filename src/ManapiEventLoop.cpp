@@ -164,7 +164,7 @@ namespace manapi::ev::internal {
         after_work_cb after_cb;
     };
 
-    struct adding_custom_callback_data_t {
+    struct adding_request_callback_data_t {
         std::move_only_function<void(manapi::event_loop *ev)> cb;
     };
 
@@ -182,8 +182,8 @@ namespace manapi::ev::internal {
     };
 #endif
 
-    struct custom_callback_t {
-        manapi::chain<adding_custom_callback_data_t> callback_data{};
+    struct request_callback_t {
+        manapi::chain<adding_request_callback_data_t> callback_data{};
         std::mutex adding_mx;
         std::mutex adding_mcv;
         std::shared_ptr <ev::async> adding_async;
@@ -589,7 +589,7 @@ manapi::ev::status_or<std::shared_ptr<manapi::event_loop>> manapi::event_loop::c
         ev->m_curl_watcher = std::make_unique<ev::internal::curl_watcher_t>();
 #endif
 
-        ev->m_callback_watcher = std::make_unique<ev::internal::custom_callback_t>();
+        ev->m_callback_watcher = std::make_unique<ev::internal::request_callback_t>();
         ev->m_logger = std::move(logger);
         ev->m_taskpool = std::move(taskpool);
         ev->m_flags = 0;
@@ -1084,15 +1084,15 @@ manapi::ev::status_or<std::shared_ptr<manapi::ev::udp>> manapi::event_loop::crea
     }
 }
 
-manapi::status manapi::event_loop::custom_callback(std::move_only_function<void(event_loop *ev)> cb) MANAPIHTTP_NOEXCEPT {
-    return this->custom_callback(&cb);
+manapi::status manapi::event_loop::request_callback(std::move_only_function<void(event_loop *ev)> cb) MANAPIHTTP_NOEXCEPT {
+    return this->request_callback(&cb);
 }
 
-manapi::status manapi::event_loop::custom_callback(std::move_only_function<void(event_loop *ev)> *cb) MANAPIHTTP_NOEXCEPT {
+manapi::status manapi::event_loop::request_callback(std::move_only_function<void(event_loop *ev)> *cb) MANAPIHTTP_NOEXCEPT {
     try {
         std::unique_lock<std::mutex> lk (this->m_callback_watcher->adding_mx);
         if (!this->m_callback_watcher->adding_async) {
-            return status_internal("custom_callback:eventloop was stopped");
+            return status_internal("request_callback:eventloop was stopped");
         }
         this->m_callback_watcher->callback_data.push_back({nullptr});
         this->m_callback_watcher->callback_data.back().cb = std::move(*cb);
@@ -1103,8 +1103,8 @@ manapi::status manapi::event_loop::custom_callback(std::move_only_function<void(
         return status_ok();
     }
     catch (std::exception const &e) {
-        manapi_log_error("%s due to %s", "custom_callback:Failed",e.what());
-        return status_internal("custom_callback:Failed");
+        manapi_log_error("%s due to %s", "request_callback:Failed",e.what());
+        return status_internal("request_callback:Failed");
     }
 }
 
@@ -1430,8 +1430,8 @@ void manapi::event_loop::interrupt(int sig) MANAPIHTTP_NOEXCEPT {
 
     manapi::event_loop::m_events.clear();
 }
-//
-//void manapi::event_loop::lock(async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT {
+
+//void manapi::event_loop::lock_mutex(const async::shared_cthread &ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT {
 //    if (ctx) {
 //        auto &ev = ctx->eventloop();
 //        while (true) {
@@ -1452,7 +1452,7 @@ void manapi::event_loop::interrupt(int sig) MANAPIHTTP_NOEXCEPT {
 //    }
 //}
 //
-//void manapi::event_loop::unlock(async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT {
+//void manapi::event_loop::unlock_mutex (const async::shared_cthread &ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT {
 //    if (ctx) {
 //        auto &ev = ctx->eventloop();
 //        mx.unlock();

@@ -109,5 +109,5 @@ namespace manapi::net::http {
 //
 //    manapi::status ip_by_addr (const sockaddr *addr, char *arr);
 //
-//    bool split_http_port (std::string_view name, std::string_view &host, std::string_view &port, bool& has_port);
+    bool split_http_port (std::string_view name, std::string_view &host, std::string_view &port, bool& has_port);
 }

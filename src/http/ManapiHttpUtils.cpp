@@ -557,46 +557,46 @@ bool manapi::net::http::header_has_more_fields(std::string_view name) MANAPIHTTP
 //    return status_ok();
 //}
 //
-//bool manapi::net::http::split_http_port(std::string_view name, std::string_view &host, std::string_view &port, bool& has_port) {
-//    has_port = false;
-//    if (!name.empty() && name[0] == '[') {
-//        // Parse a bracketed host, typically an IPv6 literal.
-//        const size_t rbracket = name.find(']', 1);
-//        if (rbracket == std::string_view::npos) {
-//            // Unmatched [
-//            return false;
-//        }
-//        if (rbracket == name.size() - 1) {
-//            // ]<end>
-//            port = std::string_view();
-//        } else if (name[rbracket + 1] == ':') {
-//            // ]:<port?>
-//            port = name.substr(rbracket + 2, name.size() - rbracket - 2);
-//            has_port = true;
-//        } else {
-//            // ]<invalid>
-//            return false;
-//        }
-//        host = name.substr(1, rbracket - 1);
-//        if (host.find(':') == std::string_view::npos) {
-//            // Require all bracketed hosts to contain a colon, because a hostname or
-//            // IPv4 address should never use brackets.
-//            host = std::string_view();
-//            return false;
-//        }
-//    } else {
-//        size_t colon = name.find(':');
-//        if (colon != std::string_view::npos &&
-//            name.find(':', colon + 1) == std::string_view::npos) {
-//            // Exactly 1 colon.  Split into host:port.
-//            host = name.substr(0, colon);
-//            port = name.substr(colon + 1, name.size() - colon - 1);
-//            has_port = true;
-//            } else {
-//                // 0 or 2+ colons.  Bare hostname or IPv6 litearal.
-//                host = name;
-//                port = std::string_view();
-//            }
-//    }
-//    return true;
-//}
+bool manapi::net::http::split_http_port(std::string_view name, std::string_view &host, std::string_view &port, bool& has_port) {
+    has_port = false;
+    if (!name.empty() && name[0] == '[') {
+        // Parse a bracketed host, typically an IPv6 literal.
+        const size_t rbracket = name.find(']', 1);
+        if (rbracket == std::string_view::npos) {
+            // Unmatched [
+            return false;
+        }
+        if (rbracket == name.size() - 1) {
+            // ]<end>
+            port = std::string_view();
+        } else if (name[rbracket + 1] == ':') {
+            // ]:<port?>
+            port = name.substr(rbracket + 2, name.size() - rbracket - 2);
+            has_port = true;
+        } else {
+            // ]<invalid>
+            return false;
+        }
+        host = name.substr(1, rbracket - 1);
+        if (host.find(':') == std::string_view::npos) {
+            // Require all bracketed hosts to contain a colon, because a hostname or
+            // IPv4 address should never use brackets.
+            host = std::string_view();
+            return false;
+        }
+    } else {
+        size_t colon = name.find(':');
+        if (colon != std::string_view::npos &&
+            name.find(':', colon + 1) == std::string_view::npos) {
+            // Exactly 1 colon.  Split into host:port.
+            host = name.substr(0, colon);
+            port = name.substr(colon + 1, name.size() - colon - 1);
+            has_port = true;
+            } else {
+                // 0 or 2+ colons.  Bare hostname or IPv6 litearal.
+                host = name;
+                port = std::string_view();
+            }
+    }
+    return true;
+}

@@ -139,15 +139,15 @@
 //    }
 //};
 //
-//static std::unordered_map<std::size_t, std::uintptr_t>::iterator wgrpc_tasks_find (std::intptr_t keys[2]) {
+//static std::unordered_map<std::size_t, std::uintptr_t>::iterator manapi__wgrpc_tasks_find (std::intptr_t keys[2]) {
 //    return ::current_wgrpc_storage().wgrpc_tasks_exists.find(static_cast<std::size_t>(keys[1]));
 //}
 //
-//static std::unordered_map<std::size_t, std::uintptr_t>::iterator wgrpc_connect_find (std::intptr_t keys[2]) {
+//static std::unordered_map<std::size_t, std::uintptr_t>::iterator manapi__wgrpc_connect_find (std::intptr_t keys[2]) {
 //    return ::current_wgrpc_storage().wgrpc_connect_exists.find(static_cast<std::size_t>(keys[1]));
 //}
 //
-//static void unbind_net_listener (manapi::ev::shared_tcp conn, manapi::async::shared_cthread ev, manapi::net::wgrpc::resolve_callback_t<absl::Status> on_shutdown) {
+//static void manapi__unbind_net_listener (manapi::ev::shared_tcp conn, manapi::async::shared_cthread ev, manapi::net::wgrpc::resolve_callback_t<absl::Status> on_shutdown) {
 //    try {
 //        auto &s = manapi::async::try_current();
 //
@@ -193,18 +193,18 @@
 ////        {
 ////            std::lock_guard<std::mutex> lk (data.mx);
 ////
-////            ev->eventloop()->custom_callback([&data] (manapi::event_loop *ev)
+////            ev->eventloop()->request_callback([&data] (manapi::event_loop *ev)
 ////                -> void {
 ////                try {
-////                    unbind_net_listener(*data.conn_, *data.ev_, std::move(*data.on_shutdown_));
+////                    manapi__unbind_net_listener(*data.conn_, *data.ev_, std::move(*data.on_shutdown_));
 ////                }
 ////                catch (...) {
 ////                    data.err = std::current_exception();
 ////                }
-////                manapi::event_loop::unlock(data.ctx, data.mx);
+////                manapi::event_loop::unlock_mutex(data.ctx, data.mx);
 ////            }).unwrap();
 ////
-////            manapi::event_loop::lock(data.ctx, data.mx);
+////            manapi::event_loop::lock_mutex(data.ctx, data.mx);
 ////        }
 ////
 ////        if (data.err)
@@ -215,7 +215,7 @@
 //    }
 //}
 //
-//static bool task_handle_cancel (grpc_event_engine::experimental::EventEngine::TaskHandle &handle) {
+//static bool manapi__task_handle_cancel (grpc_event_engine::experimental::EventEngine::TaskHandle &handle) {
 //    bool is_pending = false;
 //
 //    if (static_cast<ssize_t>(handle.keys[1]) < 0) {
@@ -228,7 +228,7 @@
 //        }
 //    }
 //
-//    auto it = ::wgrpc_tasks_find(handle.keys);
+//    auto it = ::manapi__wgrpc_tasks_find(handle.keys);
 //    if (it == current_wgrpc_storage().wgrpc_tasks_exists.end()) {
 //        return is_pending;
 //    }
@@ -245,15 +245,15 @@
 //    return true;
 //}
 //
-//static bool task_handle_cancel (manapi::cthread *t, std::size_t idx) {
+//static bool manapi__task_handle_cancel (manapi::cthread *t, std::size_t idx) {
 //    grpc_event_engine::experimental::EventEngine::TaskHandle handle{};
 //    handle.keys[0] = reinterpret_cast<std::intptr_t>(t);
 //    handle.keys[1] = static_cast<std::intptr_t>(idx);
-//    return task_handle_cancel(handle);
+//    return manapi__task_handle_cancel(handle);
 //}
 //
-//static bool task_connect_cancel (grpc_event_engine::experimental::EventEngine::ConnectionHandle &keys) {
-//    auto it = wgrpc_connect_find(keys.keys);
+//static bool manapi__task_connect_cancel (grpc_event_engine::experimental::EventEngine::ConnectionHandle &keys) {
+//    auto it = manapi__wgrpc_connect_find(keys.keys);
 //    if (it == current_wgrpc_storage().wgrpc_connect_exists.end())
 //        return false;
 //
@@ -274,11 +274,11 @@
 //    return true;
 //}
 //
-//static bool task_connect_cancel (manapi::cthread *t, std::size_t idx) {
+//static bool manapi__task_connect_cancel (manapi::cthread *t, std::size_t idx) {
 //    grpc_event_engine::experimental::EventEngine::ConnectionHandle handle{};
 //    handle.keys[0] = reinterpret_cast<std::intptr_t>(t);
 //    handle.keys[1] = static_cast<std::intptr_t>(idx);
-//    return task_connect_cancel(handle);
+//    return manapi__task_connect_cancel(handle);
 //}
 //
 //#   if !MANAPIHTTP_GRPC_SINCE_AT(1,71,0)
@@ -345,7 +345,7 @@
 //    auto &ctx = manapi::async::try_current();
 //
 //    if (reinterpret_cast <std::intptr_t>(ctx.get()) == handle.keys[0]) {
-//        return task_handle_cancel(handle);
+//        return manapi__task_handle_cancel(handle);
 //    }
 //
 //    struct data_cancel_t {
@@ -364,14 +364,14 @@
 //    {
 //        std::lock_guard<std::mutex> lk (data.mx);
 //
-//        (reinterpret_cast<manapi::cthread *>(handle.keys[0]))->eventloop()->custom_callback([&data] (event_loop *ev)
+//        (reinterpret_cast<manapi::cthread *>(handle.keys[0]))->eventloop()->request_callback([&data] (event_loop *ev)
 //            -> void {
 //            try { data.res = data.engine->Cancel(*data.handle_); }
 //            catch (...) { data.err = std::current_exception(); }
-//            manapi::event_loop::unlock(data.ctx, data.mx);
+//            manapi::event_loop::unlock_mutex(data.ctx, data.mx);
 //        }).unwrap();
 //
-//        manapi::event_loop::lock(data.ctx, data.mx);
+//        manapi::event_loop::lock_mutex(data.ctx, data.mx);
 //    }
 //
 //    if (data.err)
@@ -439,10 +439,10 @@
 //            auto &s = async::try_current();
 //            if (s == ev) {
 //                current_wgrpc_storage().wgrpc_tcp_listeners.erase(id);
-//                unbind_net_listener(std::move(conn), ev, std::move(on_shutdown_cb));
+//                manapi__unbind_net_listener(std::move(conn), ev, std::move(on_shutdown_cb));
 //            }
 //            else {
-//                ev->eventloop()->custom_callback([id, conn = std::move(conn), on_shutdown_cb = std::move(on_shutdown_cb)]
+//                ev->eventloop()->request_callback([id, conn = std::move(conn), on_shutdown_cb = std::move(on_shutdown_cb)]
 //                        (manapi::event_loop *ev) mutable -> void {
 //                    net_listener::shutdown(id, std::move(conn), std::move(on_shutdown_cb), manapi::async::current());
 //                }).unwrap();
@@ -803,7 +803,7 @@
 //            return;
 //        }
 //
-//        ev->eventloop()->custom_callback([conn = std::move(conn)] (manapi::event_loop *ev) mutable
+//        ev->eventloop()->request_callback([conn = std::move(conn)] (manapi::event_loop *ev) mutable
 //            -> void {
 //            unbind_net_endpoint (std::move(conn), manapi::async::current());
 //        }).unwrap();
@@ -910,7 +910,7 @@
 //    {
 //        std::lock_guard<std::mutex> lk (data_read.mx);
 //
-//        this->ev->eventloop()->custom_callback([&data_read] (event_loop *ev) mutable
+//        this->ev->eventloop()->request_callback([&data_read] (event_loop *ev) mutable
 //            -> void {
 //            try {
 //#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
@@ -925,10 +925,10 @@
 //            catch (...) {
 //                data_read.err = std::current_exception();
 //            }
-//            manapi::event_loop::unlock(data_read.ctx, data_read.mx);
+//            manapi::event_loop::unlock_mutex(data_read.ctx, data_read.mx);
 //        }).unwrap();
 //
-//        manapi::event_loop::lock(data_read.ctx, data_read.mx);
+//        manapi::event_loop::lock_mutex(data_read.ctx, data_read.mx);
 //    }
 //
 //    if (data_read.err)
@@ -1032,7 +1032,7 @@
 //    {
 //        std::lock_guard<std::mutex> lk (data_write.mx);
 //
-//        this->ev->eventloop()->custom_callback([&data_write] (event_loop *ev) mutable
+//        this->ev->eventloop()->request_callback([&data_write] (event_loop *ev) mutable
 //            -> void {
 //            try {
 //#if MANAPIHTTP_GRPC_SINCE_AT(1,54,0)
@@ -1047,10 +1047,10 @@
 //            catch (...) {
 //                data_write.err = std::current_exception();
 //            }
-//            manapi::event_loop::unlock(data_write.ctx, data_write.mx);
+//            manapi::event_loop::unlock_mutex(data_write.ctx, data_write.mx);
 //        }).unwrap();
 //
-//        manapi::event_loop::lock(data_write.ctx, data_write.mx);
+//        manapi::event_loop::lock_mutex(data_write.ctx, data_write.mx);
 //    }
 //
 //    if (data_write.err)
@@ -1311,13 +1311,13 @@
 //    {
 //        std::lock_guard<std::mutex> lk (data.mx);
 //
-//        cur->eventloop()->custom_callback([&data] (manapi::event_loop *ev) -> void {
+//        cur->eventloop()->request_callback([&data] (manapi::event_loop *ev) -> void {
 //            try { data.res = data.engine->Connect(std::move(*data.on_connect_), *data.addr_, *data.args_, std::move(*data.memory_allocator_), *data.timeout_); }
 //            catch (...) { data.err = std::current_exception(); }
-//            manapi::event_loop::unlock(data.ctx, data.mx);
+//            manapi::event_loop::unlock_mutex(data.ctx, data.mx);
 //        }).unwrap();
 //
-//        manapi::event_loop::lock(data.ctx, data.mx);
+//        manapi::event_loop::lock_mutex(data.ctx, data.mx);
 //    }
 //
 //    if (data.err)
@@ -1338,7 +1338,7 @@
 //        }
 //
 //        {
-//            cur->eventloop()->custom_callback(
+//            cur->eventloop()->request_callback(
 //                [closure = std::move(closure)] (manapi::event_loop *ev) mutable -> void {
 //                try {
 //                    ev->taskpool()->append_task(std::move(closure));
@@ -1365,7 +1365,7 @@
 //        }
 //
 //        {
-//            cur->eventloop()->custom_callback(
+//            cur->eventloop()->request_callback(
 //                [closure] (manapi::event_loop *ev) mutable -> void {
 //                try {
 //                    ev->taskpool()->append_task([closure] ()
@@ -1384,7 +1384,7 @@
 //    auto &ctx = manapi::async::try_current();
 //
 //    if (reinterpret_cast<std::intptr_t>(ctx.get()) == handle.keys[0]) {
-//        return task_connect_cancel (handle);
+//        return manapi__task_connect_cancel (handle);
 //    }
 //
 //    struct data_cancel_connect_t {
@@ -1402,7 +1402,7 @@
 //    {
 //        std::lock_guard<std::mutex> lk (data.mx);
 //
-//        (reinterpret_cast <manapi::cthread*>(handle.keys[0]))->eventloop()->custom_callback([&data] (event_loop *ev)
+//        (reinterpret_cast <manapi::cthread*>(handle.keys[0]))->eventloop()->request_callback([&data] (event_loop *ev)
 //            -> void {
 //            try {
 //                data.res = data.engine->CancelConnect(*data.handle);
@@ -1410,10 +1410,10 @@
 //            catch (...) {
 //                data.err = std::current_exception();
 //            }
-//            manapi::event_loop::unlock(data.ctx, data.mx);
+//            manapi::event_loop::unlock_mutex(data.ctx, data.mx);
 //        }).unwrap();
 //
-//        manapi::event_loop::lock(data.ctx, data.mx);
+//        manapi::event_loop::lock_mutex(data.ctx, data.mx);
 //    }
 //
 //    if (data.err)
@@ -1506,15 +1506,15 @@
 //    {
 //        std::lock_guard<std::mutex> lk (data.mx);
 //
-//        cur->eventloop()->custom_callback([&data] (manapi::event_loop *ev) -> void {
+//        cur->eventloop()->request_callback([&data] (manapi::event_loop *ev) -> void {
 //            try { data.res = data.engine->CreateListener(std::move(*data.on_accept_), std::move(*data.on_shutdown_),
 //                *data.config_, std::move(*data.memory_)); }
 //            catch (...) { data.err = std::current_exception(); }
 //
-//            manapi::event_loop::unlock(data.ctx, data.mx);
+//            manapi::event_loop::unlock_mutex(data.ctx, data.mx);
 //        }).unwrap();
 //
-//        manapi::event_loop::lock(data.ctx, data.mx);
+//        manapi::event_loop::lock_mutex(data.ctx, data.mx);
 //    }
 //
 //    if (data.err)
@@ -1550,7 +1550,7 @@
 //    auto rhs = ctx->timerpool()->append_timer_sync(ms,
 //       [td] (manapi::timer timer) -> void {
 //           auto closure = std::move(td->closure);
-//           ::task_handle_cancel(manapi::async::current().get(), td->index);
+//           ::manapi__task_handle_cancel(manapi::async::current().get(), td->index);
 //           try { closure->Run(); }
 //           catch (std::exception const &e) { manapi_log_error("%s:%s failed due to %s",
 //                                                              "wgrpc", "gRPC send a error", e.what()); }
@@ -1592,7 +1592,7 @@
 //    auto rhs = ctx->timerpool()->append_timer_sync(ms,
 //                                                   [td] (manapi::timer timer) -> void {
 //                                                       auto closure = std::move(td->closure);
-//                                                       ::task_handle_cancel(manapi::async::current().get(), td->index);
+//                                                       ::manapi__task_handle_cancel(manapi::async::current().get(), td->index);
 //                                                       try { closure (); }
 //                                                       catch (std::exception const &e) { manapi_log_error("%s:%s failed due to %s",
 //                                                                                                          "wgrpc", "gRPC send a error", e.what()); }
@@ -1629,7 +1629,7 @@
 //        auto rhs = ctx->timerpool()->append_timer_sync(ms,
 //            [td] (manapi::timer timer) -> void {
 //                auto closure = std::move(td->closure);
-//                task_handle_cancel(manapi::async::current().get(), td->index);
+//                manapi__task_handle_cancel(manapi::async::current().get(), td->index);
 //                try { closure->Run(); }
 //                catch (std::exception const &e) { manapi_log_error("%s:%s failed due to %s",
 //                    "wgrpc", "gRPC send a error", e.what()); }
@@ -1690,7 +1690,7 @@
 //    task.keys[0] = reinterpret_cast<intptr_t> (cur.get());
 //    task.keys[1] = static_cast<intptr_t> (indx);
 //
-//    cur->eventloop()->custom_callback([when, closure, indx] (manapi::event_loop *ev) -> void {
+//    cur->eventloop()->request_callback([when, closure, indx] (manapi::event_loop *ev) -> void {
 //        try { ::manapi__wgrpc_run_after (indx, when, closure); }
 //        catch (std::exception const &e) { manapi_log_error (e.what()); }
 //    }).unwrap();
@@ -1721,7 +1721,7 @@
 //        auto rhs = ctx->timerpool()->append_timer_sync(ms,
 //            [td] (manapi::timer timer) mutable -> void {
 //                auto closure = std::move(td->closure);
-//                task_handle_cancel(manapi::async::current().get(), td->index);
+//                manapi__task_handle_cancel(manapi::async::current().get(), td->index);
 //                try { closure (); }
 //                catch (std::exception const &e) { manapi_log_error(
 //                    "%s:%s failed due to %s", "wgrpc", "gRPC send a error", e.what()); }
@@ -1781,7 +1781,7 @@
 //    task.keys[0] = reinterpret_cast<intptr_t> (cur.get());
 //    task.keys[1] = static_cast<intptr_t> (indx);
 //
-//    cur->eventloop()->custom_callback([when, closure, indx] (manapi::event_loop *ev) -> void {
+//    cur->eventloop()->request_callback([when, closure, indx] (manapi::event_loop *ev) -> void {
 //        try { ::manapi__wgrpc_run_after (indx, when, closure); }
 //        catch (std::exception const &e) { manapi_log_error (e.what()); }
 //    }).unwrap();
@@ -1924,12 +1924,12 @@
 //    if (ctx) {
 //        while (!zb.wgrpc_tasks_exists.empty()) {
 //            auto it = zb.wgrpc_tasks_exists.begin();
-//            task_handle_cancel(ctx.get(), it->first);
+//            manapi__task_handle_cancel(ctx.get(), it->first);
 //        }
 //
 //        while (!zb.wgrpc_connect_exists.empty()) {
 //            auto it = zb.wgrpc_connect_exists.begin();
-//            task_connect_cancel(ctx.get(), it->first);
+//            manapi__task_connect_cancel(ctx.get(), it->first);
 //        }
 //    }
 //}

@@ -19,7 +19,6 @@
 //
 #include "std/ManapiRef.hpp"
 
-
 int main () {
 
     int stmax = 300;
@@ -51,13 +50,12 @@ int main () {
     std::atomic<int> a = 0;
     std::atomic<int> thrcnt = 0;
 
-    ctx->run(loops, [&thrcnt, &a] (const std::function<void()> &bind) -> void {
+    ctx->run(loops, [] (const std::function<void()> &bind) -> void {
 
             auto pool = manapi::ext::pq::pool::create().unwrap();
             auto db = manapi::ext::pq::db::create().unwrap();
 
             db->add_slave(pool).unwrap();
-
 
             manapi::async::run([ pool] () mutable -> manapi::future<> {
 

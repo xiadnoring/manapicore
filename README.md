@@ -64,7 +64,7 @@ int main () {
     /* creates 2 threads for blocking I/O syscalls */
     manapi::context::threadpoolfs(2);
     /* disable several signals */
-    manapi::context::gbs (manapi::async::context::blockedsignals());
+    manapi::context::gbs (manapi::context::blockedsignals());
     /* creates 4 additional threads for 4 additional event loops */
     auto ctx = manapi::context::create(4).unwrap();
     /* metric */

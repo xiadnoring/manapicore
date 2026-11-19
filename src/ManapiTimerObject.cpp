@@ -4,7 +4,7 @@
 #include "./include/ManapiEventStructuresInternal.hpp"
 #include "./include/ManapiAsyncInternal.hpp"
 
-static void destroy_timer_data_cb (int *flags, manapi::timer::timer_data_t::timer_data_cb_t *cb, bool renew = true) MANAPIHTTP_NOEXCEPT {
+static void manapi__destroy_timer_data_cb (int *flags, manapi::timer::timer_data_t::timer_data_cb_t *cb, bool renew = true) MANAPIHTTP_NOEXCEPT {
     try {
         if (*flags & manapi::TIMER_TASK_IS_ASYNC) {
             cb->async_cb.~move_only_function();
@@ -25,7 +25,7 @@ static void destroy_timer_data_cb (int *flags, manapi::timer::timer_data_t::time
 manapi::timer::timer_data_t::timer_data_cb_t::~timer_data_cb_t() {}
 
 manapi::timer::timer_data_t::~timer_data_t() {
-    destroy_timer_data_cb(&this->flags, &this->cb, false);
+    manapi__destroy_timer_data_cb(&this->flags, &this->cb, false);
 }
 
 manapi::timer::timer() {
@@ -190,7 +190,7 @@ void manapi::internal::timer__call (const std::shared_ptr<manapi::timer::timer_d
 
 void manapi::timer::clear() MANAPIHTTP_NOEXCEPT {
     if (!(this->m_data->flags & TIMER_TASK_ENABLED)) {
-        destroy_timer_data_cb(&this->m_data->flags, &this->m_data->cb);
+        manapi__destroy_timer_data_cb(&this->m_data->flags, &this->m_data->cb);
     }
 }
 
@@ -209,7 +209,7 @@ void manapi::timer::callback_async(async_cb_t cb) MANAPIHTTP_NOEXCEPT {
     try {
         if (!this->m_data)
             return;
-        destroy_timer_data_cb(&this->m_data->flags, &this->m_data->cb, false);
+        manapi__destroy_timer_data_cb(&this->m_data->flags, &this->m_data->cb, false);
         new (&this->m_data->cb.async_cb) async_cb_t (std::move(cb));
     }
     catch (std::exception const &e) {
@@ -221,7 +221,7 @@ void manapi::timer::callback_sync(sync_cb_t cb) MANAPIHTTP_NOEXCEPT {
     try {
         if (!this->m_data)
             return;
-        destroy_timer_data_cb(&this->m_data->flags, &this->m_data->cb, false);
+        manapi__destroy_timer_data_cb(&this->m_data->flags, &this->m_data->cb, false);
         new (&this->m_data->cb.sync_cb) sync_cb_t (std::move(cb));
     }
     catch (std::exception const &e) {

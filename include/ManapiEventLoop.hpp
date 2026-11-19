@@ -73,7 +73,7 @@ namespace manapi::ev::internal {
     struct curl_watcher_t;
 #endif
 
-    struct custom_callback_t;
+    struct request_callback_t;
 }
 
 namespace manapi {
@@ -278,9 +278,7 @@ namespace manapi {
         void stop_watcher_ptr (ev::connect *w) MANAPIHTTP_NOEXCEPT;
 
         template<typename T>
-        void stop_watcher (std::shared_ptr<T> w) MANAPIHTTP_NOEXCEPT {
-            this->stop_watcher_ptr(w.get());
-        }
+        void stop_watcher (std::shared_ptr<T> w) MANAPIHTTP_NOEXCEPT { this->stop_watcher_ptr(w.get()); }
 
         void stop_callback (const std::shared_ptr<ev::tcp> &s, ev::close_cb_t<ev::tcp> cb);
         
@@ -306,15 +304,15 @@ namespace manapi {
 
         manapi::status pause_watch_curl (void *shared_curl) MANAPIHTTP_NOEXCEPT;
 #endif
-        manapi::status custom_callback (std::move_only_function<void(event_loop *ev)> *cb) MANAPIHTTP_NOEXCEPT;
+        manapi::status request_callback (std::move_only_function<void(event_loop *ev)> *cb) MANAPIHTTP_NOEXCEPT;
 
-        manapi::status custom_callback (std::move_only_function<void(event_loop *ev)> cb) MANAPIHTTP_NOEXCEPT;
+        manapi::status request_callback (std::move_only_function<void(event_loop *ev)> cb) MANAPIHTTP_NOEXCEPT;
 
         static void interrupt (int sig) MANAPIHTTP_NOEXCEPT;
 
-//        static void lock (async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT;
+//        static void lock_mutex (const async::shared_cthread &ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT;
 //
-//        static void unlock (async::shared_cthread ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT;
+//        static void unlock_mutex (const async::shared_cthread& ctx, std::mutex &mx) MANAPIHTTP_NOEXCEPT;
 
         manapi::ev::status run () MANAPIHTTP_NOEXCEPT;
 
@@ -370,7 +368,7 @@ namespace manapi {
 
         std::map <std::pair <int, std::size_t>, manapi::reference<finish_cb_data_t>> m_finish_cbs;
 
-        std::map <size_t, std::move_only_function<void()>> m_clean_up_cbs;
+        std::map <std::size_t, std::move_only_function<void()>> m_clean_up_cbs;
 
         std::size_t m_callback_last_id;
 
@@ -380,7 +378,7 @@ namespace manapi {
         std::unique_ptr<ev::internal::curl_watcher_t> m_curl_watcher;
 #endif
 
-        std::unique_ptr<ev::internal::custom_callback_t> m_callback_watcher;
+        std::unique_ptr<ev::internal::request_callback_t> m_callback_watcher;
 
         std::shared_ptr<ev::idle> m_idle_tasks;
 
