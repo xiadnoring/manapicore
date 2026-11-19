@@ -6,11 +6,11 @@ import icon_dark from './icon.png';
 export default function HomePage() {
   return (
     <main className="flex flex-1 flex-col justify-center text-center">
-      <title>Manapi Http</title>
+      <title>Manapi Core</title>
       <div className="grid sm:grid-cols-1 md:grid-cols-2 container">
         <div className="md:text-start flex flex-1 flex-col justify-center">
           <h2 className="text-[2rem] md:text-[2rem] xl:text-[3rem]">
-            <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-300 to-purple-500">Manapi Http</span>
+            <span className="font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-300 to-purple-500">Manapi Core</span>
           </h2>
           <p className="text-[2rem] my-0 md:text-[2rem] my-[-1rem] xl:text-[3rem] font-bold">server/client library for</p>
           <p className="text-[2rem] md:text-[2rem] xl:text-[3rem] font-bold">asynchronous C++</p>

@@ -67,8 +67,6 @@ int main () {
 //                manapi_log_trace(manapi::debug::LOG_TRACE_HIGH, "http server has been started");
 //            });
 
-            std::cout << "verdict=" << b << "\n";
-
             bind();
 
     }).unwrap();

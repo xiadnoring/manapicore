@@ -293,7 +293,7 @@ void manapi::context::gbs(std::unique_ptr<manapi::sigset_t> n) MANAPICORE_NOEXCE
 }
 
 const manapi::async::shared_cthread &manapi::async::current() MANAPICORE_NOEXCEPT {
-    assert(manapi::async::context_exists() && "context doesn't exist in that thread");
+    assert(manapi::context_exists() && "context doesn't exist in that thread");
     return manapi::async::try_current();
 }
 

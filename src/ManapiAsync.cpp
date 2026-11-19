@@ -39,7 +39,7 @@ const std::shared_ptr<manapi::cthread> & manapi::async::try_current() MANAPICORE
     return current_ctxasync().cthread;
 }
 
-bool manapi::async::context_exists() MANAPICORE_NOEXCEPT {
+bool manapi::context_exists() MANAPICORE_NOEXCEPT {
     return !!current_ctxasync().cthread;
 }
 

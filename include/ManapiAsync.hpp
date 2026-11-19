@@ -48,7 +48,9 @@ namespace manapi::async {
     const std::shared_ptr<object_pool> &memory_fabric () MANAPICORE_NOEXCEPT;
 
     const std::shared_ptr<logger> &log () MANAPICORE_NOEXCEPT;
+}
 
+namespace manapi {
     bool context_exists () MANAPICORE_NOEXCEPT;
 }
 

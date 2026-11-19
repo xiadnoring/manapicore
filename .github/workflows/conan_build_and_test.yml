@@ -70,6 +70,11 @@ jobs:
     - name: Install Conan
       run: pip install conan==2.*
 
+    - name: Install linkers
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y binutils lld
+
     - name: Restore Cache Conan Dependencies
       id: cache-conan-ubuntu
       uses: actions/cache@v5

@@ -10,19 +10,19 @@ In networking, errors can sometimes generate special signals that need to be han
 #include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
-    auto blockedsignals = manapi::async::context::blockedsignals();
+    auto blockedsignals = manapi::context::blockedsignals();
 
     // Ignore SIGABRT
     sigaddset(blockedsignals.get(), SIGABRT);
     pthread_sigmask(SIG_BLOCK, blockedsignals.get(), nullptr);
 
-    manapi::async::context::gbs(std::move(blockedsignals));
+    manapi::context::gbs(std::move(blockedsignals));
 
     return 0;
 }
 ```
 
-<Callout title="Information">```manapi::async::context::blockedsignals()``` returns a sigset_t with ```SIGPIPE``` already blocked by default.</Callout>
+<Callout title="Information">```manapi::context::blockedsignals()``` returns a sigset_t with ```SIGPIPE``` already blocked by default.</Callout>
 
 For most use cases, the default configuration is sufficient:
 
@@ -31,7 +31,7 @@ For most use cases, the default configuration is sufficient:
 #include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
-    manapi::async::context::gbs(manapi::async::context::blockedsignals());
+    manapi::context::gbs(manapi::context::blockedsignals());
 
     return 0;
 }

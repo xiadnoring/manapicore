@@ -13,7 +13,7 @@ Operating systems contain many blocking operations. To handle these efficiently,
 
 int main(int argc, char *argv[]) {
     /* Configures event loops to use 2 threads for blocking I/O system calls */
-    manapi::async::context::threadpoolfs(2);
+    manapi::context::threadpoolfs(2);
 
     return 0;
 }
@@ -29,13 +29,13 @@ int main(int argc, char *argv[]) {
 #include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
-    manapi::async::context::threadpoolfs(2);
-    auto ctx = manapi::async::context::create().unwrap();
+    manapi::context::threadpoolfs(2);
+    auto ctx = manapi::context::create().unwrap();
 
     ctx->run([](std::function<void()> bind) -> void {
         manapi::async::current()->eventloop()->append_task([](const manapi::ev::shared_work &w) -> void {
             // This executes in a worker thread
-            assert(!manapi::async::context_exists());
+            assert(!manapi::context_exists());
 
             std::chrono::seconds duration(5);
             std::this_thread::sleep_for(duration);
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
             manapi_log_debug("Waiting has finished");
         }, [](const manapi::ev::shared_work &w, int status) -> void {
             // This executes back in the main event loop thread
-            assert(manapi::async::context_exists());
+            assert(manapi::context_exists());
             
             manapi_log_debug("Waiting has finished with status: %d", status);
 

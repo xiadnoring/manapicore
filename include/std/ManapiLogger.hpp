@@ -45,7 +45,7 @@ namespace manapi {
          * @param callback Callback
          *
          * @code
-         * GCTX_OBJ = manapi::async::context::create();
+         * GCTX_OBJ = manapi::context::create();
          * GCTX_OBJ->eventloop()->setup_handle_interrupt();
          *
          * GCTX_OBJ->logger()->callback([mx = std::make_shared<manapi::async::mutex>(GCTX_OBJ)] (manapi::logger_type type, std::string_view service, int error_code, std::string msg) mutable

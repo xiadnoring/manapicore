@@ -6,7 +6,7 @@ description: About Async Context
 ## Concept
 When an application starts, we create multiple threads, each with its own async context. Each context contains its own EventLoop, TimerPool, and TaskPool, all running in the same thread.
 
-The context that executes the ```manapi::async::context::run``` method can create copies of itself.
+The context that executes the ```manapi::context::run``` method can create copies of itself.
 
 <Callout title="Note">Each thread can only contain one async context at the same time.</Callout>
 
@@ -19,9 +19,9 @@ The context that executes the ```manapi::async::context::run``` method can creat
 #include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
-    manapi::async::context::threadpoolfs(4);
-    auto blockedsignals = manapi::async::context::blockedsignals();
-    auto ctx = manapi::async::context::create(/*threadnum*/ 4).unwrap();
+    manapi::context::threadpoolfs(4);
+    auto blockedsignals = manapi::context::blockedsignals();
+    auto ctx = manapi::context::create(/*threadnum*/ 4).unwrap();
 
     std::atomic<int> runs;
     // Creates 4 copies of itself
@@ -54,9 +54,9 @@ DEBUG main.cpp:12: Async Context #4 has started. threadid=17555092437611076153
 #include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
-    manapi::async::context::threadpoolfs(4);
-    auto blockedsignals = manapi::async::context::blockedsignals();
-    auto ctx = manapi::async::context::create(/*threadnum*/ 4).unwrap();
+    manapi::context::threadpoolfs(4);
+    auto blockedsignals = manapi::context::blockedsignals();
+    auto ctx = manapi::context::create(/*threadnum*/ 4).unwrap();
 
     std::atomic<int> runs;
     ctx->run(4, [&runs](std::function<void()> bind) -> void {
@@ -93,9 +93,9 @@ TimerPool manages timeouts and intervals. Each timer has a priority level:
 #include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
-    manapi::async::context::threadpoolfs(4);
-    auto blockedsignals = manapi::async::context::blockedsignals();
-    auto ctx = manapi::async::context::create(/*threadnum*/ 4).unwrap();
+    manapi::context::threadpoolfs(4);
+    auto blockedsignals = manapi::context::blockedsignals();
+    auto ctx = manapi::context::create(/*threadnum*/ 4).unwrap();
 
     ctx->run([](std::function<void()> bind) -> void {
         manapi::async::current()->timerpool()->append_timer_sync(5000, manapi::TIMER_IMPORTANT, [](auto t) -> void {
@@ -122,9 +122,9 @@ This code will print ```5000ms timeout reached``` and then terminate.
 #include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
-    manapi::async::context::threadpoolfs(4);
-    auto blockedsignals = manapi::async::context::blockedsignals();
-    auto ctx = manapi::async::context::create(/*threadnum*/ 4).unwrap();
+    manapi::context::threadpoolfs(4);
+    auto blockedsignals = manapi::context::blockedsignals();
+    auto ctx = manapi::context::create(/*threadnum*/ 4).unwrap();
 
     ctx->run([](std::function<void()> bind) -> void {
         manapi::async::current()->timerpool()->append_timer_sync(5000, [](auto t) -> void {
@@ -226,9 +226,9 @@ To execute ```manapi::future<>``` tasks, use the ```manapi::async::run``` method
 #include <manapicore/std/ManapiContext.hpp>
 
 int main(int argc, char *argv[]) {
-    manapi::async::context::threadpoolfs(4);
-    auto blockedsignals = manapi::async::context::blockedsignals();
-    auto ctx = manapi::async::context::create(/*threadnum*/ 4).unwrap();
+    manapi::context::threadpoolfs(4);
+    auto blockedsignals = manapi::context::blockedsignals();
+    auto ctx = manapi::context::create(/*threadnum*/ 4).unwrap();
 
     ctx->run([](std::function<void()> bind) -> void {
         // Execute future<> task
@@ -320,7 +320,7 @@ co_await task;
 
 ## Stopping Mechanism
 
-To stop the current context, use the asynchronous ```stop()``` method in the ```manapi::async::context``` class:
+To stop the current context, use the asynchronous ```stop()``` method in the ```manapi::context``` class:
 
 ```cpp
 ctx->run([](std::function<void()> bind) -> void {

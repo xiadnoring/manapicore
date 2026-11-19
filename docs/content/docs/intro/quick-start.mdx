@@ -38,11 +38,11 @@ int main(int argc, char *argv[]) {
     /* Enable low-level log tracing */
     manapi::init_tools::log_trace_init(manapi::debug::LOG_TRACE_LOW);
     /* Create 2 threads for blocking I/O system calls */
-    manapi::async::context::threadpoolfs(2);
+    manapi::context::threadpoolfs(2);
     /* Disable several signals */
-    manapi::async::context::gbs(manapi::async::context::blockedsignals());
+    manapi::context::gbs(manapi::context::blockedsignals());
     /* Create main context */
-    auto ctx = manapi::async::context::create().unwrap();
+    auto ctx = manapi::context::create().unwrap();
     /* HTTP context for multiple HTTP routers (thread-safe) */
     auto router_ctx = manapi::net::http::server_ctx::create().unwrap();
 

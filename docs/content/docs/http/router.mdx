@@ -7,7 +7,7 @@ description: Creating the First Pages
 
 ## Server Context
 
-In Manapi Http, you can use HTTP with multithreading.  
+In Manapi Core, you can use HTTP with multithreading.  
 Because of this, you need to use `manapi::net::http::server_ctx`.
 
 To create it, use `manapi::net::http::server_ctx::create` before starting the context.
@@ -25,11 +25,11 @@ You can then use the context in HTTP routers with `manapi::net::http::server::cr
 
 int main() {
     /* creates 2 threads for blocking I/O syscalls */
-    manapi::async::context::threadpoolfs(2);
+    manapi::context::threadpoolfs(2);
     /* disable several signals */
-    manapi::async::context::gbs(manapi::async::context::blockedsignals());
+    manapi::context::gbs(manapi::context::blockedsignals());
     /* creates 4 additional threads for 4 additional event loops */
-    auto ctx = manapi::async::context::create(4).unwrap();
+    auto ctx = manapi::context::create(4).unwrap();
     /* HTTP context for multiple HTTP routers (thread-safe) */
     auto router_ctx = manapi::net::http::server_ctx::create().unwrap();
     /* runs main event loop and 4 additional event loops */

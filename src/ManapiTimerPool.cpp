@@ -174,7 +174,7 @@ static void timerpool__start(const std::shared_ptr<manapi::timer_pool::data_t> &
 
 static manapi::status timerpool__init_timer(const std::shared_ptr<manapi::timer_pool::data_t> &data) MANAPICORE_NOEXCEPT {
     try {
-        if (!data->timer && manapi::async::context_exists()) {
+        if (!data->timer && manapi::context_exists()) {
             data->timer = manapi::async::eventloop()->create_watcher_timer(
                     [data](const std::shared_ptr<manapi::ev::timer> &w)
                             -> void {
