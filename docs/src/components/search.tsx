@@ -14,7 +14,7 @@ export default function DefaultSearchDialog(props: SharedProps) {
     const client = useDocsSearch({
         type: 'static',
         initOrama,
-        from: '/manapi-http/api/search'
+        from: '/manapicore/api/search'
     });
 
     

@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DOCS_BASE_DIR: /manapi-http
+      DOCS_BASE_DIR: /manapicore
     outputs:
       docs: ${{ steps.filter.outputs.docs }}
     steps:
