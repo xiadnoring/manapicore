@@ -22,8 +22,6 @@
 //
 #include "std/ManapiRef.hpp"
 
-import test;
-
 int main () {
 
     int stmax = 300;
@@ -69,7 +67,6 @@ int main () {
 //                manapi_log_trace(manapi::debug::LOG_TRACE_HIGH, "http server has been started");
 //            });
 
-            int b = add (5, 5);
             std::cout << "verdict=" << b << "\n";
 
             bind();

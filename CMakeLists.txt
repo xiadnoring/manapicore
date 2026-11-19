@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28) # CXX Modules Support
 # cmake_minimum_required(VERSION 3.10)
-project(manapicore LANGUAGES CXX VERSION 1.1.1 DESCRIPTION "Fast HTTP Server/Client Library for easy develop API-Services and Web Applications")
+project(manapicore LANGUAGES CXX VERSION 1.1.1 DESCRIPTION "manapi core")
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -830,7 +830,7 @@ set(MANAPICORE_HTTP_FILES
 )
 
 set(MANAPICORE_MODULES
-        modules/test.cppm
+#        modules/test.cppm
 )
 
 if (MANAPICORE_BUILD_TYPE STREQUAL "exe" OR MANAPICORE_BUILD_TYPE STREQUAL "test")
@@ -967,11 +967,11 @@ if (MANAPICORE_BUILD_TYPE STREQUAL "exe" OR MANAPICORE_BUILD_TYPE STREQUAL "test
     target_compile_definitions(${PROJECT_NAME} PRIVATE MANAPICORE_HTTP_AS_EXECUTABLE)
     target_sources(${PROJECT_NAME} PRIVATE main.cpp impl.cpp ${MANAPICORE_HTTP_FILES} ${PROTO_SRCS} ${PROTO_HDRS})
 
-    target_sources(${PROJECT_NAME} PUBLIC
-            FILE_SET CXX_MODULES
-            BASE_DIRS ${CMAKE_SOURCE_DIR}/modules
-            FILES ${MANAPICORE_MODULES}
-    )
+#    target_sources(${PROJECT_NAME} PUBLIC
+#            FILE_SET CXX_MODULES
+#            BASE_DIRS ${CMAKE_SOURCE_DIR}/modules
+#            FILES ${MANAPICORE_MODULES}
+#    )
 
 else ()
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -993,19 +993,19 @@ else ()
             VERSION ${PROJECT_VERSION}
             SOVERSION ${PROJECT_VERSION_MAJOR})
 
-    target_sources(${PROJECT_NAME} PUBLIC
-            FILE_SET CXX_MODULES
-            BASE_DIRS ${CMAKE_SOURCE_DIR}/modules
-            FILES ${MANAPICORE_MODULES}
-    )
+#    target_sources(${PROJECT_NAME} PUBLIC
+#            FILE_SET CXX_MODULES
+#            BASE_DIRS ${CMAKE_SOURCE_DIR}/modules
+#            FILES ${MANAPICORE_MODULES}
+#    )
 
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/${PROJECT_NAME}.pc.in ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc @ONLY)
 endif ()
 
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmerge-all-constants>)
 #target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmodules>)
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmodules-ts>)
-set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD OFF DISABLE_PRECOMPILE_HEADERS ON)
+#target_compile_options(${PROJECT_NAME} PRIVATE $<$<CXX_COMPILER_ID:GNU>:-fmodules-ts>)
+set_target_properties(${PROJECT_NAME} PROPERTIES UNITY_BUILD ${MANAPICORE_UNITY_BUILD})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_23)
 
 include(GenerateExportHeader)
@@ -1381,20 +1381,20 @@ else ()
             LIBRARY  DESTINATION ${CMAKE_INSTALL_LIBDIR}
             RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR}
             INCLUDES  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-            FILE_SET CXX_MODULES
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/src
-            CXX_MODULES_BMI
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
+#            FILE_SET CXX_MODULES
+#            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/src
+#            CXX_MODULES_BMI
+#            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
             FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECTNAME}
     )
 
     install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
     install(DIRECTORY ${CMAKE_BINARY_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 
-    install(EXPORT manapicore-targets
-            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-            CXX_MODULES_DIRECTORY .
-    )
+#    install(EXPORT manapicore-targets
+#            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+#            CXX_MODULES_DIRECTORY .
+#    )
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
             COMPILE_PDB_NAME ${PROJECT_NAME}
