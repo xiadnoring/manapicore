@@ -18,7 +18,7 @@ UTEST(fs, unique_file) {
     auto ctx = init_ctx(utest_result);
 
     manapi::async::run ([&] () -> manapi::future<> {
-        auto z = manapi::unwrap(co_await manapi::fs::async_open("create_test.tmp", manapi::ev::FS_O_CREAT|manapi::ev::FS_O_RDWR, 0755));
+        auto z = manapi::unwrap(co_await manapi::fs::open("create_test.tmp", manapi::ev::FS_O_CREAT|manapi::ev::FS_O_RDWR, 0755));
 
         auto handle = z.get();
 #define return co_return
@@ -27,7 +27,7 @@ UTEST(fs, unique_file) {
         z.reset (handle);
 
         z.reset();
-        manapi::unwrap(co_await manapi::fs::async_unlink("create_test.tmp"));
+        manapi::unwrap(co_await manapi::fs::unlink("create_test.tmp"));
 
         co_await ctx->stop();
     });

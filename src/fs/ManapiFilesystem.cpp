@@ -146,21 +146,21 @@ static manapi::future<manapi::ev::status> manapi__fs_easy_operation (manapi__fs_
         }, source, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status_or<bool>> manapi::fs::async_exists(std::string path, manapi::ctoken cancellation) {
-    auto res = co_await manapi::fs::async_stat(std::move(path),
+manapi::future<manapi::ev::status_or<bool>> manapi::fs::exists(std::string path, manapi::ctoken cancellation) {
+    auto res = co_await manapi::fs::stat(std::move(path),
         [] (ev::stat_t *st) -> void { }, std::move(cancellation));
     if (res.ok()) co_return true;
     if (res.syserr() == ev::ERR_NOENT) co_return false;
     co_return std::move(res);
 }
 
-manapi::future<manapi::ev::status_or<std::chrono::system_clock::time_point>> manapi::fs::async_last_time_write(std::string path, manapi::ctoken cancellation) {
+manapi::future<manapi::ev::status_or<std::chrono::system_clock::time_point>> manapi::fs::last_time_write(std::string path, manapi::ctoken cancellation) {
 #if MANAPHTTP_UV_SINCE_AT(1,45,0)
     uv_timespec64_t mtime;
 #else
     uv_timespec_t mtime;
 #endif
-    auto res = co_await manapi::fs::async_stat(std::move(path), [&mtime] (ev::stat_t *stat)
+    auto res = co_await manapi::fs::stat(std::move(path), [&mtime] (ev::stat_t *stat)
         -> void {
         assert(stat);
         mtime.tv_nsec = static_cast<decltype(mtime.tv_nsec)>(stat->st_mtim.tv_nsec);
@@ -180,7 +180,7 @@ manapi::future<manapi::ev::status_or<std::chrono::system_clock::time_point>> man
             std::chrono::seconds{mtime.tv_sec}/* + std::chrono::nanoseconds{mtime.tv_nsec} */);
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_mkdir(std::string path, int mode, bool recursive, manapi::ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::mkdir(std::string path, int mode, bool recursive, manapi::ctoken cancellation) {
     enum data_flags { MANAPI__MKDIR_DATA_FLAG_NONE = 0, MANAPI__MKDIR_DATA_FLAG_FIND, MANAPI__MKDIR_DATA_FLAG_BUILD };
     struct data_t { char *path; int mode; std::vector < std::size_t > parts; std::size_t l, r; int state; };
     data_t data ( path.data(), mode );
@@ -231,7 +231,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_mkdir(std::string path, int
     }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status_or<manapi::ev::unique_file>> manapi::fs::async_open(std::string path, int flags, int mode, manapi::ctoken cancellation) {
+manapi::future<manapi::ev::status_or<manapi::ev::unique_file>> manapi::fs::open(std::string path, int flags, int mode, manapi::ctoken cancellation) {
     struct data_t { const char *path; int flags; int mode; manapi::ev::unique_file result; };
     data_t data ( path.data(), flags, mode );
     auto st = co_await manapi__fs_operation (
@@ -255,7 +255,7 @@ manapi::future<manapi::ev::status_or<manapi::ev::unique_file>> manapi::fs::async
     co_return std::move(data.result);
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_close(ev::file file, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::close(ev::file file, ctoken cancellation) {
     manapi_log_trace2("manapicore::fs", manapi::debug::LOG_TRACE_LOW, "fs:fd %d close", file);
     co_return co_await manapi__fs_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
         -> int {
@@ -269,30 +269,30 @@ manapi::future<manapi::ev::status> manapi::fs::async_close(ev::file file, ctoken
         }, &file, std::move(cancellation));
 }
 
-manapi::future<ssize_t> manapi::fs::async_write(ev::file file, const void *data, std::size_t size, int64_t offset, manapi::ctoken cancellation) {
+manapi::future<ssize_t> manapi::fs::write(ev::file file, const void *data, std::size_t size, int64_t offset, manapi::ctoken cancellation) {
     ev::buff_t buff;
     buff.base = (char *)(data);
     buff.len = static_cast<decltype(buff.len)>(size);
-    co_return co_await async_write(file, &buff, 1,  offset, std::move(cancellation));
+    co_return co_await fs::write(file, &buff, 1,  offset, std::move(cancellation));
 }
 
-manapi::future<ssize_t> manapi::fs::async_read(ev::file file, void *data, std::size_t size, int64_t offset, manapi::ctoken cancellation) {
+manapi::future<ssize_t> manapi::fs::read(ev::file file, void *data, std::size_t size, int64_t offset, manapi::ctoken cancellation) {
     ev::buff_t buff;
     buff.base = static_cast<char*>(data);
     buff.len = static_cast<decltype(buff.len)>(size);
-    co_return co_await async_read (file, &buff, 1, offset, std::move(cancellation));
+    co_return co_await fs::read (file, &buff, 1, offset, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_write(std::string path, std::string data, int mode, int flags, int64_t offset, manapi::ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::write(std::string path, std::string data, int mode, int flags, int64_t offset, manapi::ctoken cancellation) {
     ev::unique_file fileno;
     {
-        auto fileno_res = co_await async_open(path, flags, mode, cancellation.sub());
+        auto fileno_res = co_await fs::open(path, flags, mode, cancellation.sub());
         if (!fileno_res.ok()) co_return fileno_res.err();
         fileno = fileno_res.unwrap();
     }
     auto sv = std::string_view (data);
     while (!sv.empty()) {
-        auto rhs = co_await async_write(fileno.get(), sv.data(), (sv.size()), offset, cancellation.sub());
+        auto rhs = co_await fs::write(fileno.get(), sv.data(), (sv.size()), offset, cancellation.sub());
         if (rhs < 0) co_return ev::status_unknown("fs:write failed", static_cast<int>(rhs));
         if (offset >= 0) offset += static_cast<int64_t> (rhs);
         sv = sv.substr ( static_cast<std::size_t> (rhs) );
@@ -300,17 +300,17 @@ manapi::future<manapi::ev::status> manapi::fs::async_write(std::string path, std
     co_return ev::status_ok();
 }
 
-manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_read(std::string path, int flags, int64_t offset, manapi::ctoken cancellation) {
+manapi::future<manapi::ev::status_or<std::string>> manapi::fs::read(std::string path, int flags, int64_t offset, manapi::ctoken cancellation) {
     ev::unique_file fileno;
     std::string data;
 
     {
-        auto fileno_res = co_await async_open(path, flags, 0, cancellation.sub());
+        auto fileno_res = co_await fs::open(path, flags, 0, cancellation.sub());
         if (!fileno_res.ok()) co_return fileno_res.err();
         fileno = fileno_res.unwrap();
     }
 
-    auto res = co_await async_file_size(fileno.get(), cancellation.sub());
+    auto res = co_await fs::file_size(fileno.get(), cancellation.sub());
 
     if (!res.ok()) co_return res.err();
 
@@ -319,7 +319,7 @@ manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_read(std::s
     std::string_view sv (data);
 
     while (!sv.empty()) {
-        auto rhs = co_await async_read(fileno.get(), const_cast<char *>(sv.data()), sv.size(), offset, cancellation.sub());
+        auto rhs = co_await fs::read(fileno.get(), const_cast<char *>(sv.data()), sv.size(), offset, cancellation.sub());
         if (rhs < 0) co_return ev::status_unknown("fs:read failed", static_cast<int>(rhs));
         if (offset >= 0) offset += static_cast<int64_t> (rhs);
         sv = sv.substr (static_cast<std::size_t> (rhs));
@@ -328,7 +328,7 @@ manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_read(std::s
     co_return std::move(data);
 }
 
-manapi::future<ssize_t> manapi::fs::async_write(ev::file file, ev::buff_t *buff, uint32_t nbuff, int64_t offset, ctoken cancellation) {
+manapi::future<ssize_t> manapi::fs::write(ev::file file, ev::buff_t *buff, uint32_t nbuff, int64_t offset, ctoken cancellation) {
     ssize_t res = 0;
     std::size_t shift = 0;
 
@@ -390,7 +390,7 @@ manapi::future<ssize_t> manapi::fs::async_write(ev::file file, ev::buff_t *buff,
     co_return data.result;
 }
 
-manapi::future<ssize_t> manapi::fs::async_read(ev::file file, ev::buff_t *buff, uint32_t nbuff, int64_t offset, ctoken cancellation) {
+manapi::future<ssize_t> manapi::fs::read(ev::file file, ev::buff_t *buff, uint32_t nbuff, int64_t offset, ctoken cancellation) {
     ssize_t res = 0;
     std::size_t shift = 0;
 
@@ -451,14 +451,14 @@ manapi::future<ssize_t> manapi::fs::async_read(ev::file file, ev::buff_t *buff, 
     co_return data.result;
 }
 
-manapi::future<ssize_t> manapi::fs::async_write(ev::file file, slice_view slice, int64_t offset, ctoken cancellation) {
+manapi::future<ssize_t> manapi::fs::write(ev::file file, slice_view slice, int64_t offset, ctoken cancellation) {
     ssize_t total = 0;
 
     while (true) {
         std::size_t buffs_sz = 0;
         std::size_t buffs_cnt = 0;
         auto buffs = slice.slices_buffs(128, &buffs_cnt, &buffs_sz);
-        auto z = co_await async_write(file, buffs.get(), static_cast<uint32_t>(buffs_cnt), offset, cancellation.sub());
+        auto z = co_await fs::write (file, buffs.get(), static_cast<uint32_t>(buffs_cnt), offset, cancellation.sub());
         if (z < 0) co_return z;
         total += z;
 
@@ -474,14 +474,14 @@ manapi::future<ssize_t> manapi::fs::async_write(ev::file file, slice_view slice,
     co_return total;
 }
 
-manapi::future<ssize_t> manapi::fs::async_read(ev::file file, slice_view slice, int64_t offset, ctoken cancellation) {
+manapi::future<ssize_t> manapi::fs::read(ev::file file, slice_view slice, int64_t offset, ctoken cancellation) {
     ssize_t total = 0;
 
     while (true) {
         std::size_t buffs_sz = 0;
         std::size_t buffs_cnt = 0;
         auto buffs = slice.slices_buffs(128, &buffs_cnt, &buffs_sz);
-        auto z = co_await async_read(file, buffs.get(), static_cast<uint32_t>(buffs_cnt), offset, cancellation.sub());
+        auto z = co_await fs::read(file, buffs.get(), static_cast<uint32_t>(buffs_cnt), offset, cancellation.sub());
         if (z < 0) co_return z;
         total += z;
         if (static_cast<std::size_t>(z) == buffs_sz) {
@@ -496,27 +496,27 @@ manapi::future<ssize_t> manapi::fs::async_read(ev::file file, slice_view slice, 
     co_return total;
 }
 
-manapi::future<manapi::ev::status_or<uint64_t>> manapi::fs::async_file_size(std::string path, manapi::ctoken cancellation) {
+manapi::future<manapi::ev::status_or<uint64_t>> manapi::fs::file_size(std::string path, manapi::ctoken cancellation) {
     uint64_t size;
 
-    auto res = co_await fs::async_stat(std::move(path), [&size] (ev::stat_t *stat)
+    auto res = co_await fs::stat(std::move(path), [&size] (ev::stat_t *stat)
         -> void { size = stat->st_size; }, std::move(cancellation));
 
     if (!res) co_return std::move(res);
     co_return size;
 }
 
-manapi::future<manapi::ev::status_or<uint64_t>> manapi::fs::async_file_size(ev::file file, manapi::ctoken cancellation) {
+manapi::future<manapi::ev::status_or<uint64_t>> manapi::fs::file_size(ev::file file, manapi::ctoken cancellation) {
     uint64_t size;
 
-    auto res = co_await fs::async_fstat(file, [&size] (ev::stat_t *stat)
+    auto res = co_await fs::fstat(file, [&size] (ev::stat_t *stat)
         -> void { size = stat->st_size; }, std::move(cancellation));
 
     if (!res) co_return std::move(res);
     co_return size;
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_stat(std::string path, std::move_only_function<void(ev::stat_t *data)> callback, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::stat(std::string path, std::move_only_function<void(ev::stat_t *data)> callback, ctoken cancellation) {
     struct data_t { const char *path;
         decltype(callback) *cb; };
     data_t data ( path.data(), &callback );
@@ -533,7 +533,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_stat(std::string path, std:
         }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_fstat(ev::file file, std::move_only_function<void(ev::stat_t *data)> callback, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::fstat(ev::file file, std::move_only_function<void(ev::stat_t *data)> callback, ctoken cancellation) {
     struct data_t { ev::file file;
         decltype(callback) *cb; };
     data_t data ( file, &callback );
@@ -652,17 +652,17 @@ std::string manapi::fs::path::root_directory() {
     return std::filesystem::current_path().root_directory().string();
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_unlink (std::string path, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::unlink (std::string path, ctoken cancellation) {
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
         -> int { return w->unlink( static_cast<const char *> (source) ); }, path.data(), std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_rmdir (std::string path, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::rmdir (std::string path, ctoken cancellation) {
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
         -> int { return w->rmdir( static_cast<const char *>(source) ); }, path.data(), std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_rmdir_all(std::string path, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::rmdir_all(std::string path, ctoken cancellation) {
     std::unique_ptr<manapi::ev::dirent_t, manapi::ev::impl_array_deleter<manapi::ev::dirent_t>> dirents (new manapi::ev::dirent_t[128]);
     std::vector<std::string> folders;
     std::vector<std::unique_ptr<uv_dir_s, ev::dir_deleter_t>> dirs;
@@ -670,7 +670,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_rmdir_all(std::string path,
 
     std::exception_ptr err{nullptr};
 
-    auto fd_res = co_await manapi::fs::async_opendir(path, cancellation.sub());
+    auto fd_res = co_await manapi::fs::opendir(path, cancellation.sub());
     if (!fd_res) co_return fd_res.err();
 
     dirs.push_back(fd_res.unwrap());
@@ -680,7 +680,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_rmdir_all(std::string path,
         auto &b = dirs.back();
 
         if (!b) {
-            auto rm_res = co_await manapi::fs::async_rmdir(paths.back(), cancellation.sub());
+            auto rm_res = co_await manapi::fs::rmdir(paths.back(), cancellation.sub());
             if (!rm_res && rm_res.syserr() != ev::ERR_NOENT)
                 co_return std::move(rm_res);
 
@@ -697,7 +697,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_rmdir_all(std::string path,
 
         while (true) {
             std::size_t cnt;
-            auto res = co_await manapi::fs::async_readdir(b.get(), [&files, &folders, &paths, &err, &cnt] (ev::dir_t *handle, std::size_t cnt1) -> bool {
+            auto res = co_await manapi::fs::readdir(b.get(), [&files, &folders, &paths, &err, &cnt] (ev::dir_t *handle, std::size_t cnt1) -> bool {
                 try {
                     cnt = cnt1;
                     for (std::size_t i = 0; i < cnt1; i++) {
@@ -730,7 +730,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_rmdir_all(std::string path,
             while (!files.empty()) {
                 auto &z = files.back();
 
-                auto rmres = co_await manapi::fs::async_unlink(manapi::fs::path::join(paths.back(), z), cancellation.sub());
+                auto rmres = co_await manapi::fs::unlink(manapi::fs::path::join(paths.back(), z), cancellation.sub());
                 if (!rmres && rmres.syserr() != ev::ERR_NOENT)
                     co_return std::move(rmres);
 
@@ -748,7 +748,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_rmdir_all(std::string path,
         }
 
         if (!folders.empty()) {
-            fd_res = co_await manapi::fs::async_opendir(folders.back(), cancellation.sub());
+            fd_res = co_await manapi::fs::opendir(folders.back(), cancellation.sub());
             if (!fd_res) {
                 if (fd_res.syserr() == ev::ERR_NOENT) {
                     folders.pop_back();
@@ -768,12 +768,12 @@ manapi::future<manapi::ev::status> manapi::fs::async_rmdir_all(std::string path,
     co_return manapi::status_ok();
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_closedir (manapi::ev::dir_t *directory, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::closedir (manapi::ev::dir_t *directory, ctoken cancellation) {
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
         -> int { return w->closedir(static_cast<manapi::ev::dir_t *> ( source )); }, directory, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_statfs (std::string path, std::move_only_function<void(ev::statfs_t *data)> callback, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::statfs (std::string path, std::move_only_function<void(ev::statfs_t *data)> callback, ctoken cancellation) {
     struct data_t { const char *path;
         decltype(callback) *cb; };
     data_t data ( path.data(), &callback );
@@ -790,7 +790,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_statfs (std::string path, s
         }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_rename (std::string oldpath, std::string newpath, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::rename (std::string oldpath, std::string newpath, ctoken cancellation) {
     struct data_t { const char *oldpath, *newpath; };
     data_t data ( oldpath.data(), newpath.data() );
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -799,7 +799,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_rename (std::string oldpath
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_copyfile (std::string src, std::string dest, int flags, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::copyfile (std::string src, std::string dest, int flags, ctoken cancellation) {
     struct data_t { const char *src, *dest; int flags; };
     data_t data ( src.data(), dest.data(), flags );
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -810,7 +810,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_copyfile (std::string src, 
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_chmod (std::string path, int mode, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::chmod (std::string path, int mode, ctoken cancellation) {
     struct data_t { const char *path; int mode; };
     data_t data ( path.data(), mode );
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -820,7 +820,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_chmod (std::string path, in
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_fchmod (ev::file file, int mode, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::fchmod (ev::file file, int mode, ctoken cancellation) {
     struct data_t { ev::file file; int mode; };
     data_t data ( file, mode );
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -830,7 +830,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_fchmod (ev::file file, int 
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_access (std::string path, int mode, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::access (std::string path, int mode, ctoken cancellation) {
     struct data_t { const char *path; int mode; };
     data_t data ( path.data(), mode );
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -841,7 +841,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_access (std::string path, i
                     ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_utime (std::string path, double atime, double mtime, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::utime (std::string path, double atime, double mtime, ctoken cancellation) {
     struct data_t { const char *path; double atime; double mtime; };
     data_t data ( path.data(), atime, mtime );
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -852,7 +852,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_utime (std::string path, do
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_futime (ev::file file, double atime, double mtime, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::futime (ev::file file, double atime, double mtime, ctoken cancellation) {
     struct data_t { ev::file file; double atime; double mtime; };
     data_t data (file, atime, mtime);
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -863,7 +863,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_futime (ev::file file, doub
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_link (std::string path, std::string newpath, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::link (std::string path, std::string newpath, ctoken cancellation) {
     struct data_t { const char *path,* newpath; };
     data_t data (path.data(), newpath.data());
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -873,7 +873,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_link (std::string path, std
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_symlink (std::string path, std::string newpath, int flags, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::symlink (std::string path, std::string newpath, int flags, ctoken cancellation) {
     struct data_t { const char *path, *newpath; int flags; };
     data_t data (path.data(), newpath.data(), flags);
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -884,17 +884,17 @@ manapi::future<manapi::ev::status> manapi::fs::async_symlink (std::string path, 
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_fsync (ev::file file, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::fsync (ev::file file, ctoken cancellation) {
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
         -> int { return w->fsync(*static_cast<ev::file *> (source)); }, &file, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_fdatasync(ev::file file, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::fdatasync(ev::file file, ctoken cancellation) {
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
         -> int { return w->fdatasync(*static_cast<ev::file *> (source)); }, &file, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status_or<std::unique_ptr<manapi::ev::dir_t, manapi::ev::dir_deleter_t>>> manapi::fs::async_opendir(std::string path, ctoken cancellation) {
+manapi::future<manapi::ev::status_or<std::unique_ptr<manapi::ev::dir_t, manapi::ev::dir_deleter_t>>> manapi::fs::opendir(std::string path, ctoken cancellation) {
     struct data_t { const char *path; std::unique_ptr<manapi::ev::dir_t, manapi::ev::dir_deleter_t> result; };
     data_t data (path.data());
     auto st = co_await manapi__fs_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -911,7 +911,7 @@ manapi::future<manapi::ev::status_or<std::unique_ptr<manapi::ev::dir_t, manapi::
     co_return std::move(data.result);
 }
 
-manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_readlink (std::string path, ctoken cancellation) {
+manapi::future<manapi::ev::status_or<std::string>> manapi::fs::readlink (std::string path, ctoken cancellation) {
     struct data_t { const char *path; std::string result; };
     data_t data (path.data());
     auto st = co_await manapi__fs_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -928,7 +928,7 @@ manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_readlink (s
     co_return std::move(data.result);
 }
 
-manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_realpath (std::string path, ctoken cancellation) {
+manapi::future<manapi::ev::status_or<std::string>> manapi::fs::realpath (std::string path, ctoken cancellation) {
     struct data_t { const char *path; std::string result; };
     data_t data ( path.data() );
     auto st = co_await manapi__fs_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -945,7 +945,7 @@ manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_realpath (s
     co_return std::move(data.result);
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_chown(std::string path, ev::uid_t uid, ev::gid_t gid, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::chown(std::string path, ev::uid_t uid, ev::gid_t gid, ctoken cancellation) {
     struct data_t { const char *path; ev::uid_t uid; ev::gid_t gid; };
     data_t data ( path.data(), uid, gid);
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -956,7 +956,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_chown(std::string path, ev:
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_fchown(ev::file file, ev::uid_t uid, ev::gid_t gid, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::fchown(ev::file file, ev::uid_t uid, ev::gid_t gid, ctoken cancellation) {
     struct data_t { manapi::ev::file file; ev::uid_t uid; ev::gid_t gid; };
     data_t data ( file, uid, gid );
     co_return co_await manapi__fs_easy_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -967,7 +967,7 @@ manapi::future<manapi::ev::status> manapi::fs::async_fchown(ev::file file, ev::u
                 ); }, &data, std::move(cancellation));
 }
 
-manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_mkdtemp(std::string tpl, ctoken cancellation) {
+manapi::future<manapi::ev::status_or<std::string>> manapi::fs::mkdtemp(std::string tpl, ctoken cancellation) {
     struct data_t { const char *tpl; std::string result; };
     data_t data ( tpl.data() );
     auto st = co_await manapi__fs_operation (+[] (std::shared_ptr<ev::fs> w, void *source)
@@ -984,7 +984,7 @@ manapi::future<manapi::ev::status_or<std::string>> manapi::fs::async_mkdtemp(std
     co_return std::move(data.result);
 }
 
-manapi::future<manapi::ev::status_or<std::pair<std::string, manapi::ev::unique_file>>> manapi::fs::async_mkstemp(std::string tpl, ctoken cancellation) {
+manapi::future<manapi::ev::status_or<std::pair<std::string, manapi::ev::unique_file>>> manapi::fs::mkstemp(std::string tpl, ctoken cancellation) {
     typedef std::pair<std::string, manapi::ev::unique_file> value_t;
     struct data_t { const char *tpl; value_t result; };
     data_t data (tpl.data());
@@ -1003,7 +1003,7 @@ manapi::future<manapi::ev::status_or<std::pair<std::string, manapi::ev::unique_f
     co_return std::move(data.result);
 }
 
-manapi::future<manapi::ev::status_or<std::size_t>> manapi::fs::async_scandir (std::string path, int flags, std::move_only_function<void(ev::dir_t *dir, std::size_t result)> callback, ctoken cancellation) {
+manapi::future<manapi::ev::status_or<std::size_t>> manapi::fs::scandir (std::string path, int flags, std::move_only_function<void(ev::dir_t *dir, std::size_t result)> callback, ctoken cancellation) {
     struct data_t { const char *path; int flags;
         decltype(callback) *cb; std::size_t result; };
     data_t data ( path.data(), flags, &callback, 0 );
@@ -1026,7 +1026,7 @@ manapi::future<manapi::ev::status_or<std::size_t>> manapi::fs::async_scandir (st
     co_return data.result;
 }
 
-manapi::future<manapi::ev::status> manapi::fs::async_readdir (ev::dir_t *dir, std::move_only_function<bool (ev::dir_t *, std::size_t)> callback, ctoken cancellation) {
+manapi::future<manapi::ev::status> manapi::fs::readdir (ev::dir_t *dir, std::move_only_function<bool (ev::dir_t *, std::size_t)> callback, ctoken cancellation) {
     struct data_t { ev::dir_t *dir; decltype(callback) *cb; };
     data_t data ( dir, &callback );
 

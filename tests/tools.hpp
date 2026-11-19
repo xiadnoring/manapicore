@@ -73,7 +73,7 @@ inline void wait_ctx (manapi::async::shared_ctx ctx) {
 //
 //        std::string current = manapi::fs::path::current_path();
 //        while (true) {
-//            auto st = co_await manapi::fs::async_exists(manapi::fs::path::join(current, "examples", "self-signed-ssl"));
+//            auto st = co_await manapi::fs::exists(manapi::fs::path::join(current, "examples", "self-signed-ssl"));
 //            if (st.ok()) {
 //                if (st.unwrap())
 //                    break;

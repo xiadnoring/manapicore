@@ -70,7 +70,7 @@
 //
 //                        try {
 //                            manapi::unwrap(
-//                                    co_await manapi::fs::async_mkdir(folder, manapi::ev::IRWXU|manapi::ev::IRGRP|manapi::ev::IXGRP, true));
+//                                    co_await manapi::fs::mkdir(folder, manapi::ev::IRWXU|manapi::ev::IRGRP|manapi::ev::IXGRP, true));
 //                        }
 //                        catch (std::exception const &e) {
 //                            manapi_log_error("%s due to %s", "mkdir cache directory failed", e.what());
@@ -81,7 +81,7 @@
 //                            cached_path = manapi::fs::path::join(folder,
 //                                                                 ::manapi__generate_cache_name(fdata->fpath, features->compress));
 //                            cached_fd = manapi::unwrap(
-//                                    co_await manapi::fs::async_open(cached_path,
+//                                    co_await manapi::fs::open(cached_path,
 //                                                                    manapi::ev::FS_O_RDWR | manapi::ev::FS_O_CREAT,
 //                                                                    0755));
 //
@@ -114,7 +114,7 @@
 //                    co_return manapi::status_unavailable("busy");
 //                }
 //            } else {
-//                auto cached_fd_res = co_await manapi::fs::async_open(cached_path, manapi::ev::FS_O_RDONLY, 0755);
+//                auto cached_fd_res = co_await manapi::fs::open(cached_path, manapi::ev::FS_O_RDONLY, 0755);
 //                if (cached_fd_res.syserr() == manapi::ev::ERR_NOENT) {
 //                    cache_prev_found = false;
 //                    continue;
@@ -131,7 +131,7 @@
 //            fmeta.found = false;
 //
 //            manapi::unwrap(
-//                co_await manapi::fs::async_fstat(cached_fd.get(), [&fmeta](manapi::ev::stat_t *stat) -> void {
+//                co_await manapi::fs::fstat(cached_fd.get(), [&fmeta](manapi::ev::stat_t *stat) -> void {
 //                    if (stat) {
 //                        fmeta.st_size = stat->st_size;
 //                        fmeta.found = true;
@@ -320,7 +320,7 @@
 //                        manapi::ev::unique_file fd;
 //
 //                        {
-//                            auto fd_res = co_await manapi::fs::async_open(path, manapi::ev::FS_O_RDONLY, 0755,
+//                            auto fd_res = co_await manapi::fs::open(path, manapi::ev::FS_O_RDONLY, 0755,
 //                                                                          manapi::ctokens::timeout(5000));
 //
 //                            if (!fd_res.ok()) {
@@ -337,7 +337,7 @@
 //                        }
 //
 //                        if (fd.has_value()) {
-//                            manapi::unwrap(co_await manapi::fs::async_fstat(fd.get(), [&fmeta](manapi::ev::stat_t *stat)
+//                            manapi::unwrap(co_await manapi::fs::fstat(fd.get(), [&fmeta](manapi::ev::stat_t *stat)
 //                                    -> void {
 //                                if (stat) {
 //                                    fmeta.st_mode = stat->st_mode;
@@ -593,12 +593,12 @@
 //        try {
 //            if (!resfile.fd.has_value()) {
 //                resfile.fd = manapi::unwrap(
-//                        co_await manapi::fs::async_open(resfile.fpath, manapi::ev::FS_O_RDONLY, 0755,
+//                        co_await manapi::fs::open(resfile.fpath, manapi::ev::FS_O_RDONLY, 0755,
 //                                                        res->req()->cancellation().sub().tm(5000)));
 //            }
 //
 //            manapi::unwrap(
-//                    co_await manapi::fs::async_fstat(resfile.fd.get(), [&resfile](manapi::ev::stat_t *stat) -> void {
+//                    co_await manapi::fs::fstat(resfile.fd.get(), [&resfile](manapi::ev::stat_t *stat) -> void {
 //                        if (stat) {
 //                            resfile.flags |= internal::FILE_FD_FLAG_META;
 //                            resfile.fsize = stat->st_size;

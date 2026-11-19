@@ -128,20 +128,20 @@
 //
 //    if (cache_path_z.second) {
 //
-//        cache_path_z.first->second.as_string() = manapi::unwrap(co_await manapi::fs::async_mkdtemp(
+//        cache_path_z.first->second.as_string() = manapi::unwrap(co_await manapi::fs::mkdtemp(
 //                manapi::fs::path::join(std::filesystem::temp_directory_path().string(), "manapicore-cache-XXXXXX"), ctokens::timeout(5000)));
 //
 //
 //    }
 //    else {
 //
-//        manapi::unwrap(co_await manapi::fs::async_mkdir(
+//        manapi::unwrap(co_await manapi::fs::mkdir(
 //                cache_path_z.first->second.as_string(), ev::IRWXU|ev::IRGRP|ev::IXGRP, true, ctokens::timeout(5000)));
 //
 //    }
 //
 //    try {
-//        auto text = manapi::unwrap(co_await manapi::fs::async_read(manapi::fs::path::join( cache_path_z.first->second.as_string(), std::string{manapi__http_default_config_name} ),
+//        auto text = manapi::unwrap(co_await manapi::fs::read(manapi::fs::path::join( cache_path_z.first->second.as_string(), std::string{manapi__http_default_config_name} ),
 //                                                   -1, manapi::ev::FS_O_RDONLY, manapi::ctokens::timeout(5000)));
 //        cache_it->second = manapi::json::parse(text).unwrap();
 //    }
@@ -437,7 +437,7 @@
 //            if (!data.data.is_object()) {
 //                lk.unlock();
 //
-//                auto res = co_await manapi::fs::async_read(path, manapi::ev::FS_O_RDONLY, -1, manapi::ctokens::timeout(5000));
+//                auto res = co_await manapi::fs::read(path, manapi::ev::FS_O_RDONLY, -1, manapi::ctokens::timeout(5000));
 //                auto obj = manapi::json::parse(res.unwrap()).unwrap();
 //                if (!obj.is_object()) co_return manapi::status_unknown("http:Config invalid");
 //
@@ -631,7 +631,7 @@
 //
 //    try {
 //        if (data.data["cnf"]["cache_rm"].as_bool()) {
-//            manapi::async::run <manapi::ev::status> (manapi::fs::async_rmdir_all(fs::path::join(data.data["cnf"]["cache_path"].as_string())),
+//            manapi::async::run <manapi::ev::status> (manapi::fs::rmdir_all(fs::path::join(data.data["cnf"]["cache_path"].as_string())),
 //                                    [token = this->m_data->stopping] ( std::exception_ptr err, manapi::ev::status *st ) -> void {  });
 //        }
 //    }
@@ -854,7 +854,7 @@
 //    }
 //
 //    if (!path2del.empty()) {
-//        manapi::async::run<manapi::ev::status>(manapi::fs::async_unlink(std::move(path2del),
+//        manapi::async::run<manapi::ev::status>(manapi::fs::unlink(std::move(path2del),
 //                        manapi::ctokens::timeout(5000)));
 //    }
 //

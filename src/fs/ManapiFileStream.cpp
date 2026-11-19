@@ -71,7 +71,7 @@ manapi::future<manapi::ev::status> manapi::fs::fstream::open(int flags, int mode
         }
 
         try {
-            auto res = co_await manapi::fs::async_open(this->m_data->path, flags, mode,
+            auto res = co_await manapi::fs::open(this->m_data->path, flags, mode,
                                                        ctoken::unit(this->m_data->cancellation));
             if (!res.ok())
                 co_return res.err();
@@ -111,7 +111,7 @@ manapi::future<ssize_t> manapi::fs::fstream::read(void *buff, std::size_t buff_s
     while (true) {
         ssize_t rhs;
 
-        rhs = co_await manapi::fs::async_read(this->m_data->file, buff, buff_size, this->m_data->offset,
+        rhs = co_await manapi::fs::read(this->m_data->file, buff, buff_size, this->m_data->offset,
             manapi::ctoken::unit(this->m_data->cancellation));
 
         if (rhs < 0)
@@ -134,7 +134,7 @@ manapi::future<ssize_t> manapi::fs::fstream::write(const void *buff, std::size_t
     while (true) {
         ssize_t rhs;
 
-        rhs = co_await manapi::fs::async_write(this->m_data->file, buff, buff_size, this->m_data->offset,
+        rhs = co_await manapi::fs::write(this->m_data->file, buff, buff_size, this->m_data->offset,
             manapi::ctoken::unit(this->m_data->cancellation));
 
         if (rhs > 0 && this->m_data->offset >= 0) {
@@ -184,7 +184,7 @@ manapi::future<ssize_t> manapi::fs::fstream::read(manapi::slice_view slice) {
     while (true) {
         ssize_t rhs;
 
-        rhs = co_await manapi::fs::async_read(this->m_data->file, slice, this->m_data->offset,
+        rhs = co_await manapi::fs::read(this->m_data->file, slice, this->m_data->offset,
             manapi::ctoken::unit(this->m_data->cancellation));
 
         if (rhs < 0)
@@ -207,7 +207,7 @@ manapi::future<ssize_t> manapi::fs::fstream::write(manapi::slice_view slice) {
     while (true) {
         ssize_t rhs;
 
-        rhs = co_await manapi::fs::async_write(this->m_data->file, slice, this->m_data->offset,
+        rhs = co_await manapi::fs::write(this->m_data->file, slice, this->m_data->offset,
             manapi::ctoken::unit(this->m_data->cancellation));
 
         if (rhs > 0 && this->m_data->offset >= 0) {
@@ -299,7 +299,7 @@ manapi::future<manapi::ev::status_or<std::size_t>> manapi::fs::fstream::size() c
 
     std::size_t size;
     bool failed{true};
-    auto res = co_await manapi::fs::async_fstat(this->m_data->file, [&size, &failed] (ev::stat_t *data)
+    auto res = co_await manapi::fs::fstat(this->m_data->file, [&size, &failed] (ev::stat_t *data)
         -> void {
         if (data) {
             size = static_cast<std::size_t>(data->st_size);

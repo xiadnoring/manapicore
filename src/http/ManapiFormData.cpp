@@ -775,7 +775,7 @@ manapi::future<manapi::status_or<uint64_t>> manapi::net::formdata_send::payload_
         for (const auto &param : params.second) {
             switch (param.type) {
                 case DATA_FILE: {
-                    auto res = co_await manapi::fs::async_file_size(param.data);
+                    auto res = co_await manapi::fs::file_size(param.data);
                     if (!res.ok())
                         co_return res.err();
                     s += res.unwrap();

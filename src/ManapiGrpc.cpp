@@ -1862,7 +1862,7 @@
 //
 //manapi::future<manapi::status_or<std::shared_ptr<grpc::ChannelCredentials>>> manapi::net::wgrpc::secure_channel_credentials(std::string certfile) {
 //    try {
-//        auto res = co_await manapi::fs::async_read(certfile);
+//        auto res = co_await manapi::fs::read(certfile);
 //        if (!res.ok())
 //            co_return res.err();
 //        grpc::SslCredentialsOptions ssl_opts;
@@ -1965,7 +1965,7 @@
 //            if (!data.data.is_object()) {
 //                lk.unlock();
 //
-//                auto text = manapi::unwrap(co_await manapi::fs::async_read(path));
+//                auto text = manapi::unwrap(co_await manapi::fs::read(path));
 //
 //                auto t = manapi::json::object();
 //                t["grpc"] =  manapi::json::parse(text).unwrap();
@@ -2076,11 +2076,11 @@
 //
 //            try {
 //                grpc::SslServerCredentialsOptions::PemKeyCertPair pkcp;
-//                auto read_res = co_await manapi::fs::async_read(cert);
+//                auto read_res = co_await manapi::fs::read(cert);
 //                if (!read_res.ok())
 //                    co_return read_res.err();
 //                pkcp.cert_chain = read_res.unwrap();
-//                read_res = co_await manapi::fs::async_read(key);
+//                read_res = co_await manapi::fs::read(key);
 //                if (!read_res.ok())
 //                    co_return read_res.err();
 //                pkcp.private_key = read_res.unwrap();
