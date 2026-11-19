@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28) # CXX Modules Support
+cmake_minimum_required(VERSION 3.10) # CXX Modules Support
 # cmake_minimum_required(VERSION 3.10)
 project(manapicore LANGUAGES CXX VERSION 1.1.1 DESCRIPTION "manapi core")
 
@@ -1309,9 +1309,6 @@ endif ()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(${PROJECT_NAME} PRIVATE -pipe -fno-semantic-interposition)
-    if (UNIX)
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=gold")
-    endif()
 endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -1385,16 +1382,16 @@ else ()
 #            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/src
 #            CXX_MODULES_BMI
 #            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}/bmi-${CMAKE_CXX_COMPILER_ID}_$<CONFIG>
-            FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECTNAME}
+#            FILE_SET HEADERS DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECTNAME}
     )
 
     install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
     install(DIRECTORY ${CMAKE_BINARY_DIR}/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME})
 
-#    install(EXPORT manapicore-targets
-#            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+    install(EXPORT manapicore-targets
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 #            CXX_MODULES_DIRECTORY .
-#    )
+    )
 
     set_target_properties(${PROJECT_NAME} PROPERTIES
             COMPILE_PDB_NAME ${PROJECT_NAME}
